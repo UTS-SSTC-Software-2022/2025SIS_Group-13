@@ -29,7 +29,6 @@ CREATE TABLE DailySchedules (
 
 CREATE TABLE POI (
     poi_id INT AUTO_INCREMENT PRIMARY KEY,
-    schedule_id INT,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     category VARCHAR(100), 
@@ -47,18 +46,12 @@ CREATE TABLE POI (
     FOREIGN KEY (schedule_id) REFERENCES DailySchedules(schedule_id)
 );
 
-CREATE TABLE Bookings (
-    booking_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
+CREATE TABLE Schedule_POI (
+    schedule_id INT,
     poi_id INT,
-    itinerary_id INT,
-    booking_link VARCHAR(500),
-    status ENUM('Pending','Confirmed','Cancelled'),
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (poi_id) REFERENCES POI(poi_id),
-    FOREIGN KEY (itinerary_id) REFERENCES Itineraries(itinerary_id)
+    PRIMARY KEY (schedule_id, poi_id),
+    FOREIGN KEY (schedule_id) REFERENCES DailySchedules(schedule_id) ON DELETE CASCADE,
+    FOREIGN KEY (poi_id) REFERENCES POI(poi_id) ON DELETE CASCADE
 );
 
 CREATE TABLE Feedback (
@@ -67,7 +60,6 @@ CREATE TABLE Feedback (
     itinerary_id INT,
     schedule_id INT,
     feedback_text TEXT,
-    feedback_type ENUM('TooRushed','TooSlow','MoreFood','LessWalking','Other'),
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
