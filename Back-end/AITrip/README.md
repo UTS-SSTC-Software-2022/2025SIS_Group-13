@@ -80,6 +80,10 @@ pip install mysqlclient
 #### 2. 创建MySQL数据库
 在MySQL中自行创建数据库
 
+#### 3. 在系统环境变量中增加DB_PASSWORD
+变量名： DB_PASSWORD
+值：你的数据库密码
+
 #### 3. 修改 `AITrip/settings.py` 文件
 
 找到 `DATABASES` 配置section（大约在第75行），将其替换为：
