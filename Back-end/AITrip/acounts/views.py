@@ -14,6 +14,7 @@ from .serializers import (
     UserPasswordChangeSerializer,
     UserListSerializer
 )
+from utils.response import ResponseHandler
 
 logger = logging.getLogger(__name__)
 
@@ -70,31 +71,30 @@ class UserRegistrationView(APIView):
                 # Generate tokens
                 refresh = RefreshToken.for_user(user)
                 
-                return Response({
-                    'success': True,
-                    'data': {
-                        'user': UserProfileSerializer(user).data,
-                        'tokens': {
-                            'refresh': str(refresh),
-                            'access': str(refresh.access_token),
-                        }
-                    },
-                    'message': 'User registered successfully'
-                }, status=status.HTTP_201_CREATED)
+                data = {
+                    'user': UserProfileSerializer(user).data,
+                    'tokens': {
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                    }
+                }
+                
+                return ResponseHandler.success(
+                    data=data,
+                    msg='User registered successfully',
+                    status_code=status.HTTP_201_CREATED
+                )
             
-            logger.warning(f"User registration failed: {serializer.errors}")
-            return Response({
-                'success': False,
-                'errors': serializer.errors,
-                'message': 'Registration failed'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return ResponseHandler.error(
+                msg='Registration failed',
+                data=serializer.errors
+            )
             
         except Exception as e:
-            logger.error(f"User registration error: {str(e)}")
-            return Response({
-                'success': False,
-                'message': 'Internal server error'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return ResponseHandler.error(
+                msg=str(e),
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class UserLoginView(APIView):
@@ -117,31 +117,29 @@ class UserLoginView(APIView):
                 
                 logger.info(f"User logged in: {user.email}")
                 
-                return Response({
-                    'success': True,
-                    'data': {
-                        'user': UserProfileSerializer(user).data,
-                        'tokens': {
-                            'refresh': str(refresh),
-                            'access': str(refresh.access_token),
-                        }
-                    },
-                    'message': 'Login successful'
-                }, status=status.HTTP_200_OK)
+                data = {
+                    'user': UserProfileSerializer(user).data,
+                    'tokens': {
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                    }
+                }
+                
+                return ResponseHandler.success(
+                    data=data,
+                    msg='Login successful'
+                )
             
-            logger.warning(f"Login failed: {serializer.errors}")
-            return Response({
-                'success': False,
-                'errors': serializer.errors,
-                'message': 'Login failed'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return ResponseHandler.error(
+                msg='Login failed',
+                data=serializer.errors
+            )
             
         except Exception as e:
-            logger.error(f"Login error: {str(e)}")
-            return Response({
-                'success': False,
-                'message': 'Internal server error'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return ResponseHandler.error(
+                msg=str(e),
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class UserLogoutView(APIView):
@@ -161,17 +159,15 @@ class UserLogoutView(APIView):
             logout(request)
             logger.info(f"User logged out: {request.user.email}")
             
-            return Response({
-                'success': True,
-                'message': 'Logout successful'
-            }, status=status.HTTP_200_OK)
+            return ResponseHandler.success(
+                msg='Logout successful'
+            )
             
         except Exception as e:
-            logger.error(f"Logout error: {str(e)}")
-            return Response({
-                'success': False,
-                'message': 'Logout failed'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return ResponseHandler.error(
+                msg=str(e),
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class UserProfileView(APIView):
@@ -184,18 +180,16 @@ class UserProfileView(APIView):
         """Get current user profile"""
         try:
             serializer = UserProfileSerializer(request.user)
-            return Response({
-                'success': True,
-                'data': serializer.data,
-                'message': 'Profile retrieved successfully'
-            }, status=status.HTTP_200_OK)
+            return ResponseHandler.success(
+                data=serializer.data,
+                msg='Profile retrieved successfully'
+            )
             
         except Exception as e:
-            logger.error(f"Profile retrieval error: {str(e)}")
-            return Response({
-                'success': False,
-                'message': 'Internal server error'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return ResponseHandler.error(
+                msg=str(e),
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
     def put(self, request):
         """Update user profile"""
@@ -210,24 +204,21 @@ class UserProfileView(APIView):
                 user = serializer.save()
                 logger.info(f"Profile updated: {user.email}")
                 
-                return Response({
-                    'success': True,
-                    'data': serializer.data,
-                    'message': 'Profile updated successfully'
-                }, status=status.HTTP_200_OK)
+                return ResponseHandler.success(
+                    data=serializer.data,
+                    msg='Profile updated successfully'
+                )
             
-            return Response({
-                'success': False,
-                'errors': serializer.errors,
-                'message': 'Profile update failed'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return ResponseHandler.error(
+                msg='Profile update failed',
+                data=serializer.errors
+            )
             
         except Exception as e:
-            logger.error(f"Profile update error: {str(e)}")
-            return Response({
-                'success': False,
-                'message': 'Internal server error'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return ResponseHandler.error(
+                msg=str(e),
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class UserPasswordChangeView(APIView):
@@ -248,20 +239,17 @@ class UserPasswordChangeView(APIView):
                 serializer.save()
                 logger.info(f"Password changed: {request.user.email}")
                 
-                return Response({
-                    'success': True,
-                    'message': 'Password changed successfully'
-                }, status=status.HTTP_200_OK)
+                return ResponseHandler.success(
+                    msg='Password changed successfully'
+                )
             
-            return Response({
-                'success': False,
-                'errors': serializer.errors,
-                'message': 'Password change failed'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return ResponseHandler.error(
+                msg='Password change failed',
+                data=serializer.errors
+            )
             
         except Exception as e:
-            logger.error(f"Password change error: {str(e)}")
-            return Response({
-                'success': False,
-                'message': 'Internal server error'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return ResponseHandler.error(
+                msg=str(e),
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

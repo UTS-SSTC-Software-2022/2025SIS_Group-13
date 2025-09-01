@@ -138,7 +138,7 @@ def create_superuser():
             [sys.executable, "manage.py", "createsuperuser", "--noinput"], check=True
         )
         print("✅ 超级用户创建完成")
-        print("   用户名: admin")
+        print("   用户名: admin@aitrip.com")
         print("   密码: admin123")
         return True
     except subprocess.CalledProcessError:
