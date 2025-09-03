@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Virtual Envs
+venv/
+.venv/
+ENV/
+env/
+
+# VSCode IDE
+.vscode/
+
+# macOS / Windows系统文件
+.DS_Store
+Thumbs.db
