@@ -12,10 +12,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -40,7 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
-    "acounts",
+    "accounts",
+    "LLM_API",
 ]
 
 MIDDLEWARE = [
@@ -78,12 +80,12 @@ WSGI_APPLICATION = "AITrip.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "leisura",
-        "USER": "root",
-        "PASSWORD": os.environ.get('DB_PASSWORD'),
-        "HOST": "localhost",
-        "PORT": "3306",
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME', 'leisura'),
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '3306'),
     }
 }
 
@@ -118,7 +120,7 @@ REST_FRAMEWORK = {
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Australia/Sydney"
 
 USE_I18N = True
 
@@ -136,4 +138,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom User Model
-AUTH_USER_MODEL = 'acounts.User'
+AUTH_USER_MODEL = 'accounts.User'
+
+# Security: read API key from env
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')

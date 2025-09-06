@@ -13,6 +13,8 @@ django_filter==25.1
 # Django REST Framework SimpleJWT，用于 JWT 认证
 djangorestframework_simplejwt==5.5.0
 
-
 # MySQL 数据库驱动
 mysqlclient==2.2.4
+
+# donet
+python-dotenv==1.0
