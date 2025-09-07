@@ -1,13 +1,5 @@
 <template>
   <div class="earth-globe-page">
-    <!-- Logo and Brand Header -->
-    <header class="brand-header">
-      <div class="logo-container">
-        <img src="\src\assets\images\LeisurA logo.svg" alt="LeisurA Logo" class="logo" />
-        <!-- <h1 class="brand-title">LeisurA</h1> -->
-      </div>
-    </header>
-
     <!-- 3D Globe Container -->
     <div ref="container" class="globe-container"></div>
 
@@ -57,35 +49,6 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100dvh;
   overflow: hidden;
-}
-
-/* Brand Header */
-.brand-header {
-  position: absolute;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-}
-
-.logo {
-  width: 10rem;
-  height:5rem;
-  filter: drop-shadow(0 0 10px rgba(4, 108, 184, 0.3));
-}
-
-.brand-title {
-  font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0;
-  text-shadow: 0 0 20px rgba(4, 108, 184, 0.5);
-  letter-spacing: -0.02em;
 }
 
 /* 3D Globe Container */
