@@ -14,33 +14,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         write_only=True,
         min_length=8,
         validators=[validate_password],
-        style={'input_type': 'password'}
     )
     password_confirm = serializers.CharField(
         write_only=True,
-        style={'input_type': 'password'}
     )
     
-    # Make first_name and last_name required
-    first_name = serializers.CharField(
-        required=True,
-        max_length=30,
-        help_text='Required field'
-    )
-    last_name = serializers.CharField(
-        required=True,
-        max_length=150,
-        help_text='Required field'
-    )
-    
-    # Middle name is optional
-    middle_name = serializers.CharField(
-        required=False,
-        allow_blank=True,
-        max_length=30,
-        help_text='Optional middle name'
-    )
-
     class Meta:
         model = User
         fields = (
