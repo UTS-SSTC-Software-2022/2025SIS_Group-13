@@ -1,0 +1,174 @@
+:root[data-theme="dark"] {
+
+    /* Font settings */
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    /* Rendering optimization */
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    /* 灰阶（深色优先，数值越大越亮） */
+    --gray-950: #0b0f14;
+    --gray-900: #0f141a;
+    --gray-850: #131a21;
+    --gray-800: #172029;
+    --gray-750: #1b2631;
+    --gray-700: #1f2c39;
+    --gray-650: #253445;
+    --gray-600: #2b3e50;
+    --gray-500: #3b5166;
+    --gray-400: #546a7f;
+    --gray-300: #7c91a4;
+    --gray-200: #a7b6c3;
+    --gray-150: #c3ced7;
+    --gray-100: #d7e0e7;
+
+    /* 主品牌（蓝青） */
+    --primary-900: #0a3a4a;
+    --primary-800: #0d4b60;
+    --primary-700: #11627c;
+    --primary-600: #157a99;
+    --primary-500: #1a90b3;
+    /* 主色 */
+    --primary-400: #42a9c7;
+    --primary-300: #6cc1d8;
+    --primary-200: #97d6e6;
+    --primary-100: #c3e8f1;
+
+    /* 次品牌（紫） */
+    --secondary-800: #3c2a55;
+    --secondary-700: #4e3471;
+    --secondary-600: #5f3f8c;
+    --secondary-500: #704aa6;
+    /* 次色 */
+    --secondary-400: #8a6ac0;
+    --secondary-300: #a78dd3;
+
+    /* 功能色 */
+    --success-600: #1f7a5f;
+    --success-500: #259c79;
+    /* 绿 */
+    --warning-600: #96601e;
+    --warning-500: #bf7a24;
+    /* 橙 */
+    --danger-600: #933443;
+    --danger-500: #b34155;
+    /* 红 */
+    --info-600: #14527a;
+    --info-500: #1870a6;
+    /* 蓝 */
+
+    /* 文本与分割线（深色专用对比） */
+    --text-high: rgba(255, 255, 255, 0.92);
+    --text-medium: rgba(255, 255, 255, 0.72);
+    --text-disabled: rgba(255, 255, 255, 0.42);
+    --text-inverse: #0f141a;
+    /* 用在亮色按钮/徽章上 */
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+
+    /* 背景与海拔（Elevation） */
+    --bg-app: linear-gradient(135deg, hsl(220, 22%, 10%), hsl(220, 18%, 18%));
+    /* 整体背景 */
+    --bg-canvas: var(--gray-900);
+    /* 页面容器 */
+    --bg-surface-1: var(--gray-850);
+    /* 卡片/一级面板 */
+    --bg-surface-2: var(--gray-800);
+    /* 弹窗/二级面板 */
+    --bg-surface-3: var(--gray-750);
+    /* 浮层/三级 */
+    --overlay: rgba(0, 0, 0, 0.52);
+    /* 遮罩 */
+
+    /* 交互状态/透明度 */
+    --state-hover: rgba(255, 255, 255, 0.06);
+    --state-active: rgba(255, 255, 255, 0.10);
+    --state-focus: rgba(26, 144, 179, 0.35);
+    /* 与主色一致 */
+    --disabled-bg: rgba(255, 255, 255, 0.06);
+    --disabled-fg: rgba(255, 255, 255, 0.35);
+
+    /* 阴影（深色更柔和，扩散更大） */
+    --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-2: 0 6px 18px rgba(0, 0, 0, 0.45);
+    --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.55);
+
+    /* 渐变（建议：YES，用于品牌与重点 CTA） */
+    --grad-primary: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-400) 100%);
+    --grad-secondary: linear-gradient(135deg, var(--secondary-600) 0%, var(--secondary-400) 100%);
+    --grad-accent-cyan: linear-gradient(135deg, #13a3b7 0%, #6cc1d8 100%);
+
+    /* 数据可视化（配色有可区分度，暗底清晰） */
+    --viz-1: #54c1e0;
+    --viz-2: #9c7ae8;
+    --viz-3: #4fd4a2;
+    --viz-4: #f2a45d;
+    --viz-5: #e66d84;
+    --viz-6: #c3d35a;
+}
+
+:root[data-theme="dark"] {
+    /* 文字 */
+    --text-primary: var(--text-high);
+    --text-secondary: var(--text-medium);
+    --text-tertiary: var(--text-disabled);
+    --text-link: var(--primary-400);
+    --text-link-hover: var(--primary-300);
+
+    /* 线条与分割 */
+    --divider: var(--border-subtle);
+    --border: var(--border-strong);
+
+    /* 交互控件 */
+    --control-bg: var(--gray-800);
+    --control-bg-hover: color-mix(in oklab, var(--gray-800), white 6%);
+    --control-bg-active: color-mix(in oklab, var(--gray-800), white 10%);
+    --control-border: var(--border);
+    --control-placeholder: rgba(255, 255, 255, 0.45);
+
+    /* 按钮 */
+    --btn-primary-bg: var(--primary-500);
+    --btn-primary-bg-hover: var(--primary-400);
+    --btn-primary-fg: var(--text-inverse);
+    --btn-secondary-bg: var(--gray-700);
+    --btn-secondary-bg-hover: var(--gray-600);
+    --btn-secondary-fg: var(--text-primary);
+    --btn-danger-bg: var(--danger-500);
+    --btn-danger-bg-hover: var(--danger-400);
+    --btn-ghost-bg-hover: var(--state-hover);
+    --btn-ghost-fg: var(--text-primary);
+
+    /* 状态反馈 */
+    --state-success-bg: color-mix(in oklab, var(--success-600), black 40%);
+    --state-success-fg: #a6f2d6;
+    --state-warning-bg: color-mix(in oklab, var(--warning-600), black 35%);
+    --state-warning-fg: #ffd7a3;
+    --state-danger-bg: color-mix(in oklab, var(--danger-600), black 35%);
+    --state-danger-fg: #ffc1cb;
+    --state-info-bg: color-mix(in oklab, var(--info-600), black 35%);
+    --state-info-fg: #bfe1ff;
+
+    /* 选择/焦点 */
+    --focus-ring: 0 0 0 3px var(--state-focus);
+
+    /* 表格/列表 */
+    --table-row-hover: rgba(255, 255, 255, 0.04);
+    --table-row-selected: rgba(26, 144, 179, 0.18);
+
+    /* Tag/Badge */
+    --badge-bg: var(--gray-700);
+    --badge-fg: var(--text-medium);
+
+    /* Tooltip/Popover */
+    --tooltip-bg: var(--gray-750);
+    --tooltip-fg: var(--text-high);
+
+    /* Skeleton */
+    --skeleton-base: rgba(255, 255, 255, 0.08);
+    --skeleton-shine: rgba(255, 255, 255, 0.18);
+}

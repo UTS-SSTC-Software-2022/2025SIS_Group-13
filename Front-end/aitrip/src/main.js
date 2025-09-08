@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import './style.css'
+import './color.css'
 // Import Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css'
 // Import Bootstrap JavaScript
