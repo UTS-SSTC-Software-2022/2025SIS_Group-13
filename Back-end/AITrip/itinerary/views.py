@@ -7,6 +7,7 @@ from .serializers import ItinerarySerializer, DailyScheduleSerializer, POISerial
 from django_filters.rest_framework import DjangoFilterBackend
 
 from utils.response import CustomModelViewSet
+from utils.customPagination import CustomPagination
 
 class ItineraryViewSet(CustomModelViewSet):
     queryset = Itinerary.objects.all()
@@ -14,6 +15,7 @@ class ItineraryViewSet(CustomModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
+    pagination_class = CustomPagination
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -24,6 +26,7 @@ class DailyScheduleViewSet(CustomModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
+    pagination_class = CustomPagination
 
 class POIViewSet(CustomModelViewSet):
     queryset = POI.objects.all()
@@ -31,3 +34,4 @@ class POIViewSet(CustomModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
+    pagination_class = CustomPagination
