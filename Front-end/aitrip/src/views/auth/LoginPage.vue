@@ -86,7 +86,7 @@ const goToLoginForm = () => {
   width: 100%;
   height: 100%;
   z-index: 1;
-  background: var(--bg-app);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
 }
 
 /* Mobile responsive */

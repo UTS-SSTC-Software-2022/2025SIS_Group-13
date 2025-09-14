@@ -145,7 +145,6 @@ AUTH_USER_MODEL = 'acounts.User'
 CORS_ALLOW_ALL_ORIGINS = True
 
 
-
 # JWT
 from datetime import timedelta
 SIMPLE_JWT = {
