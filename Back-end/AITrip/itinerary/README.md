@@ -1,228 +1,174 @@
-## **General Information**
+**Base URL:** `/api/itinerary/`
+ **Authentication:** JWT Bearer Token required
 
-- **Authentication**: JWT Token required
+```
+Authorization: Bearer <access_token>
+```
 
-  ```
-  Authorization: Bearer <access_token>
-  ```
-
-- **Response Format**: JSON
-
-- **Base URL**: `/api/itinerary/`
-
-- **Pagination**
-
-  - Default page size: 5 items per page
-
-  - Can be customized with query parameters:
-
-    | Parameter   | Type | Default | Description                            |
-    | ----------- | ---- | ------- | -------------------------------------- |
-    | `page`      | int  | 1       | Page number                            |
-    | `page_size` | int  | 5       | Number of items per page (maximum 100) |
-
-- **Filtering**: All model fields are filterable.
-   Example:
-
-  ```
-  GET /api/itinerary/pois/?name=Osaka%20Castle
-  ```
-
-------
-
-## **1. Itineraries Management**
-
-| Method     | URL                                | Description                   |
-| ---------- | ---------------------------------- | ----------------------------- |
-| **GET**    | `/api/itinerary/itineraries/`      | List itineraries (paginated)  |
-| **POST**   | `/api/itinerary/itineraries/`      | Create a new itinerary        |
-| **GET**    | `/api/itinerary/itineraries/{id}/` | Retrieve itinerary details    |
-| **PUT**    | `/api/itinerary/itineraries/{id}/` | Update an itinerary           |
-| **PATCH**  | `/api/itinerary/itineraries/{id}/` | Partially update an itinerary |
-| **DELETE** | `/api/itinerary/itineraries/{id}/` | Delete an itinerary           |
-
-### 1.1 Request Parameters (POST / PUT / PATCH)
-
-| Field         | Type   | Required | Description             |
-| ------------- | ------ | -------- | ----------------------- |
-| `name`        | string | ✅ Yes    | Itinerary name          |
-| `start_date`  | date   | ✅ Yes    | Start date `YYYY-MM-DD` |
-| `end_date`    | date   | ✅ Yes    | End date `YYYY-MM-DD`   |
-| `description` | string | ❌ No     | Description             |
-
-> The `user` field is automatically set to the current authenticated user.
-
-------
-
-### 1.2 Response Example (Paginated List)
+**Response format:**
+ All responses follow this structure:
 
 ```
 {
-  "count": 12,
-  "next": "/api/itinerary/itineraries/?page=2",
-  "previous": null,
-  "results": [
-    {
-      "id": 1,
-      "name": "Japan Trip",
-      "start_date": "2025-09-20",
-      "end_date": "2025-09-30",
-      "description": "Tokyo-Osaka-Kyoto 10-day tour",
-      "user": 3,
-      "create_time": "2025-09-14T08:00:00Z",
-      "update_time": "2025-09-14T08:30:00Z"
-    }
-  ]
+  "success": 1,        // 1 for success, 0 for error
+  "msg": "Operation successful",
+  "data": {}           // Payload
 }
 ```
 
-### 1.3 Query Examples
-
-- Filter itineraries by name:
-
-```
-GET /api/itinerary/itineraries/?name=Japan%20Trip
-```
-
-- Second page with 10 items per page:
-
-```
-GET /api/itinerary/itineraries/?page=2&page_size=10
-```
-
-------
-
-## **2. Daily Schedule Management**
-
-| Method     | URL                                    | Description                       |
-| ---------- | -------------------------------------- | --------------------------------- |
-| **GET**    | `/api/itinerary/daily-schedules/`      | List daily schedules (paginated)  |
-| **POST**   | `/api/itinerary/daily-schedules/`      | Create a daily schedule           |
-| **GET**    | `/api/itinerary/daily-schedules/{id}/` | Retrieve a daily schedule         |
-| **PUT**    | `/api/itinerary/daily-schedules/{id}/` | Update a daily schedule           |
-| **PATCH**  | `/api/itinerary/daily-schedules/{id}/` | Partially update a daily schedule |
-| **DELETE** | `/api/itinerary/daily-schedules/{id}/` | Delete a daily schedule           |
-
-### 2.1 Request Parameters
-
-| Field       | Type    | Required | Description          |
-| ----------- | ------- | -------- | -------------------- |
-| `itinerary` | integer | ✅ Yes    | Related itinerary ID |
-| `date`      | date    | ✅ Yes    | Date `YYYY-MM-DD`    |
-| `notes`     | string  | ❌ No     | Notes                |
-
-------
-
-### 2.2 Response Example (Paginated)
-
-```
-{
-  "count": 20,
-  "next": "/api/itinerary/daily-schedules/?page=2",
-  "previous": null,
-  "results": [
-    {
-      "id": 12,
-      "itinerary": 1,
-      "date": "2025-09-21",
-      "notes": "Kyoto day trip",
-      "pois": [
-        {
-          "id": 5,
-          "name": "Fushimi Inari Shrine",
-          "location": "Kyoto",
-          "description": "Famous shrine with thousands of torii gates"
-        }
-      ],
-      "create_time": "2025-09-14T08:10:00Z",
-      "update_time": "2025-09-14T08:15:00Z"
-    }
-  ]
-}
-```
-
-### 2.3 Query Examples
-
-- Daily schedules for itinerary `id=1`:
-
-```
-GET /api/itinerary/daily-schedules/?itinerary=1
-```
-
-- Daily schedules for a specific date:
-
-```
-GET /api/itinerary/daily-schedules/?date=2025-09-21
-```
-
-------
-
-## **3. Points of Interest (POIs) Management**
-
-| Method     | URL                         | Description            |
-| ---------- | --------------------------- | ---------------------- |
-| **GET**    | `/api/itinerary/pois/`      | List POIs (paginated)  |
-| **POST**   | `/api/itinerary/pois/`      | Create a POI           |
-| **GET**    | `/api/itinerary/pois/{id}/` | Retrieve a POI         |
-| **PUT**    | `/api/itinerary/pois/{id}/` | Update a POI           |
-| **PATCH**  | `/api/itinerary/pois/{id}/` | Partially update a POI |
-| **DELETE** | `/api/itinerary/pois/{id}/` | Delete a POI           |
-
-### 3.1 Request Parameters
-
-| Field            | Type    | Required | Description               |
-| ---------------- | ------- | -------- | ------------------------- |
-| `daily_schedule` | integer | ✅ Yes    | Related daily schedule ID |
-| `name`           | string  | ✅ Yes    | POI name                  |
-| `location`       | string  | ❌ No     | Address                   |
-| `description`    | string  | ❌ No     | Description               |
-
-------
-
-### 3.2 Response Example (Paginated)
-
-```
-{
-  "count": 15,
-  "next": "/api/itinerary/pois/?page=2",
-  "previous": null,
-  "results": [
-    {
-      "id": 8,
-      "daily_schedule": 12,
-      "name": "Osaka Castle",
-      "location": "Chuo Ward, Osaka",
-      "description": "Famous historic landmark",
-      "create_time": "2025-09-14T09:00:00Z",
-      "update_time": "2025-09-14T09:05:00Z"
-    }
-  ]
-}
-```
-
-### 3.3 Query Examples
-
-- All POIs for daily schedule `id=12`:
-
-```
-GET /api/itinerary/pois/?daily_schedule=12
-```
-
-- Filter by POI name:
+**Filtering:**
+ All model fields are filterable via query parameters, e.g.:
 
 ```
 GET /api/itinerary/pois/?name=Osaka%20Castle
 ```
 
+**Pagination (Optional):**
+
+- Query parameters for pagination:
+
+| Parameter   | Type | Default  | Description                                                |
+| ----------- | ---- | -------- | ---------------------------------------------------------- |
+| `page`      | int  | optional | Page number. If omitted, returns all results.              |
+| `page_size` | int  | optional | Items per page (max 100). Only used if `page` is provided. |
+
+- **Behavior**: If `page` is not passed, the API returns **all records** without pagination.
+
 ------
 
-## **4. Error Response Format**
+## **1. Itineraries**
+
+| Method | URL                                          | Description                                             |
+| ------ | -------------------------------------------- | ------------------------------------------------------- |
+| GET    | `/api/itinerary/itineraries/`                | List itineraries (paginated only if `page` is provided) |
+| POST   | `/api/itinerary/itineraries/`                | Create a new itinerary                                  |
+| GET    | `/api/itinerary/itineraries/{itinerary_id}/` | Retrieve an itinerary                                   |
+| PUT    | `/api/itinerary/itineraries/{itinerary_id}/` | Update an itinerary                                     |
+| PATCH  | `/api/itinerary/itineraries/{itinerary_id}/` | Partially update an itinerary                           |
+| DELETE | `/api/itinerary/itineraries/{itinerary_id}/` | Delete an itinerary                                     |
+
+### Request Body (POST/PUT/PATCH)
+
+| Field   | Type   | Required | Description     |
+| ------- | ------ | -------- | --------------- |
+| `title` | string | ✅ Yes    | Itinerary title |
+
+> `user` is automatically set to the authenticated user.
+
+### Response Example (List with Pagination)
 
 ```
 {
-  "code": 400,
-  "message": "Validation failed",
-  "details": {
+  "success": 1,
+  "msg": "Operation successful",
+  "data": {
+    "count": 12,
+    "next": "/api/itinerary/itineraries/?page=2",
+    "previous": null,
+    "results": [
+      {
+        "itinerary_id": 1,
+        "title": "Japan Trip",
+        "user": 3,
+        "daily_schedules": [],
+        "create_time": "2025-09-14T08:00:00Z",
+        "update_time": "2025-09-14T08:30:00Z"
+      }
+    ]
+  }
+}
+```
+
+### Response Example (List without Pagination)
+
+```
+{
+  "success": 1,
+  "msg": "Operation successful",
+  "data": [
+    {
+      "itinerary_id": 1,
+      "title": "Japan Trip",
+      "user": 3,
+      "daily_schedules": [],
+      "create_time": "2025-09-14T08:00:00Z",
+      "update_time": "2025-09-14T08:30:00Z"
+    },
+    {
+      "itinerary_id": 2,
+      "title": "Kyoto Weekend",
+      "user": 3,
+      "daily_schedules": [],
+      "create_time": "2025-09-12T10:00:00Z",
+      "update_time": "2025-09-12T10:30:00Z"
+    }
+  ]
+}
+```
+
+------
+
+## **2. Daily Schedules**
+
+| Method | URL                                             | Description                                            |
+| ------ | ----------------------------------------------- | ------------------------------------------------------ |
+| GET    | `/api/itinerary/daily-schedules/`               | List daily schedules (paginated if `page` is provided) |
+| POST   | `/api/itinerary/daily-schedules/`               | Create a daily schedule                                |
+| GET    | `/api/itinerary/daily-schedules/{schedule_id}/` | Retrieve a daily schedule                              |
+| PUT    | `/api/itinerary/daily-schedules/{schedule_id}/` | Update a daily schedule                                |
+| PATCH  | `/api/itinerary/daily-schedules/{schedule_id}/` | Partially update a daily schedule                      |
+| DELETE | `/api/itinerary/daily-schedules/{schedule_id}/` | Delete a daily schedule                                |
+
+### Request Body (POST/PUT/PATCH)
+
+| Field        | Type    | Required | Description             |
+| ------------ | ------- | -------- | ----------------------- |
+| `itinerary`  | integer | ✅ Yes    | Related itinerary ID    |
+| `day_number` | integer | ✅ Yes    | Day number in itinerary |
+| `start_time` | time    | ✅ Yes    | Start time (HH:MM:SS)   |
+| `end_time`   | time    | ✅ Yes    | End time (HH:MM:SS)     |
+| `summary`    | string  | ❌ No     | Daily schedule summary  |
+
+------
+
+## **3. Points of Interest (POIs)**
+
+| Method | URL                             | Description                                 |
+| ------ | ------------------------------- | ------------------------------------------- |
+| GET    | `/api/itinerary/pois/`          | List POIs (paginated if `page` is provided) |
+| POST   | `/api/itinerary/pois/`          | Create a POI                                |
+| GET    | `/api/itinerary/pois/{poi_id}/` | Retrieve a POI                              |
+| PUT    | `/api/itinerary/pois/{poi_id}/` | Update a POI                                |
+| PATCH  | `/api/itinerary/pois/{poi_id}/` | Partially update a POI                      |
+| DELETE | `/api/itinerary/pois/{poi_id}/` | Delete a POI                                |
+
+### Request Body (POST/PUT/PATCH)
+
+| Field             | Type    | Required | Description                 |
+| ----------------- | ------- | -------- | --------------------------- |
+| `schedule`        | integer | ✅ Yes    | Related daily schedule ID   |
+| `name`            | string  | ✅ Yes    | POI name                    |
+| `description`     | string  | ❌ No     | Description                 |
+| `category`        | string  | ❌ No     | Category                    |
+| `location`        | string  | ❌ No     | Address                     |
+| `target_audience` | string  | ❌ No     | Target audience             |
+| `booking_link`    | string  | ❌ No     | Booking link                |
+| `avg_duration`    | integer | ❌ No     | Average duration in minutes |
+| `opening_hours`   | string  | ❌ No     | Opening hours               |
+| `ticket_price`    | string  | ❌ No     | Ticket price                |
+| `review_summary`  | string  | ❌ No     | Review summary              |
+| `review_source`   | string  | ❌ No     | Review source               |
+| `rating`          | decimal | ❌ No     | Rating (0.0–10.0)           |
+
+------
+
+## **4. Error Response Example**
+
+```
+{
+  "success": 0,
+  "msg": "Operation failed",
+  "data": {
     "name": ["This field may not be blank."]
   }
 }
