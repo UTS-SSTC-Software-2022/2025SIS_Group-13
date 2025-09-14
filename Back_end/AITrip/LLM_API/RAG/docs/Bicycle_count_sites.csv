@@ -1,0 +1,110 @@
+﻿OBJECTID,SiteID,Intersection
+1,1,"Intersection of Broadway, Lee Street, Quay Street, George Street and Pitt Street"
+2,2,Intersection of Castlereagh Street and Goulburn Street
+3,3,Intersection of Grosvenor Street and Gloucester Street
+4,4,Intersection of Elizabeth Street and Park Street
+5,5,"Intersection of Elizabeth Street, Wentworth Avenue and Campbell Street"
+6,6,Intersection of George Street and Alfred Street
+7,7,"Intersection of George Street, Park Street and Druitt Street"
+8,8,"Intersection of George Street, Margaret Street and Curtin Place"
+9,9,Intersection of Kent Street and Clarence Street
+10,10,Intersection of Kent Street and Druitt Street
+11,11,Intersection of King Street and Kent Street
+12,12,"Intersection of Liverpool Street, College Street, Wentworth Avenue and Oxford Street"
+13,13,Intersection of Liverpool Street and Sussex Street
+14,14,Intersection of Liverpool Street and George Street
+15,15,Intersection of Macquarie Street and Bridge Street
+16,16,Intersection of Macquarie Street and Bent Street
+17,17,"Intersection of Macquarie Street, St James Road, Hyde Park entrance and Prince Albert Road"
+18,18,"Intersection of Market Street, Sussex Street, Western Distributor and Pyrmont Bridge"
+19,19,Intersection of Pitt Street and Bridge Street
+20,20,Intersection of Pitt Street and Bathurst Street
+21,21,Intersection of Upper Fort Street and near the Sydney Harbour Bridge cycle ramp (Watson Road)
+22,22,Intersection of York Street and Grosvenor Street
+23,23,Intersection of Bourke Road and Maddox Street
+24,24,Intersection of Burrows Road and Canal Road
+25,25,Intersection of Euston Road and Campbell Road
+26,26,Intersection of Gardeners Road and Bourke Road
+27,27,"Intersection of King Street, Princes Highway and Sydney Park pedestrian entrance"
+28,28,Intersection of Bowden Street and Mandible Street
+29,29,Intersection of O'Riordan Street and Doody Street
+30,30,"Intersection of Missenden Road, John Hopkins Drive and Grose Street"
+31,31,Intersection of Missenden Road and King Street
+32,32,Intersection of Parramatta Road and Mallett Street
+33,33,"Intersection of Broadway, City Road, Parramatta Road and Bay Street"
+34,35,Intersection of Cleveland Street and Regent Street
+35,36,Intersection of Darlinghurst Road and Liverpool Street
+36,37,Intersection of New South Head Road and Neild Avenue
+37,38,Intersection of New South Head Road and Bayswater Road
+38,39,Intersection of Victoria Street and Burton Street
+39,40,Intersection of William Street and Bourke Street
+40,41,Intersection of Abercrombie Street and Codrington Street
+41,42,"Intersection of City Road, Butlin Avenue and Eastern Avenue"
+42,43,Intersection of Cleveland Street and Shepherd Street
+43,44,Intersection of Wilson Street and Shepherd Street
+44,45,"Intersection of Railway Parade, Swanston Street and Bridge Street"
+45,46,"Intersection of King Street, Concord Street and Lord Street"
+46,47,Intersection of Mitchell Road and Copeland Street
+47,48,"Intersection of Mitchell Road, Coulson Street and Huntley Street"
+48,49,Intersection of Victoria Street and George Street
+49,50,"Intersection of Mitchell Road, Davy Road and Henderson Road"
+50,51,Intersection of Pyrmont Bridge Road and Lyons Road
+51,52,Intersection of Wigram Road and Booth Street
+52,53,"Intersection of Bridge Road, Darling Street and Taylor Street"
+53,54,Intersection of Glebe Point Road and Bridge Road
+54,55,"Intersection of Parramatta Road, University Avenue, Derwent Street and Arundel Street"
+55,56,Intersection of Ross Street and St Johns Road
+56,57,"Intersection of St Johns Road, Gottenham Street and Glebe Street"
+57,58,"Intersection of The Crescent, Johnston Street and Chapman Road"
+58,59,Intersection of The Crescent and shared underpass
+59,60,Intersection of Ultimo Road and Thomas Street
+60,61,"Intersection of Darlinghurst Road, Victoria Street and Kings Cross Road"
+61,62,Intersection of Bayswater Road and Ward Avenue
+62,63,Intersection of Hickson Road and Towns Place
+63,64,"Intersection of Hickson Street, Napoleon Street and Sussex Street"
+64,65,"Intersection of Anzac Parade, Flinders Street and Moore Park Road"
+65,66,"Intersection of Anzac Parade, Cleveland Street and Lang Road"
+66,67,"Intersection of Anzac Parade, Alison Road and Dacey Avenue"
+67,68,Intersection of King Street and Enmore Road
+68,69,"Intersection of King Street, Alice Street and Angel Street"
+69,70,Intersection of Wilson Street and Erskineville Road
+70,71,"Intersection of Wilson Street, Burren Street and Brocks Lane"
+71,72,"Intersection of Oxford Street, Bourke Street and Flinders Street"
+72,73,Intersection of Oxford Street and Greens Road
+73,74,"Intersection of Oxford Street, Moore Park Road, Carrington Drive, Parkes Drive and Lang Road"
+74,75,"Intersection of Hughes Street, Greenknowe Avenue and Macleay Street"
+75,76,Intersection of Miller Street and Saunders Street
+76,77,"Intersection of Pirrama Road, Jones Bay Road and Darling Island Road"
+77,78,"Intersection of Murray Street, Union Street, Pyrmont Bridge and Darling Drive"
+78,79,Intersection of Pyrmont Bridge Road and Harris Street
+79,80,"Intersection of Bourke Street, Phillip Street and Crescent Street"
+80,82,Intersection of George Street and Wells Street
+81,83,Intersection of Botany Road and Harcourt Parade
+82,84,Intersection of Dunning Avenue and Queen Street
+83,85,Intersection of Gardeners Road and Dalmeny Avenue
+84,86,Intersection of Bourke Street and Phelps Street
+85,87,Intersection of Crown Street and Fitzroy Street
+86,88,"Intersection of Elizabeth Street, Chalmers Street, Eddy Avenue and Foveaux Street"
+87,89,Intersection of Riley Street and Devonshire Street
+88,90,"Intersection of Bay Street, William Henry Street, Wentworth Park entrance and Wentworth Park Road"
+89,91,Intersection of Darling Drive and Hay Street
+90,92,Intersection of Harris Street and Ultimo Road
+91,93,Intersection of Thomas Street and Jones Street
+92,94,Intersection of Wattle Street and Kelly Street
+93,96,Intersection of Wellington Street and George Street
+94,97,Intersection of Bourke Street and Nicholson Street
+95,98,Intersection of Crown Street and Cathedral Street
+96,99,Intersection of Epsom Road and Link Road
+97,100,"Intersection of South Dowling Street, O'Dea Street and Todman Avenue"
+98,101,Intersection of Portman Street and Geddes Avenue
+99,102,Intersection of Morehead Street and Danks Street
+100,103,"Intersections of Epsom Road and Rothschild Avenue, and Epsom Road and Joynton Avenue"
+101,104,Intersection of Bourke Street and Wilson Street
+102,105,Intersection of Castlereagh St and King St
+103,106,Intersection of Canal cycle path and Huntley St 
+104,107,Intersection of Mcevoy St and Harley Street
+105,34,Intersection of Buckland Street and Myrtle Street (including Peace park shared path)
+106,81,Intersection of Elizabeth Street and Redfern Street & Redfern Park
+107,95,Intersection of Bourke Street and O'Dea Avenue & Short St
+108,108,Intersection of Riley St and Campbell St
+109,109,Intersection of Riley St and Arthur St

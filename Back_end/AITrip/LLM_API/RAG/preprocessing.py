@@ -1,9 +1,8 @@
 import os
 from typing import List
 from sentence_transformers import SentenceTransformer
-import chromadb
 
-embedding_model = SentenceTransformer("shibing624/text2vec-base-chinese")
+embedding_model = SentenceTransformer("HIT-TMG/KaLM-embedding-multilingual-mini-instruct-v2")
 
 # split
 def split_into_chunks(doc_file: str) -> List[str]:
@@ -14,6 +13,9 @@ def split_into_chunks(doc_file: str) -> List[str]:
 # batch embedding
 def embed_chunks(chunks: List[str]) -> List[List[float]]:
     return embedding_model.encode(chunks, normalize_embeddings=True).tolist()
+
+def embed_chunk_user(chunk: str) -> List[float]:
+    return embedding_model.encode(chunk, normalize_embeddings=True).tolist()
 
 # save into Chroma
 def save_embeddings(chromadb_collection, chunks: List[str], embeddings: List[List[float]], filename: str) -> None:

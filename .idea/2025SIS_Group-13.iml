@@ -4,8 +4,8 @@
     <facet type="django" name="Django">
       <configuration>
         <option name="rootFolder" value="$MODULE_DIR$" />
-        <option name="settingsModule" value="Back-end/AITrip/AITrip/settings.py" />
-        <option name="manageScript" value="Back-end/AITrip/manage.py" />
+        <option name="settingsModule" value="Back_end/AITrip/AITrip/settings.py" />
+        <option name="manageScript" value="Back_end/AITrip/manage.py" />
         <option name="environment" value="&lt;map/&gt;" />
         <option name="doNotUseTestRunner" value="false" />
         <option name="trackFilePattern" value="" />
@@ -20,15 +20,5 @@
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />
     <option name="myDocStringFormat" value="Plain" />
-  </component>
-  <component name="PyNamespacePackagesService">
-    <option name="namespacePackageFolders">
-      <list>
-        <option value="$MODULE_DIR$/Back-end" />
-      </list>
-    </option>
-  </component>
-  <component name="TemplatesService">
-    <option name="TEMPLATE_CONFIGURATION" value="Django" />
   </component>
 </module>

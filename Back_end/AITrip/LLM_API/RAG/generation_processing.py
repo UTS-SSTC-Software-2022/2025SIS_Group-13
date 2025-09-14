@@ -1,10 +1,12 @@
-from sentence_transformers import SentenceTransformer
+import os
+import yaml
+from typing import List
 from sentence_transformers import CrossEncoder
-import chromadb
+import Back_end.AITrip.LLM_API.RAG.preprocessing as pp
 
 #Retrieve
 def retrieve(chromadb_collection, query: str, top_k: int) -> List[str]:
-    query_embedding = embed_chunk(query)
+    query_embedding = pp.embed_chunk_user(query)
     results = chromadb_collection.query(
         query_embeddings=[query_embedding],
         n_results=top_k
@@ -22,8 +24,17 @@ def rerank(query: str, retrieved_chunks: List[str], top_k: int) -> List[str]:
 
     return [chunk for chunk, _ in scored_chunks][:top_k]
 
+def load_yaml_config() -> dict:
+    """Load the travel_assistant.yaml configuration."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    yaml_path = os.path.join(base_dir, "travel_assistant.yaml")
+    with open(yaml_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
 def prompt_building(query: str, chunks: List[str]) -> str:
-    prompt = f"""You are a knowledge assistant. Please generate an accurate answer based on the user's question and the following chunks.
+    config = load_yaml_config()
+    system_prompt = config["system_prompt"]
+    prompt = f"""{system_prompt}\n\n Please generate an accurate answer based on the user's question and the following chunks.
 
 User Question: {query}
 

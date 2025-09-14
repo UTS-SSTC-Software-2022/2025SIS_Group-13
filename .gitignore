@@ -12,6 +12,7 @@ venv.bak/
 
 # Pycharm
 .idea
+.idea/2025SIS_Group-13.iml
 
 #npm
 node_modules
