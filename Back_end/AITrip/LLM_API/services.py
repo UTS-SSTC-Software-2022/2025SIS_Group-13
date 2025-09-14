@@ -1,7 +1,5 @@
-# aiworker/services/gemini.py
 import os
 import json
-import yaml
 from typing import Any, Dict, Tuple
 
 # Initialize Django settings
@@ -21,7 +19,7 @@ from google.genai import types as genai_types
 
 def get_chromadb_collection():
     """Initialize or return the ChromaDB collection."""
-    client = chromadb.PersistentClient("./chromaDB/chromaTest.db")
+    client = chromadb.PersistentClient("./RAG/chromaDB/chromaTest.db")
     return client.get_or_create_collection(name="default")
 
 
