@@ -5,7 +5,9 @@ from rest_framework import viewsets, permissions
 from .models import Itinerary, DailySchedule, POI
 from .serializers import ItinerarySerializer, DailyScheduleSerializer, POISerializer
 
-class ItineraryViewSet(viewsets.ModelViewSet):
+from utils.response import CustomModelViewSet
+
+class ItineraryViewSet(CustomModelViewSet):
     queryset = Itinerary.objects.all()
     serializer_class = ItinerarySerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -13,12 +15,12 @@ class ItineraryViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-class DailyScheduleViewSet(viewsets.ModelViewSet):
+class DailyScheduleViewSet(CustomModelViewSet):
     queryset = DailySchedule.objects.all()
     serializer_class = DailyScheduleSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class POIViewSet(viewsets.ModelViewSet):
+class POIViewSet(CustomModelViewSet):
     queryset = POI.objects.all()
     serializer_class = POISerializer
     permission_classes = [permissions.IsAuthenticated]
