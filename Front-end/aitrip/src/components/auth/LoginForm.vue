@@ -87,10 +87,11 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { loginAPI } from '@/apis/auth'
 
 // No props or emits needed for this component
 
-// Router (will be used when implementing navigation after login)
+// Router
 const router = useRouter()
 
 // Form ref
@@ -109,12 +110,12 @@ const loginForm = reactive({
 // Form validation rules
 const loginRules = {
   email: [
-    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+    { required: true, message: 'Please enter your email address', trigger: 'blur' },
+    { type: 'email', message: 'Please enter a valid email address', trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度至少为6位', trigger: 'blur' }
+    { required: true, message: 'Please enter your password', trigger: 'blur' },
+    { min: 6, message: 'Password length must be at least 6 characters', trigger: 'blur' }
   ]
 }
 
@@ -129,37 +130,53 @@ const handleLogin = async () => {
 
     loading.value = true
 
-    // TODO: Replace with actual API call
-    await simulateLogin()
+    // Call login API
+    const response = await loginAPI({
+      email: loginForm.email,
+      password: loginForm.password,
+      rememberMe: loginForm.rememberMe
+    })
 
-    ElMessage.success('登录成功！')
-    
-    // TODO: Navigate to dashboard or home page after successful login
-    // router.push('/dashboard')
-    console.log('Login successful, navigation will be implemented here', router)
+    // Handle successful login
+    if (response.success) {
+      // Store user info and token if provided
+      if (response.data?.token) {
+        setToken(response.data.token)
+      }
+      if (response.data?.user) {
+        setUserInfo(response.data.user)
+      }
+
+      ElMessage.success('登录成功！')
+      
+      // Navigate to dashboard or home page after successful login
+      router.push('/dashboard')
+    } else {
+      throw new Error(response.message || '登录失败')
+    }
     
   } catch (error) {
     console.error('Login error:', error)
-    ElMessage.error(error.message || '登录失败，请重试')
+    
+    // Handle different error types
+    let errorMessage = '登录失败，请重试'
+    
+    if (error.response?.status === 401) {
+      errorMessage = '邮箱或密码错误'
+    } else if (error.response?.status === 403) {
+      errorMessage = '账户已被禁用，请联系管理员'
+    } else if (error.response?.status === 422) {
+      errorMessage = '请求参数错误'
+    } else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    ElMessage.error(errorMessage)
   } finally {
     loading.value = false
   }
-}
-
-/**
- * Simulate login API call (replace with actual implementation)
- */
-const simulateLogin = () => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Simulate successful login
-      if (loginForm.email && loginForm.password) {
-        resolve({ success: true })
-      } else {
-        reject(new Error('登录信息不完整'))
-      }
-    }, 1500)
-  })
 }
 </script>
 

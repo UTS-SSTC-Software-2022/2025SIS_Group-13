@@ -20,11 +20,6 @@ const routes = [
     path: '/forgot-password',
     name: 'forgot-password',
     component: () => import('@/views/auth/ForgotPasswordPage.vue')
-  },
-  {
-    path: '/mobile-login',
-    name: 'mobile-login',
-    component: () => import('@/views/auth/MobileLoginPage.vue')
   }
 ]
 
