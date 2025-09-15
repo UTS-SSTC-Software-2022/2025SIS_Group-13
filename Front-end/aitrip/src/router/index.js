@@ -20,6 +20,16 @@ const routes = [
     path: '/forgot-password',
     name: 'forgot-password',
     component: () => import('@/views/auth/ForgotPasswordPage.vue')
+  },
+  {
+    path: '/travel/plan',
+    name: 'travel-plan',
+    component: () => import('@/views/travel/TravelPlanPage.vue')
+  },
+  {
+    path: '/travel/itinerary-result',
+    name: 'travel-itinerary-result',
+    component: () => import('@/views/travel/TravelItineraryResultPage.vue')
   }
 ]
 
