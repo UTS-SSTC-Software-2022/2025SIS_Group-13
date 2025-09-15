@@ -72,7 +72,7 @@
     --border-strong: rgba(255, 255, 255, 0.16);
 
     /* 背景与海拔（Elevation） */
-    --bg-app: linear-gradient(135deg, hsl(220, 22%, 10%), hsl(220, 18%, 18%));
+    --bg-app: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
     /* 整体背景 */
     --bg-canvas: var(--gray-900);
     /* 页面容器 */
@@ -132,7 +132,7 @@
     --control-placeholder: rgba(255, 255, 255, 0.45);
 
     /* 按钮 */
-    --btn-primary-bg: var(--primary-500);
+    --btn-primary-bg: linear-gradient(135deg, #3b82f6, #8b5cf6);
     --btn-primary-bg-hover: var(--primary-400);
     --btn-primary-fg: var(--text-inverse);
     --btn-secondary-bg: var(--gray-700);

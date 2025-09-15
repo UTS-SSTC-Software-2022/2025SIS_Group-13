@@ -2,8 +2,8 @@
   <div class="forgot-password-container d-flex align-items-center justify-content-center min-vh-100">
     <div class="forgot-password-card">
       <div class="text-center mb-4">
-        <h2 class="form-title">重置密码</h2>
-        <p class="form-subtitle text-muted">请输入您的邮箱地址，我们将发送重置链接给您</p>
+        <h2 class="form-title">Reset Password</h2>
+        <p class="form-subtitle text-muted">Please enter your email address, we will send a reset link to you</p>
       </div>
 
       <el-form
@@ -13,25 +13,25 @@
         label-position="top"
         size="large"
       >
-        <el-form-item label="邮箱地址" prop="email">
+        <el-form-item label="Email Address" prop="email">
           <el-input
             v-model="forgotPasswordForm.email"
             type="email"
-            placeholder="请输入您的邮箱地址"
+            placeholder="Please enter your email address"
             prefix-icon="el-icon-message"
           />
         </el-form-item>
 
         <el-form-item>
           <el-button type="primary" class="w-100" size="large">
-            发送重置链接
+            Send Reset Link
           </el-button>
         </el-form-item>
 
         <div class="text-center">
-          <span class="text-muted">想起密码了？</span>
+          <span class="text-muted">Remember your password?</span>
           <router-link to="/" class="login-link ms-1">
-            返回登录
+            Back to Login
           </router-link>
         </div>
       </el-form>
@@ -50,8 +50,8 @@ const forgotPasswordForm = reactive({
 
 const forgotPasswordRules = {
   email: [
-    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+    { required: true, message: 'Please enter your email address', trigger: 'blur' },
+    { type: 'email', message: 'Please enter a valid email address', trigger: 'blur' }
   ]
 }
 </script>

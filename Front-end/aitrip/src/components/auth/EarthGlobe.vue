@@ -71,92 +71,45 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
+
+
 .main-title {
-  font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(3rem, 8vw, 6rem);
+  font-family: "Outfit","Inter","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  font-weight: 900;
+  font-size: clamp(4rem, 11vw, 7rem);
   font-weight: 800;
   color: #ffffff;
   margin: 0 0 1rem 0;
-  background: linear-gradient(135deg, #bc8e02 0%, #bfd004 50%, #e9eb77 100%);
+  background: linear-gradient(180deg, #f8ffa1 0%, #cfe607 55%, #9fb605 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 0 40px rgba(1, 31, 53, 0.875);
   letter-spacing: -0.03em;
   line-height: 0.9;
+  -webkit-text-stroke: 1px rgba(0,0,0,.45);   
+
 }
 
 .tagline {
-  font-family: 'Inter', 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-family: "Outfit","Inter","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  font-weight: 900;
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
   font-weight: 700;
   color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
   letter-spacing: 0.02em;
   line-height: 1.4;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .brand-header {
-    top: 1.5rem;
-    left: 1.5rem;
-  }
-  
-  .logo {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-  
-  .brand-title {
-    font-size: 1.5rem;
-  }
-  
-  .title-overlay {
-    padding: 0 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .brand-header {
-    top: 1rem;
-    left: 1rem;
-  }
-  
-  .logo-container {
-    gap: 0.75rem;
-  }
-  
-  .logo {
-    width: 2rem;
-    height: 2rem;
-  }
-  
-  .brand-title {
-    font-size: 1.3rem;
-  }
+  width: clamp(300px,80vw,900px);
 }
 
 /* Animation Effects */
 .main-title {
-  animation: titleGlow 4s ease-in-out infinite alternate;
+  animation: fadeInUp 2s ease-out 0.5s both;
 }
 
 .tagline {
   animation: fadeInUp 2s ease-out 0.5s both;
 }
 
-@keyframes titleGlow {
-  0% {
-    text-shadow: 0 0 40px rgba(4, 108, 184, 0.3);
-  }
-  100% {
-    text-shadow: 0 0 60px rgba(4, 108, 184, 0.6), 0 0 100px rgba(70, 163, 247, 0.2);
-  }
-}
 
 @keyframes fadeInUp {
   from {

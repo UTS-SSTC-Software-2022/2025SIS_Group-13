@@ -11,9 +11,12 @@ export default defineConfig({
     }
   },
   server: {
-    fs: {
-      // Allow serving files from one level up to the project root
-      allow: ['..']
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
     }
   },
   assetsInclude: ['**/*.gltf', '**/*.bin', '**/*.jpg', '**/*.jpeg', '**/*.png']

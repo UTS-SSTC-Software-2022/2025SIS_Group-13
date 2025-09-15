@@ -11,9 +11,9 @@ urlpatterns = [
     path('api/', include(router.urls)),
     
     # Authentication endpoints
-    path('api/auth/register/', views.UserRegistrationView.as_view(), name='user-register'),
-    path('api/auth/login/', views.UserLoginView.as_view(), name='user-login'),
-    path('api/auth/logout/', views.UserLogoutView.as_view(), name='user-logout'),
-    path('api/auth/profile/', views.UserProfileView.as_view(), name='user-profile'),
-    path('api/auth/change-password/', views.UserPasswordChangeView.as_view(), name='user-change-password'),
+    path('auth/register/', views.UserRegistrationView.as_view(), name='user-register'),
+    path('auth/login/', views.UserLoginView.as_view(), name='user-login'),
+    path('auth/logout/', views.UserLogoutView.as_view(), name='user-logout'),
+    path('auth/profile/', views.UserProfileView.as_view(), name='user-profile'),
+    path('auth/change-password/', views.UserPasswordChangeView.as_view(), name='user-change-password'),
 ]

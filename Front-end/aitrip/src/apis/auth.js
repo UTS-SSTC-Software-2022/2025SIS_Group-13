@@ -1,21 +1,19 @@
-import request from '@/utils/request'
+import request from './request'
 
 /**
  * User login API
  * @param {Object} loginData - Login credentials
  * @param {string} loginData.email - User email
  * @param {string} loginData.password - User password
- * @param {boolean} loginData.rememberMe - Remember me option
  * @returns {Promise} Login response
  */
 export const loginAPI = (loginData) => {
   return request({
-    url: '/auth/login',
+    url: '/auth/login/',
     method: 'post',
     data: {
       email: loginData.email,
       password: loginData.password,
-      rememberMe: loginData.rememberMe || false
     }
   })
 }
@@ -32,14 +30,15 @@ export const loginAPI = (loginData) => {
  */
 export const registerAPI = (registerData) => {
   return request({
-    url: '/auth/register',
+    url: '/auth/register/',
     method: 'post',
     data: {
       email: registerData.email,
+      username: registerData.username,
+      firstName: registerData.firstname,
+      lastName: registerData.lastname,
       password: registerData.password,
       confirmPassword: registerData.confirmPassword,
-      firstName: registerData.firstName,
-      lastName: registerData.lastName
     }
   })
 }
@@ -51,7 +50,7 @@ export const registerAPI = (registerData) => {
  */
 export const forgotPasswordAPI = (email) => {
   return request({
-    url: '/auth/forgot-password',
+    url: '/auth/forgot-password/',
     method: 'post',
     data: { email }
   })
@@ -67,7 +66,7 @@ export const forgotPasswordAPI = (email) => {
  */
 export const resetPasswordAPI = (resetData) => {
   return request({
-    url: '/auth/reset-password',
+    url: '/auth/reset-password/',
     method: 'post',
     data: {
       token: resetData.token,
@@ -83,7 +82,7 @@ export const resetPasswordAPI = (resetData) => {
  */
 export const getUserProfileAPI = () => {
   return request({
-    url: '/auth/profile',
+    url: '/auth/profile/',
     method: 'get'
   })
 }
@@ -99,7 +98,7 @@ export const getUserProfileAPI = () => {
  */
 export const updateUserProfileAPI = (profileData) => {
   return request({
-    url: '/auth/profile',
+    url: '/auth/profile/',
     method: 'put',
     data: profileData
   })
@@ -115,7 +114,7 @@ export const updateUserProfileAPI = (profileData) => {
  */
 export const changePasswordAPI = (passwordData) => {
   return request({
-    url: '/auth/change-password',
+    url: '/auth/change-password/',
     method: 'put',
     data: {
       currentPassword: passwordData.currentPassword,
@@ -131,7 +130,7 @@ export const changePasswordAPI = (passwordData) => {
  */
 export const logoutAPI = () => {
   return request({
-    url: '/auth/logout',
+    url: '/auth/logout/',
     method: 'post'
   })
 }
@@ -142,7 +141,7 @@ export const logoutAPI = () => {
  */
 export const refreshTokenAPI = () => {
   return request({
-    url: '/auth/refresh-token',
+    url: '/auth/refresh-token/',
     method: 'post'
   })
 }
@@ -154,7 +153,7 @@ export const refreshTokenAPI = () => {
  */
 export const verifyEmailAPI = (token) => {
   return request({
-    url: '/auth/verify-email',
+    url: '/auth/verify-email/',
     method: 'post',
     data: { token }
   })
@@ -167,7 +166,7 @@ export const verifyEmailAPI = (token) => {
  */
 export const resendVerificationAPI = (email) => {
   return request({
-    url: '/auth/resend-verification',
+    url: '/auth/resend-verification/',
     method: 'post',
     data: { email }
   })
