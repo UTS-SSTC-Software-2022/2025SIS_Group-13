@@ -20,6 +20,34 @@ export function useThreeJsGlobe() {
   let mixer = null
   let animationId = null
   let resizeHandler = null
+  let globeModel = null // Store reference to the globe model for scaling
+
+  // ==========================================
+  // RESPONSIVE SCALING UTILITIES
+  // ==========================================
+  function getResponsiveGlobeScale() {
+    const width = window.innerWidth
+    
+    // Define breakpoints (matching Tailwind CSS md breakpoint: 768px)
+    const MD_BREAKPOINT = 768
+    const SM_BREAKPOINT = 640
+    
+    // Return different scales based on screen size
+    if (width < SM_BREAKPOINT) {
+      return 0.55  // Smaller on mobile
+    } else if (width < MD_BREAKPOINT) {
+      return 0.7  // Medium size on tablet
+    } else {
+      return 0.85 // Original size on desktop
+    }
+  }
+
+  function updateGlobeScale() {
+    if (globeModel) {
+      const newScale = getResponsiveGlobeScale()
+      globeModel.scale.setScalar(newScale)
+    }
+  }
 
   // ==========================================
   // SCENE INITIALIZATION
@@ -133,8 +161,12 @@ export function useThreeJsGlobe() {
           }
         })
         
-        // Scale model to appropriate size
-        root.scale.setScalar(0.85)
+        // Store reference to the globe model for responsive scaling
+        globeModel = root
+        
+        // Apply initial responsive scale
+        const initialScale = getResponsiveGlobeScale()
+        root.scale.setScalar(initialScale)
         
         // Add model to scene
         scene.add(root)
@@ -190,6 +222,9 @@ export function useThreeJsGlobe() {
       
       // Update renderer size
       renderer.setSize(width, height)
+      
+      // Update globe scale based on new window size
+      updateGlobeScale()
     }
     
     window.addEventListener('resize', resizeHandler)
@@ -292,6 +327,7 @@ export function useThreeJsGlobe() {
       // Clear scene references
       scene = null
       camera = null
+      globeModel = null
       
       console.log('🧹 Three.js Globe cleaned up successfully')
       

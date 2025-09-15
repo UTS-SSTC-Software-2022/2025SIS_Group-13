@@ -18,7 +18,7 @@ from utils.response import ResponseHandler
 logger = logging.getLogger(__name__)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(CustomModelViewSet,viewsets.ModelViewSet):
     """
     ViewSet for User CRUD operations
     """
@@ -67,19 +67,8 @@ class UserRegistrationView(APIView):
                 user = serializer.save()
                 logger.info(f"New user registered: {user.email}")
                 
-                # Generate tokens
-                refresh = RefreshToken.for_user(user)
-                
-                data = {
-                    'user': UserProfileSerializer(user).data,
-                    'tokens': {
-                        'refresh': str(refresh),
-                        'access': str(refresh.access_token),
-                    }
-                }
-                
                 return ResponseHandler.success(
-                    data=data,
+                    data= None,
                     msg='User registered successfully',
                     status_code=status.HTTP_201_CREATED
                 )
@@ -90,10 +79,12 @@ class UserRegistrationView(APIView):
             )
             
         except Exception as e:
+            print(e)
             return ResponseHandler.error(
                 msg=str(e),
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 
 class UserLoginView(APIView):

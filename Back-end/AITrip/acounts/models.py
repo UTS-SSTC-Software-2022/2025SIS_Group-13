@@ -22,20 +22,19 @@ class User(AbstractUser):
         db_index=True
     )
     
-    # Add middle name field
-    middle_name = models.CharField(
-        max_length=30,
-        blank=True,
-        verbose_name='Middle Name',
-        help_text='Optional middle name'
-    )
-    
     # Time tracking fields to match DDL
     create_time = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Create Time',
         db_index=True,
         help_text='Time when user was created'
+    )
+
+    middle_name = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name='Middle Name',
+        help_text='Optional middle name'
     )
     
     update_time = models.DateTimeField(

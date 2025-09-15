@@ -15,15 +15,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         min_length=8,
         validators=[validate_password],
     )
-    password_confirm = serializers.CharField(
-        write_only=True,
-    )
     
     class Meta:
         model = User
         fields = (
-            'id', 'email', 'username', 'first_name', 'middle_name', 'last_name', 
-            'password', 'password_confirm', 'create_time'
+            'id', 'email', 'username', 'first_name', 'last_name', 
+            'password', 'create_time'
         )
         read_only_fields = ('id', 'create_time')
 
@@ -31,10 +28,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         """
         Validate password confirmation matches password
         """
-        if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError({
-                'password_confirm': 'Password confirmation does not match password.'
-            })
         if User.objects.filter(email=attrs['email']).exists():
             raise serializers.ValidationError({
                 'email': 'Email already exists.'
@@ -49,7 +42,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         """
         Create user with encrypted password
         """
-        validated_data.pop('password_confirm')
         password = validated_data.pop('password')
         user = User.objects.create_user(**validated_data)
         user.set_password(password)

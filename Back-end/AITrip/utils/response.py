@@ -4,7 +4,7 @@ Provides consistent API response format across all endpoints
 """
 
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets
 from typing import Any
 
 
@@ -70,7 +70,17 @@ class ResponseHandler:
         
         return Response(response_data, status=status_code)
 
+class CustomModelViewSet(viewsets.ModelViewSet):
+    def finalize_response(self, request, response, *args, **kwargs):
+        if isinstance(response.data, dict) and 'success' in response.data:
+            return super().finalize_response(request, response, *args, **kwargs)
 
+        if response.status_code < 400:
+            response.data = ResponseHandler.success(data=response.data).data
+        else:
+            response.data = ResponseHandler.error(data=response.data).data
+
+        return super().finalize_response(request, response, *args, **kwargs)
 
 
 
