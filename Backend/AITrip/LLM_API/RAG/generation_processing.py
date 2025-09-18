@@ -2,7 +2,7 @@ import os
 import yaml
 from typing import List
 from sentence_transformers import CrossEncoder
-import Back_end.AITrip.LLM_API.RAG.preprocessing as pp
+import Backend.AITrip.LLM_API.RAG.preprocessing as pp
 
 #Retrieve
 def retrieve(chromadb_collection, query: str, top_k: int) -> List[str]:
