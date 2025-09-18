@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-    "acounts",
+    "accounts",
     'itinerary',
     'review',
     "LLM_API",
@@ -144,7 +144,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom User Model
-AUTH_USER_MODEL = 'acounts.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
