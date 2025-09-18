@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 
 class PromptIn(serializers.Serializer):
-    # Required: the instruction/prompt. Can be text or a small JSON blob stringified.
+    # Required: the instruction/prompt. Can be text or a small JSON blob string field.
     prompt = serializers.CharField()
 
 
