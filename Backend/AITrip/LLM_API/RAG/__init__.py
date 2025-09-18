@@ -1,7 +1,9 @@
 #Process the knowledge datasets and store into chroma database
 import os
 import chromadb
-import Backend.AITrip.LLM_API.RAG.preprocessing as pp
+
+#import .RAG.preprocessing as pp
+from . import preprocessing as pp
 
 chromadb_client = chromadb.PersistentClient("./chromaDB/chromaTest.db")
 chromadb_collection = chromadb_client.get_or_create_collection(name="default")
