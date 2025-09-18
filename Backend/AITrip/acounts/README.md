@@ -112,7 +112,7 @@
 
 1. 运行数据库迁移：
    ```bash
-   python manage.py makemigrations acounts
+   python manage.py makemigrations accounts
    python manage.py migrate
    ```
 
