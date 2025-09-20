@@ -98,10 +98,12 @@ def check_migrations_needed():
             capture_output=True,
             text=True,
             check=True,
+            encoding="utf-8",
+            errors="ignore"
         )
 
         # 检查输出中是否有 [ ] 标记的未应用迁移
-        if "[ ]" in result.stdout:
+        if result.stdout and "[ ]" in result.stdout:
             print("⚠️ 检测到未应用的数据库迁移")
             return True
         else:

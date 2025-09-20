@@ -9,7 +9,7 @@ django.setup()
 
 from django.conf import settings
 import chromadb
-import Back_end.AITrip.LLM_API.RAG.generation_processing as gp
+from .RAG import generation_processing as gp
 
 # New unified SDK
 from google import genai
