@@ -191,7 +191,7 @@ const handleRegister = async () => {
     const response = await registerAPI(registerForm)
     if (response.success) {
       ElMessage.success('Registration successful')
-      router.push('/login')
+      router.push('/login-form')
     } else {
       ElMessage.error('Registration failed')
     }
