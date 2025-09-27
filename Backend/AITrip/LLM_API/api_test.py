@@ -1,8 +1,6 @@
 import unittest
 import services
 
-
-
 class MyTestCase(unittest.TestCase):
     def test_llm_api(self):
         query = "Give me some information about the Rocks district."
