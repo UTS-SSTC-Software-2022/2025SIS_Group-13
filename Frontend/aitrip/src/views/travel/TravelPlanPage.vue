@@ -28,6 +28,7 @@
 import { useRouter } from 'vue-router'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import axios from 'axios'
 import TravelPlanForm from '@/components/travel/TravelPlanForm.vue'
 
 const router = useRouter()
@@ -46,17 +47,25 @@ const goBack = () => {
 const handleFormSubmit = async (formData) => {
   try {
     console.log('Travel plan data:', formData)
-    
-    ElMessage.success('Generating your personalized Australian adventure...')
-    
-    // Navigate to AI itinerary result page with form data
-    await router.push({
+
+    ElMessage.info('Generating your personalized Australian adventure...')
+
+    // 调用 Django API
+    const response = await axios.post('http://localhost:8080/api/ai/generate/', formData)
+
+    const output = response.data.output
+    console.log('LLM_API output:', output)
+
+    ElMessage.success('Itinerary generated successfully!')
+
+    // 跳转到结果页面，同时可以传输出内容
+    router.push({
       path: '/travel/itinerary-result',
       query: {
-        formData: encodeURIComponent(JSON.stringify(formData))
+        result: encodeURIComponent(JSON.stringify(output))
       }
     })
-    
+
   } catch (error) {
     console.error('Generate travel plan error:', error)
     ElMessage.error('Failed to generate itinerary, please try again')

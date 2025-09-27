@@ -34,13 +34,13 @@ def load_yaml_config() -> dict:
 def prompt_building(query: str, chunks: List[str]) -> str:
     config = load_yaml_config()
     system_prompt = config["system_prompt"]
-    prompt = f"""{system_prompt}\n\n Please generate an accurate answer based on the user's question and the following chunks.
+    prompt = f"""{system_prompt}\n\n Please generate an accurate answer based on the user's question (travel form) and the following chunks.
 
 User Question: {query}
 
 Relevant Chunks:
 {"\n\n".join(chunks)}
 
-Please answer strictly based on the above content. Do not fabricate information."""
+If the chunk is empty or not related to the question, you can search from the Internet and generate answer. Please answer strictly based on the above content. Do not fabricate information."""
 
     return prompt
