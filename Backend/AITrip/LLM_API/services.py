@@ -4,12 +4,12 @@ from typing import Any, Dict, Tuple
 
 # Initialize Django settings
 import django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Back_end.AITrip.AITrip.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Backend.AITrip.AITrip.settings")
 django.setup()
 
 from django.conf import settings
 import chromadb
-from .RAG import generation_processing as gp
+from LLM_API.RAG import generation_processing as gp
 
 # New unified SDK
 from google import genai
