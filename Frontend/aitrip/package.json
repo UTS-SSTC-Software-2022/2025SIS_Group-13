@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "frontend": "vite",
+    "backend": "Backend/AITrip/start_server.py",
+    "dev": "concurrently -n FRONTEND,BACKEND -c cyan,green \"npm:frontend\" \"npm:backend\"",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "concurrently": "^8.0.1"
   }
 }
