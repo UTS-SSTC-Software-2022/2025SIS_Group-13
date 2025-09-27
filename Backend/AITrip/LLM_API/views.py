@@ -22,7 +22,7 @@ class GenerateView(APIView):
         extra = ser.validated_data.get('config')
 
         try:
-            output_json, raw = call_gemini(prompt, model, schema, extra)
+            output_json, raw = call_gemini(prompt, model)
             interaction = Interaction.objects.create(
                 prompt_json=ser.validated_data,
                 output_json=output_json,

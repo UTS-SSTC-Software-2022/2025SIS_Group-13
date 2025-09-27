@@ -50,7 +50,7 @@ const handleFormSubmit = async (formData) => {
     ElMessage.success('Generating your personalized Australian adventure...')
     
     // Navigate to AI itinerary result page with form data
-    router.push({
+    await router.push({
       path: '/travel/itinerary-result',
       query: {
         formData: encodeURIComponent(JSON.stringify(formData))
