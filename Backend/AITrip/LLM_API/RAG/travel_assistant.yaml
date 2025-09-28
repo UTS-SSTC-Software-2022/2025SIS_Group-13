@@ -1,10 +1,10 @@
 system_prompt: |
-  You are a smart travel assistant. 
-  Your role is to help users plan personalized travel itineraries, provide destination recommendations, 
+  You are a smart travel assistant.
+  Your role is to help users plan personalized travel itineraries, provide destination recommendations,
   and answer travel-related questions in a clear and structured manner.
   Always adapt to the user's preferences, constraints (budget, time, mobility), and cultural background.
   Respond in the same language the user uses.
-  Your response MUST always be in valid JSON format.
+  Your response MUST always be in valid JSON format following the structure below.
 
 user_profile:
   - name: "number_of_people"
@@ -34,49 +34,64 @@ user_profile:
     type: list
     description: "Nice-to-have attractions, optional activities"
 
-response_style:
-  format: "JSON"
-  schema:
-    type: object
-    properties:
-      itinerary:
-        type: array
-        description: "Day-by-day travel plan"
-        items:
-          type: object
-          properties:
-            day: { type: integer }
-            activities: { type: array, items: { type: string } }
-            meals: { type: array, items: { type: string } }
-      highlights:
-        type: array
-        description: "Key destination highlights"
-        items: { type: string }
-      transport:
-        type: array
-        description: "Transportation suggestions"
-        items: { type: string }
-      accommodation:
-        type: array
-        description: "Suggested hotels or lodging types"
-        items: { type: string }
-      budget:
-        type: string
-        description: "Budget level summary"
-
-example_conversations:
-  - user: "We are a family of 4 with two kids, we want a 5-day trip to Tokyo. We love anime and theme parks."
-    assistant: |
+example_assistant: |
+  {
+    "destination": "Sydney, NSW",
+    "duration": 5,
+    "travelers": 2,
+    "estimatedBudget": 2500,
+    "generatedAt": "2024-03-15T10:00:00Z",
+    "dailyPlans": [
       {
-        "itinerary": [
-          {"day": 1, "activities": ["Explore Akihabara (anime shops, cafes)"], "meals": ["Themed cafe lunch"]},
-          {"day": 2, "activities": ["Tokyo Disneyland"], "meals": ["Park food"]},
-          {"day": 3, "activities": ["Ueno Zoo", "National Museum"], "meals": ["Local restaurant"]},
-          {"day": 4, "activities": ["Ghibli Museum", "Mitaka Park"], "meals": ["Family dinner nearby"]},
-          {"day": 5, "activities": ["Shopping in Shibuya"], "meals": ["Farewell sushi dinner"]}
+        "date": "2024-03-15",
+        "overview": "Explore Sydney CBD and Harbour Bridge",
+        "weather": {
+          "condition": "Sunny",
+          "temperature": 24
+        },
+        "activities": [
+          {
+            "time": "09:00",
+            "title": "Sydney Harbour Bridge Climb",
+            "type": "Adventure",
+            "description": "Experience breathtaking 360-degree views of Sydney from the top of the iconic Harbour Bridge.",
+            "location": {
+              "name": "Sydney Harbour Bridge",
+              "address": "5 Cumberland St, The Rocks NSW 2000"
+            },
+            "transportation": {
+              "method": "Walk from hotel",
+              "duration": "15 minutes"
+            },
+            "estimatedCost": 174,
+            "tips": [
+              "Book in advance for better rates",
+              "Wear comfortable shoes and clothes",
+              "Bring a camera for stunning photos"
+            ]
+          },
+          {
+            "time": "13:00",
+            "title": "Lunch at The Rocks",
+            "type": "Dining",
+            "description": "Enjoy fresh seafood and local Australian cuisine at one of The Rocks historic restaurants.",
+            "location": {
+              "name": "The Rocks Markets",
+              "address": "Jack Mundey Pl, The Rocks NSW 2000"
+            },
+            "transportation": {
+              "method": "Walk",
+              "duration": "5 minutes"
+            },
+            "estimatedCost": 45,
+            "tips": [
+              "Try the famous meat pies",
+              "Weekend markets have more food options"
+            ]
+          }
         ],
-        "highlights": ["Akihabara", "Disneyland", "Ghibli Museum", "Shibuya"],
-        "transport": ["Suica metro card", "JR pass for longer trips"],
-        "accommodation": ["Family hotel near Shinjuku"],
-        "budget": "Medium"
+        "estimatedWalking": "3.2 km",
+        "dailyBudget": 270
       }
+    ]
+  }

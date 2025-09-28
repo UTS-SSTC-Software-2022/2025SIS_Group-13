@@ -46,29 +46,20 @@ const goBack = () => {
  */
 const handleFormSubmit = async (formData) => {
   try {
-    console.log('Travel plan data:', formData)
+    console.log('Travel plan data (will be forwarded to results page):', formData)
 
-    ElMessage.info('Generating your personalized Australian adventure...')
+    // Inform user and navigate to result page; result page will call /generate.
+    ElMessage.info('Opening itinerary results...')
 
-    // 调用 Django API
-    const response = await axios.post('http://localhost:8080/api/ai/generate/', formData)
-
-    const output = response.data.output
-    console.log('LLM_API output:', output)
-
-    ElMessage.success('Itinerary generated successfully!')
-
-    // 跳转到结果页面，同时可以传输出内容
-    router.push({
+    await router.push({
       path: '/travel/itinerary-result',
       query: {
-        result: encodeURIComponent(JSON.stringify(output))
+        formData: encodeURIComponent(JSON.stringify(formData))
       }
     })
-
   } catch (error) {
-    console.error('Generate travel plan error:', error)
-    ElMessage.error('Failed to generate itinerary, please try again')
+    console.error('Failed to navigate to results page:', error)
+    ElMessage.error('Failed to open itinerary results, please try again')
   }
 }
 </script>
@@ -141,13 +132,13 @@ const handleFormSubmit = async (formData) => {
   .travel-plan-page {
     padding: 1rem 0;
   }
-  
+
   .travel-plan-wrapper {
     margin: 1rem;
     padding: 2rem 1.5rem;
     max-height: 95vh;
   }
-  
+
   .back-button-container {
     top: 0.5rem;
     left: 0.5rem;
