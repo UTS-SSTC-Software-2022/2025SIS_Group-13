@@ -8,7 +8,7 @@
         class="back-button"
       >
         <el-icon><ArrowLeft /></el-icon>
-        Back to Planning
+        Back to Home
       </el-button>
 
       <div class="page-actions">
@@ -51,7 +51,7 @@
             Try Again
           </el-button>
           <el-button @click="goBack">
-            Back to Planning
+            Back to Home
           </el-button>
         </template>
       </el-result>
@@ -128,7 +128,7 @@
         :image-size="200"
       >
         <el-button type="primary" @click="goBack">
-          Start Planning
+          Back to Home
         </el-button>
       </el-empty>
     </div>
@@ -166,7 +166,7 @@ const feedback = reactive({
 
 // Methods
 const goBack = () => {
-  router.push('/travel/plan')
+  router.push('/home')
 }
 
 const formatGenerationTime = () => {

@@ -34,10 +34,10 @@ import TravelPlanForm from '@/components/travel/TravelPlanForm.vue'
 const router = useRouter()
 
 /**
- * Go back to previous page
+ * Go back to home page
  */
 const goBack = () => {
-  router.go(-1)
+  router.push('/home')
 }
 
 /**
