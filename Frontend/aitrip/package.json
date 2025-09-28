@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "frontend": "vite",
-    "backend": "Backend/AITrip/start_server.py",
+    "backend": "python ../../Backend/AITrip/manage.py runserver 8080",
     "dev": "concurrently -n FRONTEND,BACKEND -c cyan,green \"npm:frontend\" \"npm:backend\"",
     "build": "vite build",
     "preview": "vite preview"
