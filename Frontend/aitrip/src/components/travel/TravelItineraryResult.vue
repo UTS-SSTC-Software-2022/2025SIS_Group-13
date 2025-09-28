@@ -187,7 +187,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import {ref, reactive, onMounted, watch} from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   Calendar,
@@ -215,136 +215,32 @@ const props = defineProps({
 const expandedDays = ref([])
 const loading = ref(false)
 
-// Sample itinerary data (will be replaced by API call)
 const itinerary = reactive({
-  destination: 'Sydney, NSW',
-  duration: 5,
-  travelers: 2,
-  estimatedBudget: 2500,
-  dailyPlans: [
-    {
-      date: '2024-03-15',
-      overview: 'Explore Sydney CBD and Harbour Bridge',
-      weather: {
-        condition: 'Sunny',
-        temperature: 24
-      },
-      activities: [
-        {
-          time: '09:00',
-          title: 'Sydney Harbour Bridge Climb',
-          type: 'Adventure',
-          description: 'Experience breathtaking 360-degree views of Sydney from the top of the iconic Harbour Bridge.',
-          location: {
-            name: 'Sydney Harbour Bridge',
-            address: '5 Cumberland St, The Rocks NSW 2000'
-          },
-          transportation: {
-            method: 'Walk from hotel',
-            duration: '15 minutes'
-          },
-          estimatedCost: 174,
-          tips: [
-            'Book in advance for better rates',
-            'Wear comfortable shoes and clothes',
-            'Bring a camera for stunning photos'
-          ]
-        },
-        {
-          time: '13:00',
-          title: 'Lunch at The Rocks',
-          type: 'Dining',
-          description: 'Enjoy fresh seafood and local Australian cuisine at one of The Rocks historic restaurants.',
-          location: {
-            name: 'The Rocks Markets',
-            address: 'Jack Mundey Pl, The Rocks NSW 2000'
-          },
-          transportation: {
-            method: 'Walk',
-            duration: '5 minutes'
-          },
-          estimatedCost: 45,
-          tips: [
-            'Try the famous meat pies',
-            'Weekend markets have more food options'
-          ]
-        },
-        {
-          time: '15:30',
-          title: 'Sydney Opera House Tour',
-          type: 'Culture',
-          description: 'Take a guided tour inside the world-famous Sydney Opera House and learn about its fascinating architecture.',
-          location: {
-            name: 'Sydney Opera House',
-            address: 'Bennelong Point, Sydney NSW 2000'
-          },
-          transportation: {
-            method: 'Ferry from Circular Quay',
-            duration: '10 minutes',
-            cost: 8
-          },
-          estimatedCost: 43,
-          tips: [
-            'Book the 1-hour guided tour',
-            'Check for evening performance schedules'
-          ]
-        }
-      ],
-      estimatedWalking: '3.2 km',
-      dailyBudget: 270
-    },
-    {
-      date: '2024-03-16',
-      overview: 'Bondi Beach and Coastal Walk',
-      weather: {
-        condition: 'Partly Cloudy',
-        temperature: 22
-      },
-      activities: [
-        {
-          time: '08:30',
-          title: 'Bondi to Coogee Coastal Walk',
-          type: 'Nature',
-          description: 'Scenic 6km coastal walk featuring stunning ocean views, beaches, and clifftop paths.',
-          location: {
-            name: 'Bondi Beach',
-            address: 'Bondi Beach NSW 2026'
-          },
-          transportation: {
-            method: 'Bus from city',
-            duration: '45 minutes',
-            cost: 4
-          },
-          estimatedCost: 0,
-          tips: [
-            'Start early to avoid crowds',
-            'Bring water and sunscreen',
-            'Wear comfortable walking shoes'
-          ]
-        },
-        {
-          time: '12:00',
-          title: 'Lunch at Coogee Beach',
-          type: 'Dining',
-          description: 'Relax and enjoy fresh seafood with ocean views at Coogee Beach.',
-          location: {
-            name: 'Coogee Pavilion',
-            address: '169 Dolphin St, Coogee NSW 2034'
-          },
-          estimatedCost: 38,
-          tips: [
-            'Try the fish and chips',
-            'Great spot for people watching'
-          ]
-        }
-      ],
-      estimatedWalking: '6.5 km',
-      dailyBudget: 80
-    }
-  ]
+  destination: '',
+  duration: 0,
+  travelers: 0,
+  estimatedBudget: 0,
+  dailyPlans: []
 })
 
-// Methods
+// Watch for props changes and fully replace reactive object
+watch(
+  () => props.itineraryData,
+  (newData) => {
+    if (newData) {
+      // 用 JSON 深拷贝，确保 reactive 完全更新
+      const copy = JSON.parse(JSON.stringify(newData))
+      itinerary.destination = copy.destination || ''
+      itinerary.duration = copy.duration || 0
+      itinerary.travelers = copy.travelers || 0
+      itinerary.estimatedBudget = copy.estimatedBudget || 0
+      itinerary.dailyPlans = copy.dailyPlans || []
+    }
+  },
+  { immediate: true }
+)
+
+// Toggle day details
 const toggleDayDetails = (dayIndex) => {
   const index = expandedDays.value.indexOf(dayIndex)
   if (index > -1) {
@@ -414,27 +310,26 @@ const saveItinerary = () => {
 
 // Lifecycle
 onMounted(() => {
-  // TODO: Replace with actual API call
-  // if (props.itineraryData) {
-  //   Object.assign(itinerary, props.itineraryData)
-  // } else {
-  //   fetchItineraryFromAPI()
-  // }
+    if (props.itineraryData) {
+      Object.assign(itinerary, props.itineraryData)
+    } else {
+      fetchItineraryFromAPI()
+    }
 })
 
 // TODO: API call function
 const fetchItineraryFromAPI = async () => {
   try {
     loading.value = true
-    // const response = await fetch('/api/travel/itinerary/generate', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(travelFormData)
-    // })
-    // const data = await response.json()
-    // Object.assign(itinerary, data)
+    const response = await fetch('/api/travel/itinerary/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(travelFormData)
+    })
+    const data = await response.json()
+    Object.assign(itinerary, data)
   } catch (error) {
     console.error('Failed to fetch itinerary:', error)
     ElMessage.error('Failed to load itinerary')
