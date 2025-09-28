@@ -4,7 +4,7 @@ from typing import List
 from sentence_transformers import CrossEncoder
 from . import preprocessing as pp
 
-#Retrieve
+# Retrieve
 def retrieve(chromadb_collection, query: str, top_k: int) -> List[str]:
     query_embedding = pp.embed_chunk_user(query)
     results = chromadb_collection.query(
@@ -13,7 +13,7 @@ def retrieve(chromadb_collection, query: str, top_k: int) -> List[str]:
     )
     return results['documents'][0]
 
-#Rerank
+# Rerank
 def rerank(query: str, retrieved_chunks: List[str], top_k: int) -> List[str]:
     cross_encoder = CrossEncoder('cross-encoder/mmarco-mMiniLMv2-L12-H384-v1')
     pairs = [(query, chunk) for chunk in retrieved_chunks]
@@ -34,13 +34,24 @@ def load_yaml_config() -> dict:
 def prompt_building(query: str, chunks: List[str]) -> str:
     config = load_yaml_config()
     system_prompt = config["system_prompt"]
-    prompt = f"""{system_prompt}\n\n Please generate an accurate answer based on the user's question (travel form) and the following chunks.
+    example_assistant = config["example_assistant"]
 
-User Question: {query}
+    prompt = f"""{system_prompt}
+
+Please generate an accurate travel itinerary in strict JSON format.
+The JSON MUST strictly follow the structure and field names in the example below.
+Do not add extra text or explanations outside the JSON.
+
+User Question (form input): {query}
 
 Relevant Chunks:
 {"\n\n".join(chunks)}
 
-If the chunk is empty or not related to the question, you can search from the Internet and generate answer. Please answer strictly based on the above content. Do not fabricate information."""
+Expected JSON structure example:
+{example_assistant}
+
+If the chunks are empty or irrelevant, you may use your knowledge to generate a realistic itinerary,
+but you MUST always return a valid JSON following the example schema.
+"""
 
     return prompt

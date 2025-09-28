@@ -69,5 +69,5 @@ def call_gemini(
 
     # Provide raw response dict for auditing
     raw_dict = getattr(response, 'to_dict', lambda: {})()
-
+    print(raw_dict)
     return parsed, raw_dict
