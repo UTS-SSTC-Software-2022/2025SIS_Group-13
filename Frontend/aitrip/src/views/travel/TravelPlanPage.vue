@@ -54,7 +54,7 @@ const handleFormSubmit = async (formData) => {
     await router.push({
       path: '/travel/itinerary-result',
       query: {
-        formData: encodeURIComponent(JSON.stringify(formData))
+        result: encodeURIComponent(JSON.stringify(output))
       }
     })
   } catch (error) {
