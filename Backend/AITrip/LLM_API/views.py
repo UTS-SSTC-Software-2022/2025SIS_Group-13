@@ -13,7 +13,7 @@ class GenerateView(APIView):
         form_data = request.data  # 前端直接发送整个 formData 对象
 
         # 可选：你可以把整个 formData 转成字符串 prompt
-        prompt = f"Generate a travel itinerary based on: {form_data}"
+        prompt = f"Generate a travel plan based on: {form_data}"
 
         model_name = form_data.get('model')  # 如果前端传了模型参数
 

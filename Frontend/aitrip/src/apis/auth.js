@@ -32,13 +32,13 @@ export const registerAPI = (registerData) => {
   return request({
     url: '/auth/register/',
     method: 'post',
+    noToken: true,  // Registration doesn't require authentication
     data: {
       email: registerData.email,
       username: registerData.username,
-      firstName: registerData.firstname,
-      lastName: registerData.lastname,
+      first_name: registerData.firstname,
+      last_name: registerData.lastname,
       password: registerData.password,
-      confirmPassword: registerData.confirmPassword,
     }
   })
 }

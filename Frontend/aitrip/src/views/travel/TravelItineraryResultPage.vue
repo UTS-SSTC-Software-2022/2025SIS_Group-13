@@ -2,26 +2,26 @@
   <div class="travel-itinerary-result-page">
     <!-- Navigation Bar -->
     <div class="page-header">
-      <el-button 
-        type="text" 
-        @click="goBack" 
+      <el-button
+        type="text"
+        @click="goBack"
         class="back-button"
       >
         <el-icon><ArrowLeft /></el-icon>
-        Back to Planning
+        Back to Home
       </el-button>
-      
+
       <div class="page-actions">
-        <el-button 
-          type="primary" 
+        <el-button
+          type="primary"
           @click="regenerateItinerary"
           :loading="regenerating"
         >
           <el-icon><Refresh /></el-icon>
           Regenerate
         </el-button>
-        <el-button 
-          type="success" 
+        <el-button
+          type="success"
           @click="modifyPreferences"
         >
           <el-icon><Edit /></el-icon>
@@ -51,7 +51,7 @@
             Try Again
           </el-button>
           <el-button @click="goBack">
-            Back to Planning
+            Back to Home
           </el-button>
         </template>
       </el-result>
@@ -71,7 +71,7 @@
       </div>
 
       <!-- Itinerary Component -->
-      <TravelItineraryResult 
+      <TravelItineraryResult
         :itinerary-data="itineraryData"
         @download="handleDownload"
         @share="handleShare"
@@ -87,17 +87,17 @@
               <p>Your feedback helps us improve our AI recommendations</p>
             </div>
           </template>
-          
+
           <div class="feedback-content">
             <div class="rating-section">
               <span class="rating-label">Overall Rating:</span>
-              <el-rate 
-                v-model="feedback.rating" 
+              <el-rate
+                v-model="feedback.rating"
                 :colors="['#F7BA2A', '#F7BA2A', '#F7BA2A']"
                 show-text
               />
             </div>
-            
+
             <el-input
               v-model="feedback.comment"
               type="textarea"
@@ -106,10 +106,10 @@
               maxlength="500"
               show-word-limit
             />
-            
+
             <div class="feedback-actions">
-              <el-button 
-                type="primary" 
+              <el-button
+                type="primary"
                 @click="submitFeedback"
                 :loading="submittingFeedback"
               >
@@ -123,12 +123,12 @@
 
     <!-- Empty State -->
     <div v-else class="empty-container">
-      <el-empty 
+      <el-empty
         description="No itinerary data available"
         :image-size="200"
       >
         <el-button type="primary" @click="goBack">
-          Start Planning
+          Back to Home
         </el-button>
       </el-empty>
     </div>
@@ -138,6 +138,7 @@
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import axios from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Refresh, Edit } from '@element-plus/icons-vue'
 import TravelItineraryResult from '@/components/travel/TravelItineraryResult.vue'
@@ -154,6 +155,9 @@ const error = ref('')
 const itineraryData = ref(null)
 const generationTime = ref(new Date())
 
+// Keep the last form data we used to generate the itinerary
+const lastFormData = ref(null)
+
 // Feedback data
 const feedback = reactive({
   rating: 0,
@@ -162,112 +166,103 @@ const feedback = reactive({
 
 // Methods
 const goBack = () => {
-  router.push('/travel/plan')
+  router.push('/home')
 }
 
-const generateItinerary = async (formData = null) => {
-  try {
-    loading.value = true
-    error.value = ''
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/travel/itinerary/generate', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': `Bearer ${getAuthToken()}`
-    //   },
-    //   body: JSON.stringify({
-    //     preferences: formData || route.query,
-    //     userId: getCurrentUserId(),
-    //     timestamp: new Date().toISOString()
-    //   })
-    // })
-    
-    // if (!response.ok) {
-    //   throw new Error(`HTTP error! status: ${response.status}`)
-    // }
-    
-    // const data = await response.json()
-    
-    // Mock successful response
-    const mockData = {
-      destination: 'Sydney, NSW',
-      duration: 5,
-      travelers: 2,
-      estimatedBudget: 2500,
-      generatedAt: new Date().toISOString(),
-      dailyPlans: [
-        {
-          date: '2024-03-15',
-          overview: 'Explore Sydney CBD and Harbour Bridge',
-          weather: {
-            condition: 'Sunny',
-            temperature: 24
-          },
-          activities: [
-            {
-              time: '09:00',
-              title: 'Sydney Harbour Bridge Climb',
-              type: 'Adventure',
-              description: 'Experience breathtaking 360-degree views of Sydney from the top of the iconic Harbour Bridge.',
-              location: {
-                name: 'Sydney Harbour Bridge',
-                address: '5 Cumberland St, The Rocks NSW 2000'
-              },
-              transportation: {
-                method: 'Walk from hotel',
-                duration: '15 minutes'
-              },
-              estimatedCost: 174,
-              tips: [
-                'Book in advance for better rates',
-                'Wear comfortable shoes and clothes',
-                'Bring a camera for stunning photos'
-              ]
-            },
-            {
-              time: '13:00',
-              title: 'Lunch at The Rocks',
-              type: 'Dining',
-              description: 'Enjoy fresh seafood and local Australian cuisine at one of The Rocks historic restaurants.',
-              location: {
-                name: 'The Rocks Markets',
-                address: 'Jack Mundey Pl, The Rocks NSW 2000'
-              },
-              transportation: {
-                method: 'Walk',
-                duration: '5 minutes'
-              },
-              estimatedCost: 45,
-              tips: [
-                'Try the famous meat pies',
-                'Weekend markets have more food options'
-              ]
-            }
-          ],
-          estimatedWalking: '3.2 km',
-          dailyBudget: 270
-        }
-      ]
-    }
-    
-    itineraryData.value = mockData
-    generationTime.value = new Date()
-    
-    ElMessage.success('Itinerary generated successfully!')
-    
-  } catch (err) {
-    console.error('Failed to generate itinerary:', err)
-    error.value = err.message || 'Failed to generate itinerary. Please try again.'
-    ElMessage.error('Failed to generate itinerary')
-  } finally {
-    loading.value = false
-  }
+const formatGenerationTime = () => {
+  return generationTime.value.toLocaleString('en-AU', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
+
+/**
+ * generateItinerary
+ * - 接收 formData（对象），向后端 POST /api/ai/generate/
+ * - 后端应返回 { output: { destination, duration, travelers, estimatedBudget, generatedAt, dailyPlans: [...] } }
+ * - 解析后设置 itineraryData
+ */
+const generateItinerary = async (formData = null) => {
+  // helper: try to strip code fences like ```json ... ``` and parse JSON
+  const tryParseJsonFromString = (s) => {
+    if (!s || typeof s !== 'string') return null;
+    let candidate = s.trim();
+    // remove triple-backtick fences and leading language tag like ```json
+    candidate = candidate.replace(/^```(?:\w+)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    try {
+      return JSON.parse(candidate);
+    } catch (e) {
+      return null;
+    }
+  };
+
+  try {
+    loading.value = true;
+    error.value = '';
+
+    // choose payload and save for regenerate
+    const payload = formData || lastFormData.value || {};
+    lastFormData.value = payload;
+
+    // call backend
+    const response = await axios.post('http://localhost:8080/api/ai/generate/', payload, {
+      headers: { 'Content-Type': 'application/json' },
+      // optional timeout here
+      // timeout: 120000
+    });
+
+    console.log('API full response:', response);
+
+    // get candidate output: response.data.output or response.data
+    let outputCandidate = response?.data?.output ?? response?.data;
+
+    // If outputCandidate is object and contains raw_text or text, try to parse that
+    if (outputCandidate && typeof outputCandidate === 'object') {
+      const textField = outputCandidate.raw_text ?? outputCandidate.text ?? null;
+      if (textField) {
+        const parsed = tryParseJsonFromString(textField);
+        if (parsed) {
+          outputCandidate = parsed;
+        } else {
+          // If not parseable, leave it as object (but likely won't contain dailyPlans)
+          console.warn('Could not parse JSON from output.raw_text/text; content preview:', (textField.slice ? textField.slice(0, 300) : textField));
+        }
+      }
+    }
+
+    // If outputCandidate is string, try to parse it
+    if (typeof outputCandidate === 'string') {
+      const parsed = tryParseJsonFromString(outputCandidate) || (() => { try { return JSON.parse(outputCandidate); } catch { return null; } })();
+      if (parsed) {
+        outputCandidate = parsed;
+      } else {
+        throw new Error('AI returned text but it could not be parsed as JSON.');
+      }
+    }
+
+    console.log('Normalized parsed output:', outputCandidate);
+
+    // Now require the field the frontend expects: dailyPlans (strict)
+    if (!outputCandidate || typeof outputCandidate !== 'object' || !Array.isArray(outputCandidate.dailyPlans)) {
+      console.error('AI response missing required field dailyPlans:', outputCandidate);
+      throw new Error('AI response missing dailyPlans');
+    }
+
+    // success -> assign
+    itineraryData.value = outputCandidate;
+    generationTime.value = new Date(outputCandidate.generatedAt || outputCandidate.generated_at || Date.now());
+    ElMessage.success('Itinerary generated successfully!');
+  } catch (err) {
+    console.error('Failed to generate itinerary:', err);
+    error.value = err.response?.data?.error || err.message || 'Failed to generate itinerary. Please try again.';
+    ElMessage.error(error.value);
+  } finally {
+    loading.value = false;
+  }
+};
 
 const regenerateItinerary = async () => {
   try {
@@ -280,10 +275,10 @@ const regenerateItinerary = async () => {
         type: 'warning'
       }
     )
-    
+
     if (confirmed) {
       regenerating.value = true
-      await generateItinerary()
+      await generateItinerary(lastFormData.value)
       regenerating.value = false
     }
   } catch {
@@ -300,17 +295,13 @@ const modifyPreferences = () => {
 }
 
 const retryGeneration = () => {
-  generateItinerary()
-}
-
-const formatGenerationTime = () => {
-  return generationTime.value.toLocaleString('en-AU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  // retry using lastFormData (if none, try to parse route again)
+  if (lastFormData.value) {
+    generateItinerary(lastFormData.value)
+  } else {
+    initFromRoute()
+    if (lastFormData.value) generateItinerary(lastFormData.value)
+  }
 }
 
 const handleDownload = () => {
@@ -326,7 +317,6 @@ const handleShare = () => {
 const handleSave = async () => {
   try {
     // TODO: Implement save to user account
-    // await saveItineraryToAccount(itineraryData.value)
     ElMessage.success('Itinerary saved to your account!')
   } catch (err) {
     ElMessage.error('Failed to save itinerary')
@@ -338,31 +328,16 @@ const submitFeedback = async () => {
     ElMessage.warning('Please provide a rating')
     return
   }
-  
+
   try {
     submittingFeedback.value = true
-    
+
     // TODO: Submit feedback to API
-    // await fetch('/api/feedback/itinerary', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': `Bearer ${getAuthToken()}`
-    //   },
-    //   body: JSON.stringify({
-    //     itineraryId: itineraryData.value.id,
-    //     rating: feedback.rating,
-    //     comment: feedback.comment,
-    //     timestamp: new Date().toISOString()
-    //   })
-    // })
-    
     ElMessage.success('Thank you for your feedback!')
-    
+
     // Reset feedback form
     feedback.rating = 0
     feedback.comment = ''
-    
   } catch (err) {
     console.error('Failed to submit feedback:', err)
     ElMessage.error('Failed to submit feedback')
@@ -371,26 +346,39 @@ const submitFeedback = async () => {
   }
 }
 
+/**
+ * Parse route.query.formData and set lastFormData then call generateItinerary
+ */
+const initFromRoute = () => {
+  error.value = ''
+  loading.value = true
+  try {
+    if (route.query.formData) {
+      const parsed = JSON.parse(decodeURIComponent(route.query.formData))
+      lastFormData.value = parsed
+    } else {
+      lastFormData.value = {}
+    }
+  } catch (err) {
+    console.error('Failed to parse formData from route:', err)
+    error.value = 'Invalid form data passed from planner.'
+    lastFormData.value = {}
+  } finally {
+    loading.value = false
+  }
+}
+
 // Lifecycle
 onMounted(() => {
-  // Check if we have form data from the planning page
-  if (route.query.formData) {
-    try {
-      const formData = JSON.parse(decodeURIComponent(route.query.formData))
-      generateItinerary(formData)
-    } catch (err) {
-      console.error('Failed to parse form data:', err)
-      generateItinerary()
-    }
-  } else {
-    // Generate with default/sample data
-    generateItinerary()
-  }
+  // parse route and trigger generation
+  initFromRoute()
+  // start generation (use lastFormData, even if it's empty)
+  generateItinerary(lastFormData.value)
 })
 
 // Cleanup
 onBeforeUnmount(() => {
-  // Cancel any pending requests if needed
+  // Cancel any pending requests if needed (axios cancel token) - optional
 })
 </script>
 
@@ -529,17 +517,17 @@ onBeforeUnmount(() => {
     gap: 1rem;
     padding: 1rem;
   }
-  
+
   .page-actions {
     width: 100%;
     justify-content: center;
   }
-  
+
   .itinerary-container,
   .loading-container {
     padding: 1rem;
   }
-  
+
   .rating-section {
     flex-direction: column;
     align-items: flex-start;

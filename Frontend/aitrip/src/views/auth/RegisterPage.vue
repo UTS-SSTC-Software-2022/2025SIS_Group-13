@@ -189,15 +189,109 @@ const handleRegister = async () => {
   try {
     await registerFormRef.value.validate()
     const response = await registerAPI(registerForm)
-    if (response.success) {
-      ElMessage.success('Registration successful')
+    // Backend returns success as number 1 for success, 0 for failure
+    if (response.success === 1) {
+      ElMessage.success('注册成功！正在跳转到登录页面...')
       router.push('/login-form')
     } else {
-      ElMessage.error('Registration failed')
+      ElMessage.error(response.msg || '注册失败，请重试')
     }
   } catch (error) {
-    console.error('Form validation failed:', error)
+    console.error('Registration error:', error)
+    
+    // Handle API errors with detailed messages
+    if (error.response && error.response.data) {
+      const errorData = error.response.data
+      
+      // Handle validation errors (400 Bad Request)
+      if (error.response.status === 400 && errorData.data && typeof errorData.data === 'object') {
+        const fieldErrors = []
+        
+        // Process each field error with user-friendly messages
+        Object.entries(errorData.data).forEach(([field, messages]) => {
+          const fieldName = getFieldDisplayName(field)
+          const errorMessages = Array.isArray(messages) ? messages : [messages]
+          
+          errorMessages.forEach(message => {
+            fieldErrors.push(`${fieldName}: ${translateErrorMessage(message)}`)
+          })
+        })
+        
+        if (fieldErrors.length > 0) {
+          ElMessage.error(fieldErrors.join('\n'))
+        } else {
+          ElMessage.error('注册信息有误，请检查后重试')
+        }
+      } 
+      // Handle other server errors
+      else if (error.response.status >= 500) {
+        ElMessage.error('服务器错误，请稍后重试')
+      }
+      // Handle other client errors
+      else if (error.response.status >= 400) {
+        ElMessage.error(errorData.msg || '请求失败，请检查输入信息')
+      }
+      // Handle general API errors
+      else {
+        ElMessage.error(errorData.msg || '注册失败，请重试')
+      }
+    } 
+    // Handle network errors
+    else if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
+      ElMessage.error('网络连接失败，请检查网络后重试')
+    }
+    // Handle timeout errors
+    else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      ElMessage.error('请求超时，请重试')
+    }
+    // Handle other errors
+    else {
+      ElMessage.error('注册失败，请重试')
+    }
   }
+}
+
+// Helper function to get user-friendly field names
+const getFieldDisplayName = (field) => {
+  const fieldNames = {
+    'email': '邮箱',
+    'username': '用户名',
+    'first_name': '名字',
+    'last_name': '姓氏',
+    'password': '密码',
+    'non_field_errors': '表单'
+  }
+  return fieldNames[field] || field
+}
+
+// Helper function to translate error messages to Chinese
+const translateErrorMessage = (message) => {
+  const translations = {
+    'This field is required.': '此字段为必填项',
+    'Email already exists.': '该邮箱已被注册',
+    'Username already exists.': '该用户名已被使用',
+    'Enter a valid email address.': '请输入有效的邮箱地址',
+    'This password is too short. It must contain at least 8 characters.': '密码太短，至少需要8个字符',
+    'This password is too common.': '密码太常见，请使用更复杂的密码',
+    'This password is entirely numeric.': '密码不能全为数字',
+    'The password is too similar to the username.': '密码与用户名太相似',
+    'The password is too similar to the email address.': '密码与邮箱地址太相似'
+  }
+  
+  // Check for exact matches first
+  if (translations[message]) {
+    return translations[message]
+  }
+  
+  // Check for partial matches
+  for (const [english, chinese] of Object.entries(translations)) {
+    if (message.includes(english)) {
+      return chinese
+    }
+  }
+  
+  // Return original message if no translation found
+  return message
 }
 </script>
 
