@@ -1,24 +1,29 @@
 <template>
-  <div class="profile-show">
-    <!-- Page header -->
-    <el-page-header
-      class="page-header"
-      @back="goBack"
-      title="< Back"
-      content="User Profile"
-    />
+  <div class="show-shell">
+    <!-- 深色渐变背景（与注册页一致） -->
+    <div class="auth-bg" />
 
-    <!-- Card: Basic Information -->
-    <div class="container">
-      <el-card class="main-card" shadow="hover">
-        <h1 class="title">Basic Information</h1>
-        <p class="subtitle">This is the profile information stored in the system.</p>
+    <!-- 内容卡片 -->
+    <div class="show-card">
+      <!-- 顶部：返回 + 标题（深色背景下浅色文字） -->
+      <el-page-header
+        class="page-header"
+        @back="$router.back()"
+        title="< Back"
+        content="User Profile"
+      />
 
+      <!-- 标题与说明 -->
+      <h1 class="heading">Basic Information</h1>
+      <p class="subtext">This is the profile information stored in the system.</p>
+
+      <!-- 浅色信息表（与浅色表格风格一致） -->
+      <div class="table-card">
         <el-descriptions
-          class="desc"
+          class="desc-table"
           :column="1"
           border
-          :label-style="{ width: '160px' }"
+          :label-style="{ width: '220px' }"
         >
           <el-descriptions-item label="Email">
             {{ profile.email || '-' }}
@@ -37,27 +42,21 @@
           </el-descriptions-item>
 
           <el-descriptions-item label="Avatar">
-            <div class="avatar-row">
-              <el-avatar
-                v-if="profile.avatar"
-                :src="profile.avatar"
-                size="large"
-              />
-              <span v-else>-</span>
-            </div>
+            {{ profile.avatar || '-' }}
           </el-descriptions-item>
         </el-descriptions>
-      </el-card>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
-
+/**
+ * 你项目里若已有获取用户信息的方式（例如 Pinia/接口），
+ * 可直接把下方的默认赋值替换为你的数据源。
+ */
 const profile = reactive({
   email: '',
   firstName: '',
@@ -66,80 +65,110 @@ const profile = reactive({
   avatar: ''
 })
 
-function goBack() {
-  // 有浏览历史就返回，否则去首页
-  if (window.history.length > 1) router.back()
-  else router.push('/home')
-}
-
-// 尝试从常见的 localStorage key 里读取用户信息
-function readAny(keys) {
-  for (const k of keys) {
-    const raw = localStorage.getItem(k)
-    if (!raw) continue
-    try { return JSON.parse(raw) } catch { return raw }
-  }
-  return null
-}
-
 onMounted(() => {
-  const data =
-    readAny(['user', 'userInfo', 'profile', 'auth_user', 'currentUser']) || {}
-
-  // 做字段兼容
-  profile.email = data.email || data.mail || ''
-  profile.firstName =
-    data.firstName || data.firstname || data.givenName || data.name?.first || ''
-  profile.lastName =
-    data.lastName || data.lastname || data.surname || data.name?.last || ''
-  profile.phone = data.phone || data.mobile || data.telephone || ''
-  profile.avatar = data.avatar || data.avatarUrl || data.photo || ''
+  // 示例：如果之前把资料放在 localStorage，可在此恢复
+  try {
+    const saved = JSON.parse(localStorage.getItem('profile') || '{}')
+    Object.assign(profile, saved)
+  } catch (e) { /* 忽略 */ }
 })
 </script>
 
 <style scoped>
-.profile-show {
+.show-shell {
   min-height: 100vh;
-  padding: 24px;
-  /* 背景渐变与当前项目常用配色接近 */
-  background: linear-gradient(180deg, #7a69f5 0%, #7f86f3 40%, #8eb4f7 100%);
+  position: relative;
+  overflow: hidden;
 }
 
+/* 内容卡片最大宽度与居中 */
+.show-card {
+  position: relative;
+  z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 28px 40px;
+}
+
+/* 顶部返回区在深色背景下的浅色文字 */
 .page-header {
-  max-width: 1100px;
-  margin: 0 auto 8px;
+  margin-bottom: 12px;
+}
+:deep(.el-page-header__left .el-page-header__title) {
+  color: #e8edf6; /* 浅色 */
+  font-weight: 600;
+}
+:deep(.el-page-header__content) {
+  color: #e8edf6; /* “User Profile” */
+  font-weight: 700;
+  font-size: 22px;
 }
 
-.container {
-  display: flex;
-  justify-content: center;
+/* 标题与副标题（浅色） */
+.heading {
+  color: #e8edf6;
+  font-size: 36px;
+  font-weight: 800;
+  margin: 6px 0 6px;
+  letter-spacing: .2px;
+}
+.subtext {
+  color: rgba(232, 237, 246, .85);
+  margin: 0 0 18px;
+  font-size: 18px;
 }
 
-.main-card {
-  width: 100%;
-  max-width: 1100px;
-  border-radius: 16px;
-  padding: 8px 4px;
+/* 表格所在的浅色卡片（与浅色表格搭配） */
+.table-card {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
+  padding: 0;
+  overflow: hidden;
 }
 
-.title {
-  margin: 4px 8px;
-  font-size: 20px;
+/* Element Plus Descriptions 的浅色表格风格（第三张图） */
+.desc-table {
+  --border-color: #e6ebf2;
+}
+:deep(.el-descriptions__body) {
+  border-top: 1px solid var(--border-color);
+}
+:deep(.el-descriptions__table.is-bordered .el-descriptions__cell) {
+  border-color: var(--border-color);
+}
+
+/* 左侧标签列：浅灰底、深灰字、加粗 */
+:deep(.el-descriptions__label.is-bordered-label) {
+  background: #f5f7fa;        /* 浅灰底 */
+  color: #606266;             /* 深灰字 */
   font-weight: 600;
 }
 
-.subtitle {
-  margin: 0 8px;
-  color: #666;
+/* 右侧内容列：白底深灰字 */
+:deep(.el-descriptions__content) {
+  background: #ffffff;
+  color: #606266;
 }
 
-.desc {
-  margin-top: 12px;
+/* 小屏优化 */
+@media (max-width: 768px) {
+  .show-card { padding: 18px 16px 28px; }
+  .heading { font-size: 28px; }
+  .subtext { font-size: 14px; }
 }
+</style>
 
-.avatar-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+<!-- 深色渐变背景（非 scoped；与注册页一致的感觉） -->
+<style>
+.auth-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  /* 与注册页统一的深色渐变氛围 */
+  background:
+    radial-gradient(1200px 800px at 85% 35%, rgba(98, 86, 240, 0.25) 0%, rgba(98, 86, 240, 0) 60%),
+    radial-gradient(1000px 700px at 10% 20%, rgba(35, 116, 221, 0.25) 0%, rgba(35, 116, 221, 0) 60%),
+    linear-gradient(180deg, #0f1b2d 0%, #0e1a2c 45%, #15243d 100%);
 }
 </style>

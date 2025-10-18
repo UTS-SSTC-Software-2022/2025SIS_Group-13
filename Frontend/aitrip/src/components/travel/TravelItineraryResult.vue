@@ -1,750 +1,164 @@
 <template>
-  <div class="travel-itinerary-result">
-    <!-- Header Section -->
-    <div class="result-header">
-      <h2 class="result-title">Your Personalized Australian Adventure</h2>
-      <p class="result-subtitle">AI-generated itinerary based on your preferences</p>
-      <div class="trip-summary">
-        <el-row :gutter="30">
-          <el-col :span="6">
-            <div class="summary-item">
-              <el-icon class="summary-icon"><Calendar /></el-icon>
-              <div>
-                <div class="summary-label">Duration</div>
-                <div class="summary-value">{{ itinerary.duration }} days</div>
-              </div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="summary-item">
-              <el-icon class="summary-icon"><Location /></el-icon>
-              <div>
-                <div class="summary-label">Destination</div>
-                <div class="summary-value">{{ itinerary.destination }}</div>
-              </div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="summary-item">
-              <el-icon class="summary-icon"><User /></el-icon>
-              <div>
-                <div class="summary-label">Travelers</div>
-                <div class="summary-value">{{ itinerary.travelers }} people</div>
-              </div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="summary-item">
-              <el-icon class="summary-icon"><Money /></el-icon>
-              <div>
-                <div class="summary-label">Est. Budget</div>
-                <div class="summary-value">${{ itinerary.estimatedBudget }}</div>
-              </div>
-            </div>
-          </el-col>
-        </el-row>
-      </div>
-    </div>
+  <div class="travel-theme">
+    <!-- 背景（与注册页一致） -->
+    <div class="auth-bg"></div>
 
-    <!-- Daily Itinerary Section -->
-    <div class="daily-itinerary">
-      <h3 class="section-title">Daily Itinerary</h3>
-      <div class="itinerary-timeline">
-        <div 
-          v-for="(day, index) in itinerary.dailyPlans" 
-          :key="index"
-          class="day-card"
-        >
-          <!-- Day Header -->
-          <div 
-            class="day-header" 
-            @click="toggleDayDetails(index)"
-            :class="{ 'expanded': expandedDays.includes(index) }"
-          >
-            <div class="day-info">
-              <div class="day-number">Day {{ index + 1 }}</div>
-              <div class="day-date">{{ formatDate(day.date) }}</div>
-              <div class="day-overview">{{ day.overview }}</div>
-            </div>
-            <div class="day-weather">
-              <el-icon class="weather-icon" :class="getWeatherIconClass(day.weather.condition)">
-                <component :is="getWeatherIcon(day.weather.condition)" />
-              </el-icon>
-              <div class="weather-info">
-                <div class="temperature">{{ day.weather.temperature }}°C</div>
-                <div class="condition">{{ day.weather.condition }}</div>
-              </div>
-            </div>
-            <el-icon class="expand-icon" :class="{ 'rotated': expandedDays.includes(index) }">
-              <ArrowDown />
-            </el-icon>
+    <!-- 玻璃卡片外壳（与注册页一致） -->
+    <div class="auth-card">
+      <!-- 顶部返回（保持原样逻辑，可按需修改） -->
+      <el-page-header
+        class="page-header"
+        @back="$router.push('/home')"
+        title="< Back"
+        content="Create Your Personalized Travel Itinerary"
+      />
+
+      <!-- ✅ 保留原文案与原格式 -->
+      <h1 class="title">Create Your Personalized Travel Itinerary</h1>
+      <p class="subtitle">
+        Tell us your preferences and we'll craft the perfect Australian adventure for you
+      </p>
+
+      <!-- 内层主卡片（深色毛玻璃，与注册页一致） -->
+      <el-card class="main-card" shadow="hover">
+        <!-- 可滚动表单区域：不改内部结构 -->
+        <div class="scroll-area">
+          <!-- ✅ 在此处粘贴你当前的 el-form 内容（完全原样，不要动里面的字段/校验/数据） -->
+          <!-- ───────────────────────────────────────────────────────────── -->
+          <!-- 例如：                                                        -->
+          <!-- <el-form ref="formRef" :model="form" :rules="rules"           -->
+          <!--          label-position="top">                                -->
+          <!--   ... 你原来的所有 el-form-item、按钮、等内容 ...               -->
+          <!-- </el-form>                                                   -->
+          <!-- ───────────────────────────────────────────────────────────── -->
+
+          <!-- 下面仅提供一个“示例按钮”，便于展示样式与跳转。若你已有主按钮，请删除这一段。 -->
+          <div class="demo-btn-wrap">
+            <el-button
+              type="primary"
+              size="large"
+              class="btn-primary"
+              @click="goResult"
+            >
+              Generate Travel Itinerary
+            </el-button>
           </div>
-
-          <!-- Day Details (Expandable) -->
-          <el-collapse-transition>
-            <div v-show="expandedDays.includes(index)" class="day-details">
-              <div class="activities-timeline">
-                <div 
-                  v-for="(activity, actIndex) in day.activities" 
-                  :key="actIndex"
-                  class="activity-item"
-                >
-                  <div class="activity-time">{{ activity.time }}</div>
-                  <div class="activity-content">
-                    <div class="activity-header">
-                      <h4 class="activity-title">{{ activity.title }}</h4>
-                      <el-tag :type="getActivityTypeColor(activity.type)" size="small">
-                        {{ activity.type }}
-                      </el-tag>
-                    </div>
-                    <p class="activity-description">{{ activity.description }}</p>
-                    
-                    <!-- Location Info -->
-                    <div v-if="activity.location" class="activity-location">
-                      <el-icon><Location /></el-icon>
-                      <span>{{ activity.location.name }}</span>
-                      <span class="address">{{ activity.location.address }}</span>
-                    </div>
-
-                    <!-- Transportation -->
-                    <div v-if="activity.transportation" class="activity-transport">
-                      <el-icon><Position /></el-icon>
-                      <span>{{ activity.transportation.method }}</span>
-                      <span class="duration">({{ activity.transportation.duration }})</span>
-                      <span v-if="activity.transportation.cost" class="cost">
-                        - ${{ activity.transportation.cost }}
-                      </span>
-                    </div>
-
-                    <!-- Tips -->
-                    <div v-if="activity.tips && activity.tips.length > 0" class="activity-tips">
-                      <h5>💡 Tips:</h5>
-                      <ul>
-                        <li v-for="(tip, tipIndex) in activity.tips" :key="tipIndex">
-                          {{ tip }}
-                        </li>
-                      </ul>
-                    </div>
-
-                    <!-- Estimated Cost -->
-                    <div v-if="activity.estimatedCost" class="activity-cost">
-                      <el-icon><Money /></el-icon>
-                      <span>Estimated cost: ${{ activity.estimatedCost }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Day Summary -->
-              <div class="day-summary">
-                <h4 class="summary-title">📊 Day Summary</h4>
-                <div class="summary-stats">
-                  <div class="stat-item">
-                    <div class="stat-icon">🎯</div>
-                    <div>
-                      <span class="stat-label">Total Activities</span>
-                      <span class="stat-value">{{ day.activities.length }}</span>
-                    </div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-icon">🚶</div>
-                    <div>
-                      <span class="stat-label">Estimated Walking</span>
-                      <span class="stat-value">{{ day.estimatedWalking }}</span>
-                    </div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-icon">💰</div>
-                    <div>
-                      <span class="stat-label">Daily Budget</span>
-                      <span class="stat-value">${{ day.dailyBudget }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </el-collapse-transition>
         </div>
-      </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <el-button type="primary" size="large" @click="downloadItinerary">
-        <el-icon><Download /></el-icon>
-        Download Itinerary
-      </el-button>
-      <el-button type="default" size="large" @click="shareItinerary">
-        <el-icon><Share /></el-icon>
-        Share
-      </el-button>
-      <el-button type="success" size="large" @click="saveItinerary">
-        <el-icon><Star /></el-icon>
-        Save to Favorites
-      </el-button>
+      </el-card>
     </div>
   </div>
 </template>
 
 <script setup>
-import {ref, reactive, onMounted, watch} from 'vue'
-import { ElMessage } from 'element-plus'
-import {
-  Calendar,
-  Location,
-  User,
-  Money,
-  ArrowDown,
-  Position,
-  Download,
-  Share,
-  Star,
-  Sunny,
-  Cloudy
-} from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
-// Props
-const props = defineProps({
-  itineraryData: {
-    type: Object,
-    default: null
-  }
-})
-
-// Reactive data
-const expandedDays = ref([])
-const loading = ref(false)
-
-const itinerary = reactive({
-  destination: '',
-  duration: 0,
-  travelers: 0,
-  estimatedBudget: 0,
-  dailyPlans: []
-})
-
-// Watch for props changes and fully replace reactive object
-watch(
-  () => props.itineraryData,
-  (newData) => {
-    if (newData) {
-      // 用 JSON 深拷贝，确保 reactive 完全更新
-      const copy = JSON.parse(JSON.stringify(newData))
-      itinerary.destination = copy.destination || ''
-      itinerary.duration = copy.duration || 0
-      itinerary.travelers = copy.travelers || 0
-      itinerary.estimatedBudget = copy.estimatedBudget || 0
-      itinerary.dailyPlans = copy.dailyPlans || []
-    }
-  },
-  { immediate: true }
-)
-
-// Toggle day details
-const toggleDayDetails = (dayIndex) => {
-  const index = expandedDays.value.indexOf(dayIndex)
-  if (index > -1) {
-    expandedDays.value.splice(index, 1)
-  } else {
-    expandedDays.value.push(dayIndex)
-  }
-}
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-AU', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-
-const getWeatherIcon = (condition) => {
-  const iconMap = {
-    'Sunny': Sunny,
-    'Partly Cloudy': Cloudy,
-    'Cloudy': Cloudy,
-    'Rainy': Cloudy,
-    'Drizzle': Cloudy
-  }
-  return iconMap[condition] || Sunny
-}
-
-const getWeatherIconClass = (condition) => {
-  const classMap = {
-    'Sunny': 'weather-sunny',
-    'Partly Cloudy': 'weather-cloudy',
-    'Cloudy': 'weather-cloudy',
-    'Rainy': 'weather-rainy',
-    'Drizzle': 'weather-drizzle'
-  }
-  return classMap[condition] || 'weather-sunny'
-}
-
-const getActivityTypeColor = (type) => {
-  const colorMap = {
-    'Adventure': 'danger',
-    'Culture': 'primary',
-    'Dining': 'success',
-    'Nature': 'info',
-    'Shopping': 'warning'
-  }
-  return colorMap[type] || 'default'
-}
-
-const downloadItinerary = () => {
-  ElMessage.success('Itinerary download started!')
-  // TODO: Implement PDF download functionality
-}
-
-const shareItinerary = () => {
-  ElMessage.info('Share functionality coming soon!')
-  // TODO: Implement share functionality
-}
-
-const saveItinerary = () => {
-  ElMessage.success('Itinerary saved to favorites!')
-  // TODO: Implement save to user favorites
-}
-
-// Lifecycle
-onMounted(() => {
-    if (props.itineraryData) {
-      Object.assign(itinerary, props.itineraryData)
-    } else {
-      fetchItineraryFromAPI()
-    }
-})
-
-// TODO: API call function
-const fetchItineraryFromAPI = async () => {
-  try {
-    loading.value = true
-    const response = await fetch('/api/travel/itinerary/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(travelFormData)
-    })
-    const data = await response.json()
-    Object.assign(itinerary, data)
-  } catch (error) {
-    console.error('Failed to fetch itinerary:', error)
-    ElMessage.error('Failed to load itinerary')
-  } finally {
-    loading.value = false
-  }
+/**
+ * 如果你自己的主按钮里已经有生成逻辑，直接用你自己的方法。
+ * 这里只提供一个跳转到结果页的便捷函数。
+ */
+function goResult () {
+  router.push('/travel/itinerary-result') // 如果路由不同，改这里
 }
 </script>
 
+<!-- ❶ 背景样式需要不加 scoped 才能盖住白底 -->
+<style>
+.travel-theme {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 背景与注册页一致（双径向 + 深色线性渐变） */
+.travel-theme .auth-bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(1200px 600px at 20% 20%, rgba(82, 0, 255, .20), transparent 60%),
+    radial-gradient(1200px 600px at 80% 80%, rgba(0, 212, 255, .18), transparent 60%),
+    linear-gradient(160deg, #243b55, #141e30);
+  z-index: 0;
+}
+
+/* 如果外层布局容器有白底，这里强制透明（可保留） */
+.travel-theme,
+.travel-theme *:where(.page-container, .layout, .content) {
+  background: transparent !important;
+}
+</style>
+
+<!-- ❷ 组件内部样式（scoped） -->
 <style scoped>
-.travel-itinerary-result {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem 3rem;
+/* 主题变量（与注册页一致） */
+:root {
+  --card-bg: rgba(15, 23, 42, 0.92);
+  --card-border: rgba(148, 163, 184, 0.15);
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --primary: #3b82f6;
+  --primary-2: #6ea8ff;
 }
 
-/* Header Styles */
-.result-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.result-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-}
-
-.result-subtitle {
-  font-size: 1.1rem;
-  color: #7f8c8d;
-  margin-bottom: 2rem;
-}
-
-.trip-summary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
-  padding: 2.5rem;
-  color: white;
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-}
-
-.summary-item {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.summary-item:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-.summary-icon {
-  font-size: 2rem;
-  opacity: 0.9;
-}
-
-.summary-label {
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-
-.summary-value {
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-/* Daily Itinerary Styles */
-.section-title {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.day-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  margin-bottom: 2rem;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.day-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-.day-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 2rem 2.5rem;
-  cursor: pointer;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  transition: all 0.3s ease;
-  min-height: 120px;
-}
-
-.day-header:hover {
-  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-}
-
-.day-header.expanded {
-  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
-  color: white;
-}
-
-.day-info {
-  flex: 1;
-}
-
-.day-number {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.day-date {
-  font-size: 0.9rem;
-  opacity: 0.8;
-  margin-bottom: 0.5rem;
-}
-
-.day-overview {
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-.day-weather {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-right: 1rem;
-}
-
-.weather-icon {
-  font-size: 2rem;
-}
-
-.weather-sunny {
-  color: #f39c12;
-}
-
-.weather-cloudy {
-  color: #95a5a6;
-}
-
-.weather-rainy {
-  color: #3498db;
-}
-
-.temperature {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.condition {
-  font-size: 0.85rem;
-  opacity: 0.8;
-}
-
-.expand-icon {
-  font-size: 1.2rem;
-  transition: transform 0.3s ease;
-}
-
-.expand-icon.rotated {
-  transform: rotate(180deg);
-}
-
-/* Day Details Styles */
-.day-details {
-  padding: 0 2.5rem 2rem;
-  background: #fafbfc;
-}
-
-.activities-timeline {
+/* 外层大卡片（与注册页一致） */
+.auth-card {
   position: relative;
-  padding-left: 3rem;
-  margin-top: 1rem;
-}
-
-.activities-timeline::before {
-  content: '';
-  position: absolute;
-  left: 0.75rem;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, #409eff, #66b1ff);
-}
-
-.activity-item {
-  position: relative;
-  display: flex;
-  margin-bottom: 2.5rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #e9ecef;
-  gap: 2rem;
-}
-
-.activity-item:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-}
-
-.activity-item::before {
-  content: '';
-  position: absolute;
-  left: -2.25rem;
-  top: 0.25rem;
-  width: 12px;
-  height: 12px;
-  background: #409eff;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.activity-time {
-  min-width: 100px;
-  font-weight: 700;
-  color: #409eff;
-  font-size: 1rem;
-  background: rgba(64, 158, 255, 0.1);
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
-  text-align: center;
-  height: fit-content;
-}
-
-.activity-content {
-  flex: 1;
-  margin-left: 0;
-}
-
-.activity-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.activity-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
-}
-
-.activity-description {
-  color: #5a6c7d;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.activity-location,
-.activity-transport,
-.activity-cost {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  color: #6c757d;
-}
-
-.address,
-.duration,
-.cost {
-  opacity: 0.8;
-}
-
-.activity-tips {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-top: 1rem;
-}
-
-.activity-tips h5 {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.9rem;
-  color: #495057;
-}
-
-.activity-tips ul {
-  margin: 0;
-  padding-left: 1.2rem;
-}
-
-.activity-tips li {
-  font-size: 0.85rem;
-  color: #6c757d;
-  margin-bottom: 0.25rem;
-}
-
-/* Day Summary Styles */
-.day-summary {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  z-index: 1;
+  width: min(1100px, calc(100% - 48px));
+  margin: 48px auto;
+  padding: 28px 28px 36px;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
   border-radius: 16px;
-  padding: 2rem;
-  margin-top: 2rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  color: var(--text);
 }
 
-.summary-title {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2c3e50;
+/* 标题/副标题（保留原格式） */
+.title {
+  font-size: 36px;
+  font-weight: 800;
+  margin: 8px 0 6px;
+  color: #fff;
+}
+.subtitle {
+  margin: 0 0 18px;
+  color: var(--muted);
 }
 
-.summary-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+/* 内层主卡片（与注册页一致） */
+.main-card {
+  background: rgba(2, 6, 23, 0.6);
+  border-color: rgba(148, 163, 184, 0.12);
+}
+:deep(.el-card__header) {
+  background: transparent;
+  border-color: rgba(148, 163, 184, 0.12);
+}
+:deep(.el-divider--horizontal) {
+  border-top-color: rgba(148, 163, 184, 0.12);
 }
 
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: rgba(64, 158, 255, 0.05);
-  border-radius: 12px;
-  transition: all 0.3s ease;
+/* 保留内部滚动（仅限制表单区域，避免整页滚动） */
+.scroll-area {
+  max-height: calc(100vh - 260px); /* 视情况微调，保证有滚动条 */
+  overflow: auto;
+  padding-right: 6px;
 }
 
-.stat-item:hover {
-  background: rgba(64, 158, 255, 0.1);
-  transform: translateY(-2px);
+/* 主按钮渐变（与注册页一致） */
+.btn-primary,
+:deep(.el-button--primary) {
+  border: none;
+  color: #fff;
+  background: linear-gradient(90deg, var(--primary), var(--primary-2));
+  box-shadow: 0 8px 24px rgba(59, 130, 246, .35);
+}
+.btn-primary:hover,
+:deep(.el-button--primary:hover) {
+  filter: brightness(1.05);
 }
 
-.stat-icon {
-  font-size: 1.5rem;
-}
-
-.stat-label {
-  display: block;
-  font-size: 0.85rem;
-  color: #6c757d;
-  margin-bottom: 0.25rem;
-}
-
-.stat-value {
-  font-weight: 700;
-  color: #2c3e50;
-  font-size: 1.1rem;
-}
-
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-top: 4rem;
-  padding: 2.5rem 0;
-  border-top: 2px solid #f0f2f5;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 20px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-  .travel-itinerary-result {
-    padding: 1rem;
-  }
-  
-  .result-title {
-    font-size: 2rem;
-  }
-  
-  .trip-summary {
-    padding: 1.5rem;
-  }
-  
-  .summary-stats {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .day-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .day-weather {
-    margin-right: 0;
-  }
-  
-  .activity-item {
-    flex-direction: column;
-  }
-  
-  .activity-content {
-    margin-left: 0;
-    margin-top: 0.5rem;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-  }
-}
+/* 仅用于演示按钮位置，若你已有按钮可删 */
+.demo-btn-wrap { margin-top: 12px; }
 </style>

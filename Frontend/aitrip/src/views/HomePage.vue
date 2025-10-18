@@ -96,20 +96,20 @@ import { House, MapLocation, User, SwitchButton, ArrowDown } from '@element-plus
 import { logoutAPI } from '@/apis/auth'
 
 // ✅ 本地图片用 import，Vite 会做打包处理
-import tokyoImg from '@/assets/images/destination/Tokyo.bmp'
-import parisImg from '@/assets/images/destination/paris.bmp'
+import CanberraImg from '@/assets/images/destination/Canberra.bmp'
+import MelbourneImg from '@/assets/images/destination/Melbourne.bmp'
 import sydneyImg from '@/assets/images/destination/Syndey.bmp'   // 你当前文件名是 Syndey
-import newyorkImg from '@/assets/images/destination/newyork.bmp'
+import BrisbaneImg from '@/assets/images/destination/Brisbane.bmp'
 
 const router = useRouter()
 const userName = localStorage.getItem('userName') || 'Guest'
 const activeMenu = ref('home')
 
 const destinations = ref([
-  { name: 'Tokyo',     image: tokyoImg },
-  { name: 'Paris',     image: parisImg },
+  { name: 'Canberra',     image: CanberraImg },
+  { name: 'Melbourne',     image: MelbourneImg },
   { name: 'Sydney',    image: sydneyImg },   // 若你改名为 sydney.bmp，这里也要改
-  { name: 'New York',  image: newyorkImg }
+  { name: 'Brisbane',  image: BrisbaneImg }
 ])
 
 const go = (path) => router.push(path)

@@ -1,8 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-  { path: '/__preview', name: 'preview', component: () => import('@/views/ProfilePage.vue') },
-
   // ✅ 首屏进入 Landing：用你现有的 LoginPage.vue 当宣传页
   { path: '/', name: 'landing', component: () => import('@/views/auth/LoginPage.vue') },
 
