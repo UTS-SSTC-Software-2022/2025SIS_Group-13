@@ -1,90 +1,107 @@
 <template>
   <div class="home-page">
-    <el-container class="layout-container" direction="vertical">
-      <!-- 顶部Header - 横跨整个页面宽度 -->
-      <el-header class="home-header">
-        <div class="header-left">
-          <img src="@/assets/images/LeisurA logo.svg" alt="LeisurA Logo" class="logo" />
-        </div>
-        <div class="header-right">
-          <el-dropdown>
-            <span class="user-info">
-              <el-icon><User /></el-icon>
-              {{ userName }}
-              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="go('/profile')">Profile</el-dropdown-item>
-                <el-dropdown-item divided @click="logout">Logout</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </el-header>
+    <!-- 顶部Header -->
+    <header class="home-header">
+      <div class="header-left">
+        <img src="@/assets/images/LeisurA logo.svg" alt="LeisurA Logo" class="logo" />
+      </div>
+      <div class="header-right">
+        <el-dropdown>
+          <span class="user-info">
+            <el-icon><User /></el-icon>
+            {{ userName }}
+            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="go('/profile')">Profile</el-dropdown-item>
+              <el-dropdown-item divided @click="logout">Logout</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
+    </header>
 
-      <!-- 下面部分：左侧菜单 + 右侧内容 -->
-      <el-container class="bottom-container">
-        <!-- 左侧菜单 -->
-        <el-aside class="sidebar" width="200px">
-          <el-menu 
-            mode="vertical" 
-            class="sidebar-menu" 
-            :default-active="activeMenu"
-            background-color="#0f0f0f"
-            text-color="#ccc"
-            active-text-color="#1890ff"
-          >
-            <el-menu-item index="home" @click="go('/home')">
-              <el-icon><House /></el-icon>
-              <span>Home</span>
-            </el-menu-item>
-            <el-menu-item index="plan" @click="go('/travel/plan')">
-              <el-icon><MapLocation /></el-icon>
-              <span>Plan Trip</span>
-            </el-menu-item>
-            <el-menu-item index="profile" @click="go('/profile')">
-              <el-icon><User /></el-icon>
-              <span>Profile</span>
-            </el-menu-item>
-            <el-menu-item index="logout" @click="logout">
-              <el-icon><SwitchButton /></el-icon>
-              <span>Logout</span>
-            </el-menu-item>
-          </el-menu>
-        </el-aside>
+    <!-- 主要内容区域 -->
+    <div class="main-content">
+      <div class="container-fluid">
+        <div class="row">
+          <!-- 桌面端左侧菜单 -->
+          <div class="col-auto d-none d-md-block sidebar-col">
+            <nav class="sidebar">
+              <div class="sidebar-menu">
+                <div class="menu-item" :class="{ active: activeMenu === 'home' }" @click="go('/home')">
+                  <el-icon><House /></el-icon>
+                  <span>Home</span>
+                </div>
+                <div class="menu-item" :class="{ active: activeMenu === 'plan' }" @click="go('/travel/plan')">
+                  <el-icon><MapLocation /></el-icon>
+                  <span>Plan Trip</span>
+                </div>
+                <div class="menu-item" :class="{ active: activeMenu === 'profile' }" @click="go('/profile')">
+                  <el-icon><User /></el-icon>
+                  <span>Profile</span>
+                </div>
+                <div class="menu-item" @click="logout">
+                  <el-icon><SwitchButton /></el-icon>
+                  <span>Logout</span>
+                </div>
+              </div>
+            </nav>
+          </div>
 
-        <!-- 右侧主内容区 -->
-        <el-main class="home-main">
-        <div class="welcome">
-          <h1>Welcome, {{ userName }}</h1>
-          <p>Start planning your next adventure with AI-powered itineraries!</p>
-          <el-button type="primary" size="large" @click="go('/travel/plan')">
-            Start Planning
-          </el-button>
-        </div>
+          <!-- 主内容区 -->
+          <div class="col home-main">
+            <div class="welcome">
+              <h1>Welcome, {{ userName }}</h1>
+              <p>Start planning your next adventure with AI-powered itineraries!</p>
+              <el-button type="primary" size="large" @click="go('/travel/plan')">
+                Start Planning
+              </el-button>
+            </div>
 
-        <!-- 推荐目的地 -->
-        <div class="recommend-section">
-          <h2>Popular Destinations</h2>
-          <el-row :gutter="20">
-            <el-col :span="6" v-for="(item, index) in destinations" :key="index">
-              <el-card shadow="hover" class="destination-card" @click="openPlan(item.name)">
-                <img
-                  :src="item.image"
-                  :alt="`${item.name} photo`"
-                  class="card-img"
-                  loading="lazy"
-                  @error="onImgError"
-                />
-                <div class="card-title">{{ item.name }}</div>
-              </el-card>
-            </el-col>
-          </el-row>
+            <!-- 推荐目的地 -->
+            <div class="recommend-section">
+              <h2>Popular Destinations</h2>
+              <div class="row">
+                <div class="col-lg-3 col-md-6 col-sm-6 col-12 mb-3" v-for="(item, index) in destinations" :key="index">
+                  <el-card shadow="hover" class="destination-card" @click="openPlan(item.name)">
+                    <img
+                      :src="item.image"
+                      :alt="`${item.name} photo`"
+                      class="card-img"
+                      loading="lazy"
+                      @error="onImgError"
+                    />
+                    <div class="card-title">{{ item.name }}</div>
+                  </el-card>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        </el-main>
-      </el-container>
-    </el-container>
+      </div>
+    </div>
+
+    <!-- 手机端底部导航栏 -->
+    <nav class="bottom-nav d-md-none">
+      <div class="nav-item" :class="{ active: activeMenu === 'home' }" @click="go('/home')">
+        <el-icon><House /></el-icon>
+        <span>Home</span>
+      </div>
+      <div class="nav-item" :class="{ active: activeMenu === 'plan' }" @click="go('/travel/plan')">
+        <el-icon><MapLocation /></el-icon>
+        <span>Plan</span>
+      </div>
+      <div class="nav-item" :class="{ active: activeMenu === 'profile' }" @click="go('/profile')">
+        <el-icon><User /></el-icon>
+        <span>Profile</span>
+      </div>
+      <div class="nav-item" @click="logout">
+        <el-icon><SwitchButton /></el-icon>
+        <span>Logout</span>
+      </div>
+    </nav>
   </div>
 </template>
 
@@ -126,6 +143,11 @@ const logout = async () => {
   }
 }
 
+const openPlan = (destination) => {
+  // Navigate to travel plan page with destination pre-filled
+  router.push('/travel/plan')
+}
+
 const onImgError = (e) => {
   e.target.onerror = null
   e.target.src = 'https://via.placeholder.com/400x300?text=Image+Unavailable'
@@ -138,38 +160,8 @@ const onImgError = (e) => {
 .home-page {
   height: 100vh;
   background-color: #141414;
-}
-
-.layout-container {
-  height: 100vh;
-  background-color: #141414;
-}
-
-
-/* 左侧菜单样式 */
-.sidebar {
-  background-color: #0f0f0f;
-  height: 100%;
-}
-
-.sidebar-menu {
-  height: 100%;
-  border-right: none;
-}
-
-.sidebar-menu .el-menu-item {
-  height: 56px;
-  line-height: 56px;
-}
-
-.sidebar-menu .el-menu-item:hover {
-  background-color: #1890ff !important;
-}
-
-/* 下面部分容器样式 */
-.bottom-container {
-  flex: 1;
-  height: calc(100vh - 64px); /* 减去header高度 */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Header样式 */
@@ -181,11 +173,12 @@ const onImgError = (e) => {
   align-items: center;
   padding: 0 24px;
   height: 64px;
+  flex-shrink: 0;
 }
 
 .logo {
   width: 10rem;
-  height:5rem;
+  height: 5rem;
   filter: drop-shadow(0 0 10px rgba(4, 108, 184, 0.3));
 }
 
@@ -217,12 +210,66 @@ const onImgError = (e) => {
   margin-right: 0;
 }
 
+/* 主要内容区域 */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 80px; /* 为底部导航栏留出空间 */
+}
+
+/* 桌面端左侧菜单样式 */
+.sidebar-col {
+  width: 180px;
+  max-width: 200px;
+  flex: 0 0 200px;
+}
+
+.sidebar {
+  background-color: #0f0f0f;
+  height: 100%;
+  padding: 0;
+  width: 200px;
+}
+
+.sidebar-menu {
+  padding: 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-left: 3px solid transparent;
+}
+
+.menu-item:hover {
+  background-color: #1890ff;
+  color: #fff;
+}
+
+.menu-item.active {
+  background-color: #1890ff;
+  color: #fff;
+  border-left-color: #fff;
+}
+
+.menu-item .el-icon {
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.menu-item span {
+  font-size: 14px;
+}
+
 /* 主内容区样式 */
 .home-main {
   padding: 24px;
   background-color: #1a1a1a;
-  overflow-y: auto;
-  height: 100%;
+  min-height: calc(100vh - 64px);
 }
 
 .welcome {
@@ -263,6 +310,7 @@ const onImgError = (e) => {
   transition: transform 0.3s, box-shadow 0.3s;
   background-color: #333;
   border: 1px solid #444;
+  height: 100%;
 }
 
 .destination-card:hover {
@@ -282,5 +330,85 @@ const onImgError = (e) => {
   margin-top: 12px;
   font-weight: bold;
   color: #fff;
+}
+
+/* 手机端底部导航栏样式 */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #1f1f1f;
+  border-top: 1px solid #333;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  z-index: 1000;
+  height: 60px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: all 0.3s;
+  color: #ccc;
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-item:hover {
+  color: #1890ff;
+}
+
+.nav-item.active {
+  color: #1890ff;
+}
+
+.nav-item .el-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.nav-item span {
+  font-size: 10px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 响应式调整 */
+@media (min-width: 768px) {
+  .main-content {
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .home-main {
+    padding: 16px;
+    min-height: calc(100vh - 64px - 60px);
+  }
+  
+  .welcome {
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .welcome h1 {
+    font-size: 1.5rem;
+  }
+  
+  .recommend-section {
+    padding: 16px;
+  }
+  
+  .recommend-section h2 {
+    font-size: 1.25rem;
+  }
 }
 </style>

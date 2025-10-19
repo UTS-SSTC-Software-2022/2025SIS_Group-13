@@ -2,8 +2,7 @@
   <div class="travel-plan-form">
     <!-- Header -->
     <div class="text-center mb-4">
-      <h2 class="form-title">Create Your Personalized Travel Itinerary</h2>
-      <p class="form-subtitle text-muted">Tell us your preferences and we'll craft the perfect Australian adventure for you</p>
+      <h2 class="form-title">AI Travel Planner</h2>
     </div>
 
     <!-- Travel Plan Form -->
