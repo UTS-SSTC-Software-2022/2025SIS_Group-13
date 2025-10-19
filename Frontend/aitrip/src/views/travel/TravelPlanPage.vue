@@ -34,10 +34,10 @@ import TravelPlanForm from '@/components/travel/TravelPlanForm.vue'
 const router = useRouter()
 
 /**
- * Go back to previous page
+ * Go back to home page
  */
 const goBack = () => {
-  router.go(-1)
+  router.push('/home')
 }
 
 /**
@@ -54,7 +54,7 @@ const handleFormSubmit = async (formData) => {
     await router.push({
       path: '/travel/itinerary-result',
       query: {
-        formData: encodeURIComponent(JSON.stringify(formData))
+        result: encodeURIComponent(JSON.stringify(output))
       }
     })
   } catch (error) {
