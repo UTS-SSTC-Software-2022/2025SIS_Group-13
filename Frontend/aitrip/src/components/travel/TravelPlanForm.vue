@@ -1,338 +1,467 @@
 <template>
-  <div class="travel-itinerary-result">
-    <!-- Header Section -->
-    <div class="result-header">
-      <h2 class="result-title">Your Personalized Australian Adventure</h2>
-      <p class="result-subtitle">AI-generated itinerary based on your preferences</p>
-      <div class="trip-summary">
-        <el-row :gutter="30">
-          <el-col :span="6">
-            <div class="summary-item">
-              <el-icon class="summary-icon"><Calendar /></el-icon>
-              <div>
-                <div class="summary-label">Duration</div>
-                <div class="summary-value">{{ itinerary.duration }} days</div>
-              </div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="summary-item">
-              <el-icon class="summary-icon"><Location /></el-icon>
-              <div>
-                <div class="summary-label">Destination</div>
-                <div class="summary-value">{{ itinerary.destination }}</div>
-              </div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="summary-item">
-              <el-icon class="summary-icon"><User /></el-icon>
-              <div>
-                <div class="summary-label">Travelers</div>
-                <div class="summary-value">{{ itinerary.travelers }} people</div>
-              </div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="summary-item">
-              <el-icon class="summary-icon"><Money /></el-icon>
-              <div>
-                <div class="summary-label">Est. Budget</div>
-                <div class="summary-value">${{ itinerary.estimatedBudget }}</div>
-              </div>
-            </div>
-          </el-col>
-        </el-row>
-      </div>
+  <div class="travel-plan-form">
+    <!-- Header -->
+    <div class="text-center mb-4">
+      <h2 class="form-title">Create Your Personalized Travel Itinerary</h2>
+      <p class="form-subtitle text-muted">Tell us your preferences and we'll craft the perfect Australian adventure for you</p>
     </div>
 
-    <!-- Daily Itinerary Section -->
-    <div class="daily-itinerary">
-      <h3 class="section-title">Daily Itinerary</h3>
-      <div class="itinerary-timeline">
-        <div 
-          v-for="(day, index) in itinerary.dailyPlans" 
-          :key="index"
-          class="day-card"
-        >
-          <!-- Day Header -->
-          <div 
-            class="day-header" 
-            @click="toggleDayDetails(index)"
-            :class="{ 'expanded': expandedDays.includes(index) }"
+    <!-- Travel Plan Form -->
+    <el-form
+      ref="travelFormRef"
+      :model="travelForm"
+      :rules="travelRules"
+      class="travel-form-content"
+      label-position="top"
+      size="large"
+    >
+      <!-- Basic Information Section -->
+      <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        
+        <!-- Number of Travelers -->
+        <el-form-item label="Number of Travelers" prop="peopleCount">
+          <el-select
+            v-model="travelForm.peopleCount"
+            placeholder="Select number of travelers"
+            class="w-100"
+            :disabled="loading"
           >
-            <div class="day-info">
-              <div class="day-number">Day {{ index + 1 }}</div>
-              <div class="day-date">{{ formatDate(day.date) }}</div>
-              <div class="day-overview">{{ day.overview }}</div>
-            </div>
-            <div class="day-weather">
-              <el-icon class="weather-icon" :class="getWeatherIconClass(day.weather.condition)">
-                <component :is="getWeatherIcon(day.weather.condition)" />
-              </el-icon>
-              <div class="weather-info">
-                <div class="temperature">{{ day.weather.temperature }}°C</div>
-                <div class="condition">{{ day.weather.condition }}</div>
-              </div>
-            </div>
-            <el-icon class="expand-icon" :class="{ 'rotated': expandedDays.includes(index) }">
-              <ArrowDown />
-            </el-icon>
-          </div>
+            <el-option
+              v-for="num in 10"
+              :key="num"
+              :label="`${num} ${num === 1 ? 'person' : 'people'}`"
+              :value="num"
+            />
+          </el-select>
+        </el-form-item>
 
-          <!-- Day Details (Expandable) -->
-          <el-collapse-transition>
-            <div v-show="expandedDays.includes(index)" class="day-details">
-              <div class="activities-timeline">
-                <div 
-                  v-for="(activity, actIndex) in day.activities" 
-                  :key="actIndex"
-                  class="activity-item"
+        <!-- Traveler Information -->
+        <el-form-item label="Traveler Information" prop="members">
+          <div class="members-container">
+            <div
+              v-for="(member, index) in travelForm.members"
+              :key="index"
+              class="member-item"
+            >
+              <div class="member-inputs">
+                <el-input
+                  v-model="member.age"
+                  type="number"
+                  placeholder="Age"
+                  class="age-input"
+                  :disabled="loading"
+                  min="1"
+                  max="120"
+                />
+                <el-select
+                  v-model="member.gender"
+                  placeholder="Gender"
+                  class="gender-select"
+                  :disabled="loading"
                 >
-                  <div class="activity-time">{{ activity.time }}</div>
-                  <div class="activity-content">
-                    <div class="activity-header">
-                      <h4 class="activity-title">{{ activity.title }}</h4>
-                      <el-tag :type="getActivityTypeColor(activity.type)" size="small">
-                        {{ activity.type }}
-                      </el-tag>
-                    </div>
-                    <p class="activity-description">{{ activity.description }}</p>
-                    
-                    <!-- Location Info -->
-                    <div v-if="activity.location" class="activity-location">
-                      <el-icon><Location /></el-icon>
-                      <span>{{ activity.location.name }}</span>
-                      <span class="address">{{ activity.location.address }}</span>
-                    </div>
-
-                    <!-- Transportation -->
-                    <div v-if="activity.transportation" class="activity-transport">
-                      <el-icon><Position /></el-icon>
-                      <span>{{ activity.transportation.method }}</span>
-                      <span class="duration">({{ activity.transportation.duration }})</span>
-                      <span v-if="activity.transportation.cost" class="cost">
-                        - ${{ activity.transportation.cost }}
-                      </span>
-                    </div>
-
-                    <!-- Tips -->
-                    <div v-if="activity.tips && activity.tips.length > 0" class="activity-tips">
-                      <h5>💡 Tips:</h5>
-                      <ul>
-                        <li v-for="(tip, tipIndex) in activity.tips" :key="tipIndex">
-                          {{ tip }}
-                        </li>
-                      </ul>
-                    </div>
-
-                    <!-- Estimated Cost -->
-                    <div v-if="activity.estimatedCost" class="activity-cost">
-                      <el-icon><Money /></el-icon>
-                      <span>Estimated cost: ${{ activity.estimatedCost }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Day Summary -->
-              <div class="day-summary">
-                <h4 class="summary-title">📊 Day Summary</h4>
-                <div class="summary-stats">
-                  <div class="stat-item">
-                    <div class="stat-icon">🎯</div>
-                    <div>
-                      <span class="stat-label">Total Activities</span>
-                      <span class="stat-value">{{ day.activities.length }}</span>
-                    </div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-icon">🚶</div>
-                    <div>
-                      <span class="stat-label">Estimated Walking</span>
-                      <span class="stat-value">{{ day.estimatedWalking }}</span>
-                    </div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-icon">💰</div>
-                    <div>
-                      <span class="stat-label">Daily Budget</span>
-                      <span class="stat-value">${{ day.dailyBudget }}</span>
-                    </div>
-                  </div>
-                </div>
+                  <el-option label="Male" value="male" />
+                  <el-option label="Female" value="female" />
+                </el-select>
+                <el-button
+                  v-if="travelForm.members.length > 1"
+                  type="danger"
+                  size="small"
+                  plain
+                  @click="removeMember(index)"
+                  :disabled="loading"
+                >
+                  Remove
+                </el-button>
               </div>
             </div>
-          </el-collapse-transition>
-        </div>
-      </div>
-    </div>
+            <el-button
+              type="primary"
+              plain
+              size="small"
+              @click="addMember"
+              :disabled="loading || travelForm.members.length >= 10"
+              class="add-member-btn"
+            >
+              <el-icon class="me-1"><Plus /></el-icon>
+              Add Traveler
+            </el-button>
+          </div>
+        </el-form-item>
 
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <el-button type="primary" size="large" @click="downloadItinerary">
-        <el-icon><Download /></el-icon>
-        Download Itinerary
-      </el-button>
-      <el-button type="default" size="large" @click="shareItinerary">
-        <el-icon><Share /></el-icon>
-        Share
-      </el-button>
-      <el-button type="success" size="large" @click="saveItinerary">
-        <el-icon><Star /></el-icon>
-        Save to Favorites
-      </el-button>
-    </div>
+        <!-- Trip Duration -->
+        <el-form-item label="Trip Duration" prop="days">
+          <el-input-number
+            v-model="travelForm.days"
+            :min="1"
+            :max="30"
+            placeholder="Enter trip duration"
+            class="w-100"
+            :disabled="loading"
+          />
+        </el-form-item>
+      </div>
+
+      <!-- Travel Preferences -->
+      <div class="form-section">
+        <h3 class="section-title">Travel Preferences</h3>
+        
+        <!-- Destination Selection -->
+        <el-form-item label="Travel Destination" prop="destination">
+          <el-cascader
+            v-model="travelForm.destination"
+            :options="destinationOptions"
+            placeholder="Select state/city/region"
+            class="w-100"
+            :disabled="loading"
+            clearable
+            filterable
+          />
+        </el-form-item>
+
+        <!-- Must-Visit Attractions -->
+        <el-form-item label="Must-Visit Attractions">
+          <div class="attractions-container">
+            <el-input
+              v-model="currentAttraction"
+              placeholder="Enter attraction name, press Enter to add"
+              class="attraction-input"
+              :disabled="loading"
+              @keyup.enter="addAttraction"
+            >
+              <template #append>
+                <el-button @click="addAttraction" :disabled="loading">
+                  Add
+                </el-button>
+              </template>
+            </el-input>
+            <div class="attractions-tags mt-2">
+              <el-tag
+                v-for="(attraction, index) in travelForm.attractions"
+                :key="index"
+                closable
+                @close="removeAttraction(index)"
+                class="me-2 mb-2"
+              >
+                {{ attraction }}
+              </el-tag>
+            </div>
+          </div>
+        </el-form-item>
+
+        <!-- Travel Themes -->
+        <el-form-item label="Travel Themes" prop="themes">
+          <el-checkbox-group v-model="travelForm.themes" :disabled="loading">
+            <el-checkbox label="Culture & Heritage">Culture & Heritage</el-checkbox>
+            <el-checkbox label="Nature & Wildlife">Nature & Wildlife</el-checkbox>
+            <el-checkbox label="Food & Wine">Food & Wine</el-checkbox>
+            <el-checkbox label="Relaxation & Beaches">Relaxation & Beaches</el-checkbox>
+            <el-checkbox label="Adventure & Exploration">Adventure & Exploration</el-checkbox>
+            <el-checkbox label="Shopping & Entertainment">Shopping & Entertainment</el-checkbox>
+            <el-checkbox label="Family Fun">Family Fun</el-checkbox>
+            <el-checkbox label="Photography">Photography</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </div>
+
+      <!-- Additional Requirements -->
+      <div class="form-section">
+        <h3 class="section-title">Special Requirements</h3>
+        
+        <el-form-item label="Additional Requirements">
+          <el-input
+            v-model="travelForm.description"
+            type="textarea"
+            :rows="4"
+            placeholder="Describe your special requirements, preferences or other ideas..."
+            maxlength="200"
+            show-word-limit
+            :disabled="loading"
+          />
+        </el-form-item>
+      </div>
+
+      <!-- Submit Button -->
+      <el-form-item class="mb-3">
+        <el-button
+          type="primary"
+          class="submit-btn w-100"
+          :loading="loading"
+          @click="handleSubmit"
+        >
+          {{ loading ? 'Generating...' : 'Generate Travel Itinerary' }}
+        </el-button>
+      </el-form-item>
+    </el-form>
   </div>
 </template>
 
 <script setup>
-import {ref, reactive, onMounted, watch} from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import {
-  Calendar,
-  Location,
-  User,
-  Money,
-  ArrowDown,
-  Position,
-  Download,
-  Share,
-  Star,
-  Sunny,
-  Cloudy
-} from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
 
-// Props
-const props = defineProps({
-  itineraryData: {
-    type: Object,
-    default: null
-  }
-})
+// Props and emits
+const emit = defineEmits(['submit'])
 
-// Reactive data
-const expandedDays = ref([])
+// Form ref
+const travelFormRef = ref()
+
+// Loading state
 const loading = ref(false)
 
-const itinerary = reactive({
-  destination: '',
-  duration: 0,
-  travelers: 0,
-  estimatedBudget: 0,
-  dailyPlans: []
+// Current attraction input
+const currentAttraction = ref('')
+
+// Form data
+const travelForm = reactive({
+  peopleCount: 1,
+  members: [
+    { age: '', gender: '' }
+  ],
+  days: 3,
+  destination: [],
+  attractions: [],
+  themes: [],
+  description: ''
 })
 
-// Watch for props changes and fully replace reactive object
-watch(
-  () => props.itineraryData,
-  (newData) => {
-    if (newData) {
-      // 用 JSON 深拷贝，确保 reactive 完全更新
-      const copy = JSON.parse(JSON.stringify(newData))
-      itinerary.destination = copy.destination || ''
-      itinerary.duration = copy.duration || 0
-      itinerary.travelers = copy.travelers || 0
-      itinerary.estimatedBudget = copy.estimatedBudget || 0
-      itinerary.dailyPlans = copy.dailyPlans || []
-    }
-  },
-  { immediate: true }
-)
-
-// Toggle day details
-const toggleDayDetails = (dayIndex) => {
-  const index = expandedDays.value.indexOf(dayIndex)
-  if (index > -1) {
-    expandedDays.value.splice(index, 1)
-  } else {
-    expandedDays.value.push(dayIndex)
-  }
+// Form validation rules
+const travelRules = {
+  peopleCount: [
+    { required: true, message: 'Please select number of travelers', trigger: 'change' }
+  ],
+  days: [
+    { required: true, message: 'Please enter trip duration', trigger: 'blur' },
+    { type: 'number', min: 1, max: 30, message: 'Trip duration should be between 1-30 days', trigger: 'blur' }
+  ],
+  destination: [
+    { required: true, message: 'Please select your destination', trigger: 'change' }
+  ],
+  themes: [
+    { type: 'array', min: 1, message: 'Please select at least one travel theme', trigger: 'change' }
+  ]
 }
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-AU', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-
-const getWeatherIcon = (condition) => {
-  const iconMap = {
-    'Sunny': Sunny,
-    'Partly Cloudy': Cloudy,
-    'Cloudy': Cloudy,
-    'Rainy': Cloudy,
-    'Drizzle': Cloudy
-  }
-  return iconMap[condition] || Sunny
-}
-
-const getWeatherIconClass = (condition) => {
-  const classMap = {
-    'Sunny': 'weather-sunny',
-    'Partly Cloudy': 'weather-cloudy',
-    'Cloudy': 'weather-cloudy',
-    'Rainy': 'weather-rainy',
-    'Drizzle': 'weather-drizzle'
-  }
-  return classMap[condition] || 'weather-sunny'
-}
-
-const getActivityTypeColor = (type) => {
-  const colorMap = {
-    'Adventure': 'danger',
-    'Culture': 'primary',
-    'Dining': 'success',
-    'Nature': 'info',
-    'Shopping': 'warning'
-  }
-  return colorMap[type] || 'default'
-}
-
-const downloadItinerary = () => {
-  ElMessage.success('Itinerary download started!')
-  // TODO: Implement PDF download functionality
-}
-
-const shareItinerary = () => {
-  ElMessage.info('Share functionality coming soon!')
-  // TODO: Implement share functionality
-}
-
-const saveItinerary = () => {
-  ElMessage.success('Itinerary saved to favorites!')
-  // TODO: Implement save to user favorites
-}
-
-// Lifecycle
-onMounted(() => {
-    if (props.itineraryData) {
-      Object.assign(itinerary, props.itineraryData)
-    } else {
-      fetchItineraryFromAPI()
-    }
-})
-
-// TODO: API call function
-const fetchItineraryFromAPI = async () => {
-  try {
-    loading.value = true
-    const response = await fetch('/api/travel/itinerary/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
+// Australian destination options (simplified version, should be fetched from API in production)
+const destinationOptions = [
+  {
+    value: 'nsw',
+    label: 'New South Wales',
+    children: [
+      {
+        value: 'sydney',
+        label: 'Sydney',
+        children: [
+          { value: 'sydney-cbd', label: 'Sydney CBD' },
+          { value: 'bondi', label: 'Bondi' },
+          { value: 'manly', label: 'Manly' },
+          { value: 'darling-harbour', label: 'Darling Harbour' }
+        ]
       },
-      body: JSON.stringify(travelFormData)
-    })
-    const data = await response.json()
-    Object.assign(itinerary, data)
+      {
+        value: 'blue-mountains',
+        label: 'Blue Mountains',
+        children: [
+          { value: 'katoomba', label: 'Katoomba' },
+          { value: 'leura', label: 'Leura' }
+        ]
+      },
+      { value: 'hunter-valley', label: 'Hunter Valley' },
+      { value: 'byron-bay', label: 'Byron Bay' }
+    ]
+  },
+  {
+    value: 'vic',
+    label: 'Victoria',
+    children: [
+      {
+        value: 'melbourne',
+        label: 'Melbourne',
+        children: [
+          { value: 'melbourne-cbd', label: 'Melbourne CBD' },
+          { value: 'st-kilda', label: 'St Kilda' },
+          { value: 'fitzroy', label: 'Fitzroy' },
+          { value: 'south-yarra', label: 'South Yarra' }
+        ]
+      },
+      { value: 'great-ocean-road', label: 'Great Ocean Road' },
+      { value: 'yarra-valley', label: 'Yarra Valley' },
+      { value: 'phillip-island', label: 'Phillip Island' }
+    ]
+  },
+  {
+    value: 'qld',
+    label: 'Queensland',
+    children: [
+      {
+        value: 'brisbane',
+        label: 'Brisbane',
+        children: [
+          { value: 'brisbane-cbd', label: 'Brisbane CBD' },
+          { value: 'south-bank', label: 'South Bank' }
+        ]
+      },
+      { value: 'gold-coast', label: 'Gold Coast' },
+      { value: 'cairns', label: 'Cairns' },
+      { value: 'whitsundays', label: 'Whitsundays' },
+      { value: 'sunshine-coast', label: 'Sunshine Coast' }
+    ]
+  },
+  {
+    value: 'wa',
+    label: 'Western Australia',
+    children: [
+      {
+        value: 'perth',
+        label: 'Perth',
+        children: [
+          { value: 'perth-cbd', label: 'Perth CBD' },
+          { value: 'fremantle', label: 'Fremantle' }
+        ]
+      },
+      { value: 'margaret-river', label: 'Margaret River' },
+      { value: 'broome', label: 'Broome' }
+    ]
+  },
+  {
+    value: 'sa',
+    label: 'South Australia',
+    children: [
+      {
+        value: 'adelaide',
+        label: 'Adelaide',
+        children: [
+          { value: 'adelaide-cbd', label: 'Adelaide CBD' },
+          { value: 'glenelg', label: 'Glenelg' }
+        ]
+      },
+      { value: 'barossa-valley', label: 'Barossa Valley' },
+      { value: 'kangaroo-island', label: 'Kangaroo Island' }
+    ]
+  },
+  {
+    value: 'tas',
+    label: 'Tasmania',
+    children: [
+      { value: 'hobart', label: 'Hobart' },
+      { value: 'launceston', label: 'Launceston' },
+      { value: 'cradle-mountain', label: 'Cradle Mountain' }
+    ]
+  },
+  {
+    value: 'nt',
+    label: 'Northern Territory',
+    children: [
+      { value: 'darwin', label: 'Darwin' },
+      { value: 'alice-springs', label: 'Alice Springs' },
+      { value: 'uluru', label: 'Uluru' }
+    ]
+  },
+  {
+    value: 'act',
+    label: 'Australian Capital Territory',
+    children: [
+      { value: 'canberra', label: 'Canberra' }
+    ]
+  }
+]
+
+// Watch people count to adjust members array
+watch(() => travelForm.peopleCount, (newCount) => {
+  const currentLength = travelForm.members.length
+  
+  if (newCount > currentLength) {
+    // Add new members
+    for (let i = currentLength; i < newCount; i++) {
+      travelForm.members.push({ age: '', gender: '' })
+    }
+  } else if (newCount < currentLength) {
+    // Remove excess members
+    travelForm.members.splice(newCount)
+  }
+})
+
+/**
+ * Add a new member
+ */
+const addMember = () => {
+  if (travelForm.members.length < 10) {
+    travelForm.members.push({ age: '', gender: '' })
+    travelForm.peopleCount = travelForm.members.length
+  }
+}
+
+/**
+ * Remove a member
+ */
+const removeMember = (index) => {
+  if (travelForm.members.length > 1) {
+    travelForm.members.splice(index, 1)
+    travelForm.peopleCount = travelForm.members.length
+  }
+}
+
+/**
+ * Add attraction
+ */
+const addAttraction = () => {
+  const attraction = currentAttraction.value.trim()
+  if (attraction && !travelForm.attractions.includes(attraction)) {
+    travelForm.attractions.push(attraction)
+    currentAttraction.value = ''
+  } else if (travelForm.attractions.includes(attraction)) {
+    ElMessage.warning('This attraction has already been added')
+  }
+}
+
+/**
+ * Remove attraction
+ */
+const removeAttraction = (index) => {
+  travelForm.attractions.splice(index, 1)
+}
+
+/**
+ * Handle form submission
+ */
+const handleSubmit = async () => {
+  try {
+    // Validate form
+    const valid = await travelFormRef.value.validate()
+    if (!valid) return
+
+    // Validate members info
+    const invalidMembers = travelForm.members.some(member => !member.age || !member.gender)
+    if (invalidMembers) {
+      ElMessage.error('Please complete age and gender information for all travelers')
+      return
+    }
+
+    loading.value = true
+
+    // Prepare data for submission
+    const submitData = {
+      peopleCount: travelForm.peopleCount,
+      members: travelForm.members.map(member => ({
+        age: parseInt(member.age),
+        gender: member.gender
+      })),
+      days: travelForm.days,
+      destination: travelForm.destination,
+      attractions: travelForm.attractions,
+      themes: travelForm.themes,
+      description: travelForm.description
+    }
+
+    // Emit submit event with form data
+    emit('submit', submitData)
+    
+    ElMessage.success('Generating your personalized travel itinerary...')
+    
   } catch (error) {
-    console.error('Failed to fetch itinerary:', error)
-    ElMessage.error('Failed to load itinerary')
+    console.error('Form submission error:', error)
+    ElMessage.error('Submission failed, please try again')
   } finally {
     loading.value = false
   }
@@ -340,411 +469,144 @@ const fetchItineraryFromAPI = async () => {
 </script>
 
 <style scoped>
-.travel-itinerary-result {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem 3rem;
-}
+.travel-plan-form { position: relative; }
 
-/* Header Styles */
-.result-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.result-title {
-  font-size: 2.5rem;
+.form-title {
+  color: #E5E7EB; /* 深色背景下更清晰 */
   font-weight: 700;
-  color: #2c3e50;
   margin-bottom: 0.5rem;
 }
 
-.result-subtitle {
-  font-size: 1.1rem;
-  color: #7f8c8d;
-  margin-bottom: 2rem;
-}
-
-.trip-summary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
-  padding: 2.5rem;
-  color: white;
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-}
-
-.summary-item {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.summary-item:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-.summary-icon {
-  font-size: 2rem;
-  opacity: 0.9;
-}
-
-.summary-label {
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-
-.summary-value {
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-/* Daily Itinerary Styles */
-.section-title {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.day-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  margin-bottom: 2rem;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.day-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-.day-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 2rem 2.5rem;
-  cursor: pointer;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  transition: all 0.3s ease;
-  min-height: 120px;
-}
-
-.day-header:hover {
-  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-}
-
-.day-header.expanded {
-  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
-  color: white;
-}
-
-.day-info {
-  flex: 1;
-}
-
-.day-number {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.day-date {
-  font-size: 0.9rem;
-  opacity: 0.8;
-  margin-bottom: 0.5rem;
-}
-
-.day-overview {
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-.day-weather {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-right: 1rem;
-}
-
-.weather-icon {
-  font-size: 2rem;
-}
-
-.weather-sunny {
-  color: #f39c12;
-}
-
-.weather-cloudy {
-  color: #95a5a6;
-}
-
-.weather-rainy {
-  color: #3498db;
-}
-
-.temperature {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.condition {
-  font-size: 0.85rem;
-  opacity: 0.8;
-}
-
-.expand-icon {
-  font-size: 1.2rem;
-  transition: transform 0.3s ease;
-}
-
-.expand-icon.rotated {
-  transform: rotate(180deg);
-}
-
-/* Day Details Styles */
-.day-details {
-  padding: 0 2.5rem 2rem;
-  background: #fafbfc;
-}
-
-.activities-timeline {
-  position: relative;
-  padding-left: 3rem;
-  margin-top: 1rem;
-}
-
-.activities-timeline::before {
-  content: '';
-  position: absolute;
-  left: 0.75rem;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, #409eff, #66b1ff);
-}
-
-.activity-item {
-  position: relative;
-  display: flex;
-  margin-bottom: 2.5rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #e9ecef;
-  gap: 2rem;
-}
-
-.activity-item:last-child {
-  border-bottom: none;
+.form-subtitle {
+  font-size: 14px;
   margin-bottom: 0;
+  color: #9CA3AF; /* 深色背景副标题 */
 }
 
-.activity-item::before {
-  content: '';
-  position: absolute;
-  left: -2.25rem;
-  top: 0.25rem;
-  width: 12px;
-  height: 12px;
-  background: #409eff;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+.travel-form-content { margin-top: 2rem; }
 
-.activity-time {
-  min-width: 100px;
-  font-weight: 700;
-  color: #409eff;
-  font-size: 1rem;
-  background: rgba(64, 158, 255, 0.1);
-  padding: 0.5rem 1rem;
+.form-section {
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.25rem 1rem;
+  background: rgba(17, 24, 39, 0.65); /* 深色毛玻璃卡片 */
   border-radius: 12px;
-  text-align: center;
-  height: fit-content;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
-.activity-content {
-  flex: 1;
-  margin-left: 0;
+.section-title {
+  color: #cbd5e1; /* 深色标题 */
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.activity-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+.members-container {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 10px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.04); /* 深色半透明 */
 }
 
-.activity-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
+.member-item { margin-bottom: 1rem; }
+.member-item:last-of-type { margin-bottom: 0.5rem; }
+.member-inputs { display: flex; gap: 0.5rem; align-items: center; }
+.age-input { flex: 1; max-width: 120px; }
+.gender-select { flex: 1; max-width: 120px; }
+
+.add-member-btn {
+  width: 100%;
+  border-style: dashed;
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.activity-description {
-  color: #5a6c7d;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
+.attractions-container { width: 100%; }
+.attraction-input { width: 100%; }
+.attractions-tags { min-height: 32px; }
 
-.activity-location,
-.activity-transport,
-.activity-cost {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  color: #6c757d;
-}
-
-.address,
-.duration,
-.cost {
-  opacity: 0.8;
-}
-
-.activity-tips {
-  background: #f8f9fa;
+.submit-btn {
+  height: 44px;
+  font-size: 16px;
+  font-weight: 700;
   border-radius: 8px;
-  padding: 1rem;
-  margin-top: 1rem;
+  border: none;
+  color: #fff;
+  background: linear-gradient(90deg, #3b82f6, #6366f1); /* 复用既有蓝紫渐变 */
+  box-shadow: 0 8px 22px rgba(59, 130, 246, 0.28);
+}
+.submit-btn:hover { filter: brightness(1.05); }
+
+:deep(.el-form-item__label) { color: #cdd6e3 !important; }
+:deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.035) !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+:deep(.el-input__inner),
+:deep(.el-textarea__inner) { color: #e5e7eb !important; }
+:deep(.el-input__inner::placeholder),
+:deep(.el-textarea__inner::placeholder) { color: #9aa4b2 !important; }
+:deep(.el-input.is-focus .el-input__wrapper),
+:deep(.el-textarea.is-focus .el-textarea__inner),
+:deep(.el-select .el-input.is-focus .el-input__wrapper) {
+  border-color: #7c8cf8 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.22) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
 }
 
-.activity-tips h5 {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.9rem;
-  color: #495057;
+/* 让 Select 输入框在非聚焦时也保持深色 */
+:deep(.el-select .el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
 }
 
-.activity-tips ul {
-  margin: 0;
-  padding-left: 1.2rem;
+/* 特殊需求文本域改为更深背景，降低亮度 */
+:deep(.el-textarea__inner) {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
 }
 
-.activity-tips li {
-  font-size: 0.85rem;
-  color: #6c757d;
-  margin-bottom: 0.25rem;
+/* Select 下拉面板使用深色毛玻璃，并提升文字对比 */
+:deep(.el-select__popper) {
+  background: rgba(15, 23, 42, 0.92) !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(10px) !important;
+}
+:deep(.el-select__popper .el-select-dropdown) {
+  background: transparent !important;
+  color: #e5e7eb !important;
+}
+:deep(.el-select-dropdown__item) { color: #e5e7eb !important; }
+:deep(.el-select-dropdown__item:hover) { background-color: rgba(255, 255, 255, 0.06) !important; }
+:deep(.el-select-dropdown__item.is-selected),
+:deep(.el-select-dropdown__item.selected) {
+  background-color: rgba(99, 102, 241, 0.18) !important;
+  color: #fff !important;
 }
 
-/* Day Summary Styles */
-.day-summary {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 16px;
-  padding: 2rem;
-  margin-top: 2rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-}
-
-.summary-title {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.summary-stats {
+:deep(.el-checkbox-group) {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
 }
+:deep(.el-checkbox) { margin-right: 0; white-space: nowrap; }
 
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: rgba(64, 158, 255, 0.05);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-}
-
-.stat-item:hover {
-  background: rgba(64, 158, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-.stat-icon {
-  font-size: 1.5rem;
-}
-
-.stat-label {
-  display: block;
-  font-size: 0.85rem;
-  color: #6c757d;
-  margin-bottom: 0.25rem;
-}
-
-.stat-value {
-  font-weight: 700;
-  color: #2c3e50;
-  font-size: 1.1rem;
-}
-
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-top: 4rem;
-  padding: 2.5rem 0;
-  border-top: 2px solid #f0f2f5;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 20px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
-}
-
-/* Mobile Responsive */
 @media (max-width: 768px) {
-  .travel-itinerary-result {
-    padding: 1rem;
-  }
-  
-  .result-title {
-    font-size: 2rem;
-  }
-  
-  .trip-summary {
-    padding: 1.5rem;
-  }
-  
-  .summary-stats {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .day-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .day-weather {
-    margin-right: 0;
-  }
-  
-  .activity-item {
-    flex-direction: column;
-  }
-  
-  .activity-content {
-    margin-left: 0;
-    margin-top: 0.5rem;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-  }
+  .form-section { padding: 1rem; }
+  .member-inputs { flex-direction: column; gap: 0.5rem; }
+  .age-input, .gender-select { max-width: none; }
+  :deep(.el-checkbox-group) { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+}
+
+@media (max-width: 576px) {
+  .form-title { font-size: 1.5rem; }
+  .travel-form-content { margin-top: 1.5rem; }
+  .section-title { font-size: 16px; }
 }
 </style>
