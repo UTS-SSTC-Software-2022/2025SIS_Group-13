@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework import viewsets, permissions
 from .models import Itinerary, DailySchedule, POI
-from .serializers import ItinerarySerializer, DailyScheduleSerializer, POISerializer
+from .serializers import ItinerarySerializer, DailyScheduleSerializer, POISerializer, MemoirSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 
 from utils.response import CustomModelViewSet
@@ -35,3 +35,11 @@ class POIViewSet(CustomModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
     pagination_class = CustomPagination
+
+class MemoirViewSet(CustomModelViewSet):
+    queryset = Itinerary.objects.all()
+    serializer_class = MemoirSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Itinerary.objects.filter(user=self.request.user)

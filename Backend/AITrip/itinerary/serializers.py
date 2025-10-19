@@ -21,3 +21,8 @@ class ItinerarySerializer(serializers.ModelSerializer):
         model = Itinerary
         fields = '__all__'
         read_only_fields = ('itinerary_id', 'create_time', 'update_time')
+
+class MemoirSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Itinerary
+        fields = ['itinerary_id', 'title', 'create_time', 'update_time'] 
