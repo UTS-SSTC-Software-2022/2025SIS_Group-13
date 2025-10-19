@@ -13,7 +13,8 @@ const routes = [
   { path: '/home', name: 'home', component: () => import('@/views/HomePage.vue') },
   { path: '/profile', name: 'profile', component: () => import('@/views/ProfilePage.vue') },
   {path: '/profile/show', name: 'profile-show', component: () => import('@/views/ProfileShowPage.vue')},
-  { path: '/travel/plan', name: 'travel-plan', component: () => import('@/views/travel/TravelPlanPage.vue') },
+  { path: '/travel/plan', name: 'travel-plan', component: () => import('@/views/travel/TravelPlanManagementPage.vue') },
+  { path: '/travel/plan/create', name: 'travel-plan-create', component: () => import('@/views/travel/TravelPlanPage.vue') },
   { path: '/travel/itinerary-result', name: 'travel-itinerary-result', component: () => import('@/views/travel/TravelItineraryResultPage.vue') },
 
   // 404

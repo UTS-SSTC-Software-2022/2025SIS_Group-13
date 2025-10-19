@@ -1,74 +1,103 @@
 <template>
-  <div class="profile-shell">
-    <!-- 背景，与注册页一致的深色渐变 -->
-    <div class="auth-bg"></div>
+  <el-container class="layout-container" direction="vertical">
+    <el-container class="bottom-container">
+      <el-aside class="sidebar" width="200px">
+        <el-menu 
+          mode="vertical" 
+          class="sidebar-menu" 
+          :default-active="'profile'"
+          background-color="#0f0f0f"
+          text-color="#ccc"
+          active-text-color="#1890ff"
+        >
+          <el-menu-item index="home" @click="go('/home')">
+            <el-icon><House /></el-icon>
+            <span>Home</span>
+          </el-menu-item>
+          <el-menu-item index="plan" @click="go('/travel/plan')">
+            <el-icon><MapLocation /></el-icon>
+            <span>Plan Trip</span>
+          </el-menu-item>
+          <el-menu-item index="profile" @click="go('/profile')">
+            <el-icon><User /></el-icon>
+            <span>Profile</span>
+          </el-menu-item>
+          <el-menu-item index="logout" @click="go('/login-form')">
+            <el-icon><SwitchButton /></el-icon>
+            <span>Logout</span>
+          </el-menu-item>
+        </el-menu>
+      </el-aside>
 
-    <!-- 毛玻璃/深色卡片 -->
-    <div class="auth-card">
-      <el-page-header
-        class="page-header"
-        @back="$router.back()"
-        title="< Back"
-        content="User Profile"
-      />
+      <el-main class="home-main">
+        <div class="auth-card">
+          <el-page-header
+            class="page-header"
+            @back="$router.back()"
+            title="< Back"
+            content="User Profile"
+          />
 
-      <h1 class="title">Manage Your Profile</h1>
-      <p class="subtitle">Tell us who you are. We’ll personalize your trip experience.</p>
+          <h1 class="title">Manage Your Profile</h1>
+          <p class="subtitle">Tell us who you are. We’ll personalize your trip experience.</p>
 
-      <el-divider>
-        <span class="section-name">Basic Information</span>
-      </el-divider>
+          <el-divider>
+            <span class="section-name">Basic Information</span>
+          </el-divider>
 
-      <!-- 表单：结构与文案保持不变 -->
-      <el-form
-        ref="formRef"
-        :model="profile"
-        label-position="top"
-        class="form"
-      >
-        <el-form-item label="* Email">
-          <el-input v-model="profile.email" placeholder="email@example.com" clearable />
-        </el-form-item>
+          <el-form
+            ref="formRef"
+            :model="profile"
+            label-position="top"
+            class="form"
+          >
+            <el-form-item label="* Email">
+              <el-input v-model="profile.email" placeholder="email@example.com" clearable />
+            </el-form-item>
 
-        <el-form-item label="* First Name">
-          <el-input v-model="profile.firstName" placeholder="John" clearable />
-        </el-form-item>
+            <el-form-item label="* First Name">
+              <el-input v-model="profile.firstName" placeholder="John" clearable />
+            </el-form-item>
 
-        <el-form-item label="* Last Name">
-          <el-input v-model="profile.lastName" placeholder="Doe" clearable />
-        </el-form-item>
+            <el-form-item label="* Last Name">
+              <el-input v-model="profile.lastName" placeholder="Doe" clearable />
+            </el-form-item>
 
-        <el-form-item label="* Phone">
-          <el-input v-model="profile.phone" placeholder="+61 4xx xxx xxx" clearable />
-        </el-form-item>
+            <el-form-item label="* Phone">
+              <el-input v-model="profile.phone" placeholder="+61 4xx xxx xxx" clearable />
+            </el-form-item>
 
-        <el-form-item label="Avatar">
-          <el-input v-model="profile.avatar" placeholder="Image URL" clearable />
-        </el-form-item>
+            <el-form-item label="Avatar">
+              <el-input v-model="profile.avatar" placeholder="Image URL" clearable />
+            </el-form-item>
 
-        <el-divider>
-          <span class="section-name">Settings</span>
-        </el-divider>
+            <el-divider>
+              <span class="section-name">Settings</span>
+            </el-divider>
 
-        <el-form-item label="Dark Mode">
-          <el-switch v-model="darkMode" />
-        </el-form-item>
+            <el-form-item label="Dark Mode">
+              <el-switch v-model="darkMode" />
+            </el-form-item>
 
-        <div class="actions">
-          <el-button @click="goMyProfile">View My Profile</el-button>
-          <el-button @click="goPlanHistory">View Plan History</el-button>
-          <el-button type="primary" class="btn-primary" @click="onSave">Save</el-button>
+            <div class="actions">
+              <el-button @click="goMyProfile">View My Profile</el-button>
+              <el-button @click="goPlanHistory">View Plan History</el-button>
+              <el-button type="primary" class="btn-primary" @click="onSave">Save</el-button>
+            </div>
+          </el-form>
         </div>
-      </el-form>
-    </div>
-  </div>
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { House, MapLocation, User, SwitchButton } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const go = (path) => router.push(path)
 
 // 下面的数据结构只用于示例（不改变你原有的字段和逻辑的话，直接对齐你的数据源即可）
 const profile = reactive({
@@ -256,6 +285,43 @@ const goPlanHistory = () => {
 /* 如果你给 divider 包了 <span class="section-name">，统一为白色 */
 .section-name {
   color: #ffffff !important;
+}
+
+/* Sidebar + main layout to match overall design */
+.layout-container {
+  height: 100vh;
+  background-color: #141414;
+}
+
+.bottom-container {
+  flex: 1;
+  height: 100vh;
+}
+
+.sidebar {
+  background-color: #0f0f0f;
+  height: 100%;
+}
+
+.sidebar-menu {
+  height: 100%;
+  border-right: none;
+}
+
+.sidebar-menu .el-menu-item {
+  height: 56px;
+  line-height: 56px;
+}
+
+.sidebar-menu .el-menu-item:hover {
+  background-color: #1890ff !important;
+}
+
+.home-main {
+  padding: 24px;
+  background-color: #1a1a1a;
+  overflow-y: auto;
+  height: 100%;
 }
 
 </style>

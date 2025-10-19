@@ -469,149 +469,144 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.travel-plan-form {
-  position: relative;
-}
+.travel-plan-form { position: relative; }
 
 .form-title {
-  color: #303133;
-  font-weight: 600;
+  color: #E5E7EB; /* 深色背景下更清晰 */
+  font-weight: 700;
   margin-bottom: 0.5rem;
 }
 
 .form-subtitle {
   font-size: 14px;
   margin-bottom: 0;
+  color: #9CA3AF; /* 深色背景副标题 */
 }
 
-.travel-form-content {
-  margin-top: 2rem;
-}
+.travel-form-content { margin-top: 2rem; }
 
 .form-section {
   margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.5);
+  padding: 1.25rem 1.25rem 1rem;
+  background: rgba(17, 24, 39, 0.65); /* 深色毛玻璃卡片 */
   border-radius: 12px;
-  border: 1px solid rgba(64, 158, 255, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
 .section-title {
-  color: #409eff;
+  color: #cbd5e1; /* 深色标题 */
   font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid rgba(64, 158, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .members-container {
-  border: 1px solid #dcdfe6;
-  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 10px;
   padding: 1rem;
-  background: #fafafa;
+  background: rgba(255, 255, 255, 0.04); /* 深色半透明 */
 }
 
-.member-item {
-  margin-bottom: 1rem;
-}
-
-.member-item:last-of-type {
-  margin-bottom: 0.5rem;
-}
-
-.member-inputs {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.age-input {
-  flex: 1;
-  max-width: 120px;
-}
-
-.gender-select {
-  flex: 1;
-  max-width: 120px;
-}
+.member-item { margin-bottom: 1rem; }
+.member-item:last-of-type { margin-bottom: 0.5rem; }
+.member-inputs { display: flex; gap: 0.5rem; align-items: center; }
+.age-input { flex: 1; max-width: 120px; }
+.gender-select { flex: 1; max-width: 120px; }
 
 .add-member-btn {
   width: 100%;
   border-style: dashed;
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.attractions-container {
-  width: 100%;
-}
-
-.attraction-input {
-  width: 100%;
-}
-
-.attractions-tags {
-  min-height: 32px;
-}
+.attractions-container { width: 100%; }
+.attraction-input { width: 100%; }
+.attractions-tags { min-height: 32px; }
 
 .submit-btn {
   height: 44px;
   font-size: 16px;
-  font-weight: 600;
-  border-radius: 6px;
-  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  font-weight: 700;
+  border-radius: 8px;
   border: none;
+  color: #fff;
+  background: linear-gradient(90deg, #3b82f6, #6366f1); /* 复用既有蓝紫渐变 */
+  box-shadow: 0 8px 22px rgba(59, 130, 246, 0.28);
+}
+.submit-btn:hover { filter: brightness(1.05); }
+
+:deep(.el-form-item__label) { color: #cdd6e3 !important; }
+:deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.035) !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+:deep(.el-input__inner),
+:deep(.el-textarea__inner) { color: #e5e7eb !important; }
+:deep(.el-input__inner::placeholder),
+:deep(.el-textarea__inner::placeholder) { color: #9aa4b2 !important; }
+:deep(.el-input.is-focus .el-input__wrapper),
+:deep(.el-textarea.is-focus .el-textarea__inner),
+:deep(.el-select .el-input.is-focus .el-input__wrapper) {
+  border-color: #7c8cf8 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.22) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
 }
 
-.submit-btn:hover {
-  background: linear-gradient(135deg, #66b1ff 0%, #409eff 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+/* 让 Select 输入框在非聚焦时也保持深色 */
+:deep(.el-select .el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
 }
 
-/* Checkbox group styling */
+/* 特殊需求文本域改为更深背景，降低亮度 */
+:deep(.el-textarea__inner) {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+/* Select 下拉面板使用深色毛玻璃，并提升文字对比 */
+:deep(.el-select__popper) {
+  background: rgba(15, 23, 42, 0.92) !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(10px) !important;
+}
+:deep(.el-select__popper .el-select-dropdown) {
+  background: transparent !important;
+  color: #e5e7eb !important;
+}
+:deep(.el-select-dropdown__item) { color: #e5e7eb !important; }
+:deep(.el-select-dropdown__item:hover) { background-color: rgba(255, 255, 255, 0.06) !important; }
+:deep(.el-select-dropdown__item.is-selected),
+:deep(.el-select-dropdown__item.selected) {
+  background-color: rgba(99, 102, 241, 0.18) !important;
+  color: #fff !important;
+}
+
 :deep(.el-checkbox-group) {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 0.5rem;
 }
+:deep(.el-checkbox) { margin-right: 0; white-space: nowrap; }
 
-:deep(.el-checkbox) {
-  margin-right: 0;
-  white-space: nowrap;
-}
-
-/* Mobile responsive */
 @media (max-width: 768px) {
-  .form-section {
-    padding: 1rem;
-  }
-  
-  .member-inputs {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .age-input,
-  .gender-select {
-    max-width: none;
-  }
-  
-  :deep(.el-checkbox-group) {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  }
+  .form-section { padding: 1rem; }
+  .member-inputs { flex-direction: column; gap: 0.5rem; }
+  .age-input, .gender-select { max-width: none; }
+  :deep(.el-checkbox-group) { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
 }
 
 @media (max-width: 576px) {
-  .form-title {
-    font-size: 1.5rem;
-  }
-  
-  .travel-form-content {
-    margin-top: 1.5rem;
-  }
-  
-  .section-title {
-    font-size: 16px;
-  }
+  .form-title { font-size: 1.5rem; }
+  .travel-form-content { margin-top: 1.5rem; }
+  .section-title { font-size: 16px; }
 }
 </style>
