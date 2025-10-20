@@ -214,7 +214,7 @@ const onImgError = (e) => {
 .main-content {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 80px; /* 为底部导航栏留出空间 */
+  padding-bottom: 90px; /* 为底部导航栏留出空间 */
 }
 
 /* 桌面端左侧菜单样式 */
@@ -342,9 +342,9 @@ const onImgError = (e) => {
   border-top: 1px solid #333;
   display: flex;
   justify-content: space-around;
-  padding: 8px 0;
+  padding: 6px 0 8px 0;
   z-index: 1000;
-  height: 60px;
+  height: 70px;
 }
 
 .nav-item {
@@ -353,7 +353,7 @@ const onImgError = (e) => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 4px 8px;
   transition: all 0.3s;
   color: #ccc;
   flex: 1;
@@ -369,16 +369,18 @@ const onImgError = (e) => {
 }
 
 .nav-item .el-icon {
-  font-size: 20px;
-  margin-bottom: 2px;
+  font-size: 18px;
+  margin-bottom: 4px;
 }
 
 .nav-item span {
-  font-size: 10px;
+  font-size: 11px;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
+  max-width: 100%;
 }
 
 /* 响应式调整 */
@@ -391,7 +393,7 @@ const onImgError = (e) => {
 @media (max-width: 767px) {
   .home-main {
     padding: 16px;
-    min-height: calc(100vh - 64px - 60px);
+    min-height: calc(100vh - 64px - 70px);
   }
   
   .welcome {

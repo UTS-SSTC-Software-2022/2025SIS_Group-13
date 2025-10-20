@@ -30,7 +30,7 @@ let map = null
 let markers = []
 
 // Google Maps API Key - You should replace this with your actual API key
-const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCvUOTSTS_KRZZi5kTbKoQpWsM0QLq2VfM'
 
 /**
  * Initialize Google Map
