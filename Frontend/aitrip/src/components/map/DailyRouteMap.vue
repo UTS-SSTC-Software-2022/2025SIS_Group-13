@@ -52,7 +52,6 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import { ArrowDown, Location, Clock, Position, Loading } from '@element-plus/icons-vue'
 
 // Google Maps API Key
@@ -118,16 +117,10 @@ const initializeMap = async () => {
   mapLoading.value = true
   
   try {
-    // Set Google Maps options
-    setOptions({
-      apiKey: googleMapsApiKey,
-      version: 'weekly'
-    })
-
-    // Import required libraries
-    const { Map } = await importLibrary('maps')
-    const { Marker } = await importLibrary('marker')
-    const { DirectionsService, DirectionsRenderer } = await importLibrary('routes')
+    // Load Google Maps API script if not already loaded
+    if (!window.google || !window.google.maps) {
+      await loadGoogleMapsScript()
+    }
     
     // Wait for DOM to be ready
     await nextTick()
@@ -137,7 +130,7 @@ const initializeMap = async () => {
     }
 
     // Create map instance
-    map.value = new Map(mapContainer.value, {
+    map.value = new google.maps.Map(mapContainer.value, {
       center: { lat: -37.8136, lng: 144.9631 }, // Default to Melbourne
       zoom: 12,
       mapTypeId: 'roadmap',
@@ -160,8 +153,8 @@ const initializeMap = async () => {
     })
 
     // Initialize directions service
-    directionsService.value = new DirectionsService()
-    directionsRenderer.value = new DirectionsRenderer({
+    directionsService.value = new google.maps.DirectionsService()
+    directionsRenderer.value = new google.maps.DirectionsRenderer({
       suppressMarkers: true,
       polylineOptions: {
         strokeColor: '#409eff',
@@ -182,15 +175,52 @@ const initializeMap = async () => {
   }
 }
 
+// Load Google Maps API script
+const loadGoogleMapsScript = () => {
+  return new Promise((resolve, reject) => {
+    // Check if script is already loaded
+    if (window.google && window.google.maps) {
+      resolve()
+      return
+    }
+
+    // Check if script is already being loaded
+    if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+      // Wait for the existing script to load
+      const checkLoaded = () => {
+        if (window.google && window.google.maps) {
+          resolve()
+        } else {
+          setTimeout(checkLoaded, 100)
+        }
+      }
+      checkLoaded()
+      return
+    }
+
+    // Create and load the script
+    const script = document.createElement('script')
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=maps,marker,routes&language=en`
+    script.async = true
+    script.defer = true
+    
+    script.onload = () => {
+      resolve()
+    }
+    
+    script.onerror = () => {
+      reject(new Error('Failed to load Google Maps API'))
+    }
+    
+    document.head.appendChild(script)
+  })
+}
+
 
 const loadLocationsAndDrawRoute = async () => {
   if (!map.value || dayLocations.value.length === 0) return
   
   try {
-    // Import required libraries
-    const { Marker } = await importLibrary('marker')
-    const { InfoWindow } = await importLibrary('maps')
-    
     // Clear existing markers
     markers.value.forEach(marker => marker.setMap(null))
     markers.value = []
@@ -231,7 +261,7 @@ const loadLocationsAndDrawRoute = async () => {
       }
       
       // Create marker with sequence number
-      const marker = new Marker({
+      const marker = new google.maps.Marker({
         position: position,
         map: map.value,
         title: `${location.sequence}. ${location.name}`,
@@ -252,7 +282,7 @@ const loadLocationsAndDrawRoute = async () => {
       })
       
       // Create info window
-      const infoWindow = new InfoWindow({
+      const infoWindow = new google.maps.InfoWindow({
         content: `
           <div style="padding: 8px;">
             <h4 style="margin: 0 0 4px 0; color: #333;">${location.sequence}. ${location.name}</h4>

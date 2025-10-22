@@ -35,7 +35,6 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
-import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import { Location, View, Loading, Warning } from '@element-plus/icons-vue'
 
 // Google Maps API Key - 在实际项目中应该从环境变量或配置文件中获取
@@ -67,16 +66,10 @@ const initMap = async () => {
     isLoading.value = true
     error.value = ''
     
-    // Set Google Maps options
-    setOptions({
-      apiKey: googleMapsApiKey,
-      version: 'weekly'
-    })
-
-    // Import required libraries
-    const { Map } = await importLibrary('maps')
-    const { Marker } = await importLibrary('marker')
-    const { InfoWindow } = await importLibrary('maps')
+    // Load Google Maps API script if not already loaded
+    if (!window.google || !window.google.maps) {
+      await loadGoogleMapsScript()
+    }
     
     // Wait for DOM to be ready
     await nextTick()
@@ -86,7 +79,7 @@ const initMap = async () => {
     }
 
     // Create map instance
-    map.value = new Map(mapContainer.value, {
+    map.value = new google.maps.Map(mapContainer.value, {
       center: { lat: -25.2744, lng: 133.7751 }, // Center of Australia
       zoom: 4,
       mapTypeId: mapType.value,
@@ -118,16 +111,53 @@ const initMap = async () => {
   }
 }
 
+// Load Google Maps API script
+const loadGoogleMapsScript = () => {
+  return new Promise((resolve, reject) => {
+    // Check if script is already loaded
+    if (window.google && window.google.maps) {
+      resolve()
+      return
+    }
+
+    // Check if script is already being loaded
+    if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+      // Wait for the existing script to load
+      const checkLoaded = () => {
+        if (window.google && window.google.maps) {
+          resolve()
+        } else {
+          setTimeout(checkLoaded, 100)
+        }
+      }
+      checkLoaded()
+      return
+    }
+
+    // Create and load the script
+    const script = document.createElement('script')
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=maps,marker&language=en`
+    script.async = true
+    script.defer = true
+    
+    script.onload = () => {
+      resolve()
+    }
+    
+    script.onerror = () => {
+      reject(new Error('Failed to load Google Maps API'))
+    }
+    
+    document.head.appendChild(script)
+  })
+}
+
 // Add markers for travel plans
 const addPlanMarkers = async () => {
   if (!map.value) return
 
   // Clear existing markers
   clearMarkers()
-
-  // Import Marker and InfoWindow
-  const { Marker } = await importLibrary('marker')
-  const { InfoWindow } = await importLibrary('maps')
 
   // City coordinates mapping with more details
   const cityCoordinates = {
@@ -148,7 +178,7 @@ const addPlanMarkers = async () => {
     const coords = cityCoordinates[destination]
     
     if (coords) {
-      const marker = new Marker({
+      const marker = new google.maps.Marker({
         position: coords,
         map: map.value,
         title: plan.title || `${destination} Trip (Planned)`,
@@ -166,7 +196,7 @@ const addPlanMarkers = async () => {
 
       // Create enhanced info window
       const attractions = coords.attractions ? coords.attractions.slice(0, 3).join(', ') : 'Various attractions'
-      const infoWindow = new InfoWindow({
+      const infoWindow = new google.maps.InfoWindow({
         content: `
           <div style="padding: 12px; font-family: Arial, sans-serif; max-width: 300px;">
             <div style="display: flex; align-items: center; margin-bottom: 8px;">
@@ -203,7 +233,7 @@ const addPlanMarkers = async () => {
     const coords = cityCoordinates[destination]
     
     if (coords) {
-      const marker = new Marker({
+      const marker = new google.maps.Marker({
         position: coords,
         map: map.value,
         title: plan.title || `${destination} Trip (Completed)`,
@@ -221,7 +251,7 @@ const addPlanMarkers = async () => {
 
       // Create enhanced info window for completed plans
       const attractions = coords.attractions ? coords.attractions.slice(0, 3).join(', ') : 'Various attractions'
-      const infoWindow = new InfoWindow({
+      const infoWindow = new google.maps.InfoWindow({
         content: `
           <div style="padding: 12px; font-family: Arial, sans-serif; max-width: 300px;">
             <div style="display: flex; align-items: center; margin-bottom: 8px;">
@@ -230,7 +260,7 @@ const addPlanMarkers = async () => {
             </div>
             <div style="margin-bottom: 8px;">
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📍 Destination:</strong> ${destination}</p>
-              <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || plan.formData?.duration} days</p>
+              <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || plan.formData?.duration} </p>
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📅 Date:</strong> ${plan.date || 'Completed'}</p>
             </div>
             <div style="background: #f0f9ff; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
