@@ -46,6 +46,7 @@
       </div>
     </div>
 
+
     <!-- Daily Itinerary Section -->
     <div class="daily-itinerary">
       <h3 class="section-title">Daily Itinerary</h3>
@@ -83,6 +84,9 @@
           <!-- Day Details (Expandable) -->
           <el-collapse-transition>
             <div v-show="expandedDays.includes(index)" class="day-details">
+              <!-- Daily Route Map -->
+              <DailyRouteMap :day-data="day" />
+              
               <div class="activities-timeline">
                 <div 
                   v-for="(activity, actIndex) in day.activities" 
@@ -189,6 +193,7 @@
 <script setup>
 import {ref, reactive, onMounted, watch} from 'vue'
 import { ElMessage } from 'element-plus'
+import DailyRouteMap from '@/components/map/DailyRouteMap.vue'
 import {
   Calendar,
   Location,
@@ -492,6 +497,11 @@ const saveItinerary = () => {
   background: rgba(255, 255, 255, 0.03);
 }
 
+/* Route Map Integration */
+.day-details .route-map-container {
+  margin-bottom: 2rem;
+}
+
 .activities-timeline {
   position: relative;
   padding-left: 3rem;
@@ -722,6 +732,11 @@ const saveItinerary = () => {
   
   .day-weather {
     margin-right: 0;
+  }
+  
+  /* Route Map mobile styles */
+  .day-details .route-map-container {
+    margin-bottom: 1.5rem;
   }
   
   .activity-item {

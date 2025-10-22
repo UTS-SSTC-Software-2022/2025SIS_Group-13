@@ -16,6 +16,7 @@ const routes = [
   { path: '/travel/plan', name: 'travel-plan', component: () => import('@/views/travel/TravelPlanManagementPage.vue') },
   { path: '/travel/plan/create', name: 'travel-plan-create', component: () => import('@/views/travel/TravelPlanPage.vue') },
   { path: '/travel/itinerary-result', name: 'travel-itinerary-result', component: () => import('@/views/travel/TravelItineraryResultPage.vue') },
+  { path: '/route-map-demo', name: 'route-map-demo', component: () => import('@/views/RouteMapDemo.vue') },
 
   // 404
   { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFoundPage.vue') }

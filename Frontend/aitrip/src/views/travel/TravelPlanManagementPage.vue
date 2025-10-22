@@ -125,16 +125,13 @@
               </div>
             </el-col>
 
-            <!-- Right: Map placeholder -->
+            <!-- Right: Google Map -->
             <el-col :xs="24" :sm="24" :md="12" :lg="12">
-              <div class="section-card map-placeholder">
-                <div class="section-header">
-                  <h2>Map (Placeholder)</h2>
-                </div>
-                <div class="map-box">
-                  <div class="map-hint">Google Maps integration area (to be integrated)</div>
-                </div>
-              </div>
+              <RecordMap 
+                :plans="generatedPlans" 
+                :finished-plans="finishedPlans"
+                class="map-container"
+              />
             </el-col>
           </el-row>
         </el-main>
@@ -144,10 +141,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { House, MapLocation, User, SwitchButton, ArrowDown, MoreFilled } from '@element-plus/icons-vue'
+import RecordMap from '@/components/map/RecordMap.vue'
 
 const router = useRouter()
 const userName = localStorage.getItem('userName') || 'Guest'
@@ -391,23 +389,9 @@ onMounted(() => {
   --el-border-color: rgba(255, 255, 255, 0.12);
 }
 
-.map-placeholder {
+.map-container {
   height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.map-placeholder .map-box {
-  flex: 1;
-  background: #222;
-  border: 1px dashed #444;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.map-hint {
-  color: #aaa;
+  min-height: 500px;
 }
 
 /* 响应式优化 */
@@ -417,7 +401,7 @@ onMounted(() => {
     gap: 12px;
   }
 
-  .map-placeholder {
+  .map-container {
     min-height: 300px;
   }
 }

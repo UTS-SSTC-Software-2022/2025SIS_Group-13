@@ -84,6 +84,10 @@
               <el-button type="primary" @click="retryGeneration">
                 Try Again
               </el-button>
+              <el-button type="success" @click="useMockData">
+                <el-icon><View /></el-icon>
+                Use Mock Data for Testing
+              </el-button>
               <el-button @click="goBack">
                 Back to Home
               </el-button>
@@ -162,6 +166,10 @@
             <el-button type="primary" @click="goBack">
               Back to Home
             </el-button>
+            <el-button type="success" @click="useMockData" style="margin-left: 10px;">
+              <el-icon><View /></el-icon>
+              Use Mock Data for Testing
+            </el-button>
           </el-empty>
         </div>
       </el-main>
@@ -174,7 +182,7 @@ import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Refresh, Edit, House, MapLocation, User, SwitchButton } from '@element-plus/icons-vue'
+import { ArrowLeft, Refresh, Edit, House, MapLocation, User, SwitchButton, View } from '@element-plus/icons-vue'
 import TravelItineraryResult from '@/components/travel/TravelItineraryResult.vue'
 
 // Router
@@ -383,6 +391,335 @@ const submitFeedback = async () => {
   }
 }
 
+// Mock data for testing display
+const generateMockData = () => {
+  return {
+    destination: "Sydney, Australia",
+    duration: 5,
+    travelers: 2,
+    estimatedBudget: 2500,
+    generatedAt: new Date().toISOString(),
+    dailyPlans: [
+      {
+        day: 1,
+        date: "2024-01-15",
+        overview: "Arrival & City Exploration",
+        weather: {
+          temperature: 28,
+          condition: "Sunny"
+        },
+        activities: [
+          {
+            time: "09:00",
+            title: "Arrive at Sydney Airport",
+            description: "Check into hotel and freshen up",
+            type: "Transportation",
+            location: {
+              name: "Sydney Airport",
+              address: "Sydney Airport, NSW 2020"
+            },
+            transportation: {
+              method: "Airport Shuttle",
+              duration: "30 minutes",
+              cost: 25
+            },
+            estimatedCost: 0,
+            tips: ["Arrive early to avoid queues", "Have hotel confirmation ready"]
+          },
+          {
+            time: "11:00",
+            title: "Circular Quay & Opera House",
+            description: "Visit the iconic Sydney Opera House and take photos",
+            type: "Culture",
+            location: {
+              name: "Sydney Opera House",
+              address: "Bennelong Point, Sydney NSW 2000"
+            },
+            transportation: {
+              method: "Walking",
+              duration: "15 minutes",
+              cost: 0
+            },
+            estimatedCost: 50,
+            tips: ["Best photo spots are from Circular Quay", "Book tours in advance"]
+          },
+          {
+            time: "14:00",
+            title: "Lunch at The Rocks",
+            description: "Traditional Australian lunch with harbor views",
+            type: "Dining",
+            location: {
+              name: "The Rocks",
+              address: "The Rocks, Sydney NSW 2000"
+            },
+            transportation: {
+              method: "Walking",
+              duration: "10 minutes",
+              cost: 0
+            },
+            estimatedCost: 80,
+            tips: ["Try local seafood", "Book waterfront tables"]
+          },
+          {
+            time: "16:00",
+            title: "Harbor Bridge Walk",
+            description: "Walk across the Sydney Harbour Bridge",
+            type: "Adventure",
+            location: {
+              name: "Sydney Harbour Bridge",
+              address: "Sydney Harbour Bridge, Sydney NSW 2000"
+            },
+            transportation: {
+              method: "Walking",
+              duration: "5 minutes",
+              cost: 0
+            },
+            estimatedCost: 0,
+            tips: ["Free walkway available", "Best views at sunset"]
+          }
+        ],
+        estimatedWalking: "8 km",
+        dailyBudget: 130
+      },
+      {
+        day: 2,
+        date: "2024-01-16",
+        overview: "Beach Day & Wildlife",
+        weather: {
+          temperature: 26,
+          condition: "Partly Cloudy"
+        },
+        activities: [
+          {
+            time: "08:00",
+            title: "Bondi Beach",
+            description: "Morning surf lesson and beach time",
+            type: "Adventure",
+            location: {
+              name: "Bondi Beach",
+              address: "Bondi Beach, NSW 2026"
+            },
+            transportation: {
+              method: "Bus",
+              duration: "45 minutes",
+              cost: 8
+            },
+            estimatedCost: 120,
+            tips: ["Book surf lessons early", "Bring sunscreen"]
+          },
+          {
+            time: "12:00",
+            title: "Taronga Zoo",
+            description: "Visit Australia's native wildlife",
+            type: "Nature",
+            location: {
+              name: "Taronga Zoo",
+              address: "Bradleys Head Rd, Mosman NSW 2088"
+            },
+            transportation: {
+              method: "Ferry",
+              duration: "30 minutes",
+              cost: 15
+            },
+            estimatedCost: 90,
+            tips: ["Take the cable car", "Don't miss the koala encounter"]
+          },
+          {
+            time: "17:00",
+            title: "Manly Beach Sunset",
+            description: "Ferry to Manly and sunset viewing",
+            type: "Nature",
+            location: {
+              name: "Manly Beach",
+              address: "Manly Beach, NSW 2095"
+            },
+            transportation: {
+              method: "Ferry",
+              duration: "30 minutes",
+              cost: 15
+            },
+            estimatedCost: 30,
+            tips: ["Perfect sunset views", "Try local fish and chips"]
+          }
+        ],
+        estimatedWalking: "6 km",
+        dailyBudget: 240
+      },
+      {
+        day: 3,
+        date: "2024-01-17",
+        overview: "Blue Mountains Adventure",
+        weather: {
+          temperature: 22,
+          condition: "Cloudy"
+        },
+        activities: [
+          {
+            time: "07:00",
+            title: "Blue Mountains Tour",
+            description: "Full day tour to Blue Mountains National Park",
+            type: "Adventure",
+            location: {
+              name: "Blue Mountains",
+              address: "Blue Mountains National Park, NSW"
+            },
+            transportation: {
+              method: "Tour Bus",
+              duration: "2 hours",
+              cost: 0
+            },
+            estimatedCost: 200,
+            tips: ["Wear comfortable shoes", "Bring a jacket"]
+          },
+          {
+            time: "18:00",
+            title: "Return to Sydney",
+            description: "Back to hotel for rest",
+            type: "Transportation",
+            location: {
+              name: "Sydney CBD",
+              address: "Sydney CBD, NSW 2000"
+            },
+            transportation: {
+              method: "Tour Bus",
+              duration: "2 hours",
+              cost: 0
+            },
+            estimatedCost: 0,
+            tips: ["Rest well for tomorrow"]
+          }
+        ],
+        estimatedWalking: "12 km",
+        dailyBudget: 200
+      },
+      {
+        day: 4,
+        date: "2024-01-18",
+        overview: "Cultural & Shopping Day",
+        weather: {
+          temperature: 25,
+          condition: "Sunny"
+        },
+        activities: [
+          {
+            time: "09:00",
+            title: "Art Gallery of NSW",
+            description: "Explore Australian and international art",
+            type: "Culture",
+            location: {
+              name: "Art Gallery of NSW",
+              address: "Art Gallery Rd, Sydney NSW 2000"
+            },
+            transportation: {
+              method: "Walking",
+              duration: "20 minutes",
+              cost: 0
+            },
+            estimatedCost: 20,
+            tips: ["Free general admission", "Check special exhibitions"]
+          },
+          {
+            time: "12:00",
+            title: "Queen Victoria Building",
+            description: "Shopping and lunch in historic building",
+            type: "Shopping",
+            location: {
+              name: "Queen Victoria Building",
+              address: "455 George St, Sydney NSW 2000"
+            },
+            transportation: {
+              method: "Walking",
+              duration: "15 minutes",
+              cost: 0
+            },
+            estimatedCost: 100,
+            tips: ["Beautiful architecture", "Great for souvenirs"]
+          },
+          {
+            time: "15:00",
+            title: "Darling Harbour",
+            description: "Waterfront dining and entertainment",
+            type: "Dining",
+            location: {
+              name: "Darling Harbour",
+              address: "Darling Harbour, Sydney NSW 2000"
+            },
+            transportation: {
+              method: "Walking",
+              duration: "10 minutes",
+              cost: 0
+            },
+            estimatedCost: 150,
+            tips: ["Great waterfront views", "Many dining options"]
+          }
+        ],
+        estimatedWalking: "5 km",
+        dailyBudget: 270
+      },
+      {
+        day: 5,
+        date: "2024-01-19",
+        overview: "Departure Day",
+        weather: {
+          temperature: 27,
+          condition: "Sunny"
+        },
+        activities: [
+          {
+            time: "09:00",
+            title: "Final Shopping",
+            description: "Last minute souvenirs and gifts",
+            type: "Shopping",
+            location: {
+              name: "Pitt Street Mall",
+              address: "Pitt St, Sydney NSW 2000"
+            },
+            transportation: {
+              method: "Walking",
+              duration: "10 minutes",
+              cost: 0
+            },
+            estimatedCost: 100,
+            tips: ["Popular shopping district", "Many souvenir shops"]
+          },
+          {
+            time: "12:00",
+            title: "Airport Transfer",
+            description: "Check out and head to airport",
+            type: "Transportation",
+            location: {
+              name: "Sydney Airport",
+              address: "Sydney Airport, NSW 2020"
+            },
+            transportation: {
+              method: "Airport Shuttle",
+              duration: "30 minutes",
+              cost: 25
+            },
+            estimatedCost: 50,
+            tips: ["Allow extra time for check-in", "Check flight status"]
+          }
+        ],
+        estimatedWalking: "3 km",
+        dailyBudget: 150
+      }
+    ]
+  }
+}
+
+const useMockData = () => {
+  try {
+    const mockData = generateMockData()
+    itineraryData.value = mockData
+    generationTime.value = new Date(mockData.generatedAt)
+    error.value = ''
+    ElMessage.success('Using mock data for testing display!')
+  } catch (err) {
+    console.error('Failed to load mock data:', err)
+    ElMessage.error('Failed to load mock data')
+  }
+}
+
 /**
  * Parse route.query.formData and set lastFormData then call generateItinerary
  */
@@ -411,6 +748,13 @@ onMounted(() => {
   initFromRoute()
   // start generation (use lastFormData, even if it's empty)
   generateItinerary(lastFormData.value)
+  
+  // For testing purposes: if there's an error after 3 seconds, show mock data option
+  setTimeout(() => {
+    if (error.value && !itineraryData.value) {
+      console.log('Error detected, mock data option available for testing')
+    }
+  }, 3000)
 })
 
 // Cleanup
