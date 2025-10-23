@@ -176,15 +176,11 @@
     <div class="action-buttons">
       <el-button type="primary" size="large" @click="downloadItinerary">
         <el-icon><Download /></el-icon>
-        Download Itinerary
+        Save
       </el-button>
       <el-button type="default" size="large" @click="shareItinerary">
         <el-icon><Share /></el-icon>
         Share
-      </el-button>
-      <el-button type="success" size="large" @click="saveItinerary">
-        <el-icon><Star /></el-icon>
-        Save to Favorites
       </el-button>
     </div>
   </div>
@@ -203,7 +199,6 @@ import {
   Position,
   Download,
   Share,
-  Star,
   Sunny,
   Cloudy
 } from '@element-plus/icons-vue'
@@ -306,11 +301,6 @@ const downloadItinerary = () => {
 const shareItinerary = () => {
   ElMessage.info('Share functionality coming soon!')
   // TODO: Implement share functionality
-}
-
-const saveItinerary = () => {
-  ElMessage.success('Itinerary saved to favorites!')
-  // TODO: Implement save to user favorites
 }
 
 </script>

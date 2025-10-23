@@ -111,7 +111,6 @@
             :itinerary-data="itineraryData"
             @download="handleDownload"
             @share="handleShare"
-            @save="handleSave"
           />
 
           <!-- 反馈区块（深色卡片） -->
@@ -357,15 +356,6 @@ const handleDownload = () => {
 const handleShare = () => {
   ElMessage.info('Share functionality coming soon!')
   // TODO: Implement share functionality
-}
-
-const handleSave = async () => {
-  try {
-    // TODO: Implement save to user account
-    ElMessage.success('Itinerary saved to your account!')
-  } catch (err) {
-    ElMessage.error('Failed to save itinerary')
-  }
 }
 
 const submitFeedback = async () => {
