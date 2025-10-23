@@ -74,9 +74,19 @@ const initMap = async () => {
     // Wait for DOM to be ready
     await nextTick()
     
+    // 更详细的DOM检查
     if (!mapContainer.value) {
+      console.error('Map container ref is null')
       throw new Error('Map container not found')
     }
+    
+    // 检查DOM元素是否真的存在于文档中
+    if (!document.contains(mapContainer.value)) {
+      console.error('Map container element not in document')
+      throw new Error('Map container not attached to document')
+    }
+    
+    console.log('Map container found and ready:', mapContainer.value)
 
     // Create map instance
     map.value = new google.maps.Map(mapContainer.value, {
@@ -205,7 +215,7 @@ const addPlanMarkers = async () => {
             </div>
             <div style="margin-bottom: 8px;">
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📍 Destination:</strong> ${destination}</p>
-              <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || plan.formData?.duration} days</p>
+              <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || plan.formData?.duration || '0 days'}</p>
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📅 Date:</strong> ${plan.date || 'TBD'}</p>
             </div>
             <div style="background: #f5f5f5; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
@@ -260,7 +270,7 @@ const addPlanMarkers = async () => {
             </div>
             <div style="margin-bottom: 8px;">
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📍 Destination:</strong> ${destination}</p>
-              <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || plan.formData?.duration} </p>
+              <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || plan.formData?.duration || '0 days'}</p>
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📅 Date:</strong> ${plan.date || 'Completed'}</p>
             </div>
             <div style="background: #f0f9ff; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
@@ -312,8 +322,28 @@ watch([() => props.plans, () => props.finishedPlans], async () => {
 }, { deep: true })
 
 // Lifecycle
-onMounted(() => {
-    initMap()
+onMounted(async () => {
+  // 等待DOM完全渲染
+  await nextTick()
+  
+  // 添加延迟确保DOM元素可用
+  setTimeout(() => {
+    if (mapContainer.value) {
+      initMap()
+    } else {
+      console.warn('Map container not found, retrying...')
+      // 如果容器还没准备好，再等一会儿
+      setTimeout(() => {
+        if (mapContainer.value) {
+          initMap()
+        } else {
+          console.error('Map container still not found after retry')
+          error.value = 'Map container not available'
+          isLoading.value = false
+        }
+      }, 500)
+    }
+  }, 100)
 })
 
 onUnmounted(() => {

@@ -11,7 +11,7 @@
               <el-icon class="summary-icon"><Calendar /></el-icon>
               <div>
                 <div class="summary-label">Duration</div>
-                <div class="summary-value">{{ itinerary.duration }} days</div>
+                <div class="summary-value">{{ itinerary.duration || '0 days' }}</div>
               </div>
             </div>
           </el-col>
@@ -174,10 +174,50 @@
 
     <!-- Action Buttons -->
     <div class="action-buttons">
-      <el-button type="primary" size="large" @click="downloadItinerary">
-        <el-icon><Download /></el-icon>
-        Save
+      <!-- Save按钮：将Temporary状态改为Generated -->
+      <el-button 
+        v-if="currentItineraryId && itineraryStatus === 'Temporary' && !isFromSaved"
+        type="primary" 
+        size="large" 
+        @click="saveItinerary"
+      >
+        <el-icon><Check /></el-icon>
+        Save to Generated Plan
       </el-button>
+      
+      <!-- Complete按钮：将Generated状态改为Completed -->
+      <el-button 
+        v-if="currentItineraryId && itineraryStatus === 'Generated'"
+        type="success" 
+        size="large" 
+        @click="completeItinerary"
+      >
+        <el-icon><Star /></el-icon>
+        Complete
+      </el-button>
+      
+      <!-- 状态显示按钮（已保存或已完成时显示） -->
+      <el-button 
+        v-if="currentItineraryId && itineraryStatus === 'Generated' && isFromSaved"
+        type="info" 
+        size="large" 
+        disabled
+      >
+        <el-icon><Check /></el-icon>
+        In Generated Plan
+      </el-button>
+      
+      <el-button 
+        v-if="currentItineraryId && itineraryStatus === 'Completed'"
+        type="success" 
+        size="large" 
+        disabled
+      >
+        <el-icon><Star /></el-icon>
+        Completed
+      </el-button>
+      
+      <!-- Share按钮 -->
       <el-button type="default" size="large" @click="shareItinerary">
         <el-icon><Share /></el-icon>
         Share
@@ -200,7 +240,9 @@ import {
   Download,
   Share,
   Sunny,
-  Cloudy
+  Cloudy,
+  Check,
+  Star
 } from '@element-plus/icons-vue'
 
 // Props
@@ -208,8 +250,23 @@ const props = defineProps({
   itineraryData: {
     type: Object,
     default: null
+  },
+  currentItineraryId: {
+    type: [String, Number],
+    default: null
+  },
+  itineraryStatus: {
+    type: String,
+    default: 'Temporary'
+  },
+  isFromSaved: {
+    type: Boolean,
+    default: false
   }
 })
+
+// Emits
+const emit = defineEmits(['download', 'share', 'save', 'complete'])
 
 // Reactive data
 const expandedDays = ref([])
@@ -293,14 +350,16 @@ const getActivityTypeColor = (type) => {
   return colorMap[type] || 'default'
 }
 
-const downloadItinerary = () => {
-  ElMessage.success('Itinerary download started!')
-  // TODO: Implement PDF download functionality
+const saveItinerary = () => {
+  emit('save')
+}
+
+const completeItinerary = () => {
+  emit('complete')
 }
 
 const shareItinerary = () => {
-  ElMessage.info('Share functionality coming soon!')
-  // TODO: Implement share functionality
+  emit('share')
 }
 
 </script>

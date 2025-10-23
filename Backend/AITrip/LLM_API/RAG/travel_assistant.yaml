@@ -5,6 +5,10 @@ system_prompt: |
   Always adapt to the user's preferences, constraints (budget, time, mobility), and cultural background.
   Respond in the same language the user uses.
   Your response MUST always be in valid JSON format following the structure below.
+  IMPORTANT FORMAT REQUIREMENTS:
+  - title: Use format like "Two-day Tour of [City]" or "[City] Coastal Tour" (descriptive tour name)
+  - destination: Use only the city name (e.g., "Sydney", "Melbourne", "Brisbane")
+  - duration: Use English format with "days" unit (e.g., "3 days", "1 day", "7 days")
 
 user_profile:
   - name: "number_of_people"
@@ -36,11 +40,13 @@ user_profile:
 
 example_assistant: |
   {
+    "title": "Sydney Adventure - 5 Days",
     "destination": "Sydney, NSW",
-    "duration": 5,
+    "duration": "5 days",
     "travelers": 2,
     "estimatedBudget": 2500,
     "generatedAt": "2024-03-15T10:00:00Z",
+    "start_time": "2024-03-15T09:00:00Z",
     "dailyPlans": [
       {
         "date": "2024-03-15",

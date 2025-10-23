@@ -138,39 +138,99 @@ const handleLogin = async () => {
     })
 
     // Handle successful login
-    if (response && (response.success || response.code === 200)) {
-      // Save token and user info
-      if (response.data?.token) {
-        localStorage.setItem('token', response.data.token)
+    console.log('=== LOGIN API RESPONSE DEBUG ===')
+    console.log('Response status:', response.status)
+    console.log('Response headers:', response.headers)
+    console.log('Full response object:', response)
+    console.log('Login response:', response)
+    console.log('Full response structure:', JSON.stringify(response, null, 2))
+    
+    // 检查响应是否成功
+    if (response.status && response.status !== 200) {
+      console.error('Login API returned non-200 status:', response.status)
+      ElMessage.error(`登录失败：服务器返回状态 ${response.status}`)
+      return
+    }
+    
+    // 检查响应数据结构
+    if (!response.data) {
+      console.error('No response data received')
+      ElMessage.error('登录失败：服务器未返回数据')
+      return
+    }
+    
+    if (response.success || response.data) {
+      // Store user info and token if provided
+      console.log('Response data structure:', response.data)
+      console.log('Response.data type:', typeof response.data)
+      console.log('Response.data keys:', Object.keys(response.data || {}))
+      console.log('Tokens:', response.data?.data?.tokens)
+      console.log('Direct tokens:', response.data?.tokens)
+      console.log('Access token path 1:', response.data?.data?.tokens?.access)
+      console.log('Access token path 2:', response.data?.tokens?.access)
+      console.log('Access token path 3:', response.data?.access_token)
+      console.log('Access token path 4:', response.data?.token)
+      
+      // 尝试多种可能的token路径
+      const tokenPath1 = response.data?.data?.tokens?.access
+      const tokenPath2 = response.data?.tokens?.access
+      const tokenPath3 = response.data?.access_token
+      const tokenPath4 = response.data?.token
+      
+      // 尝试多种可能的用户信息路径
+      const userPath1 = response.data?.data?.user
+      const userPath2 = response.data?.user
+      
+      console.log('User path 1 (response.data?.data?.user):', userPath1)
+      console.log('User path 2 (response.data?.user):', userPath2)
+      
+      const accessToken = tokenPath1 || tokenPath2 || tokenPath3 || tokenPath4
+      const userInfo = userPath1 || userPath2
+      
+      if (accessToken) {
+        localStorage.setItem('token', accessToken)
+        console.log('Token stored in localStorage:', accessToken)
+        console.log('Token verification from localStorage:', localStorage.getItem('token'))
+      } else {
+        console.error('No access token found in response')
+        console.error('Available response data structure:', JSON.stringify(response.data, null, 2))
       }
-      if (response.data?.user) {
-        localStorage.setItem('userName', response.data.user.firstName || 'User')
+      
+      if (userInfo) {
+        localStorage.setItem('userInfo', JSON.stringify(userInfo))
+        localStorage.setItem('userName', userInfo.username || userInfo.first_name || 'User')
+        console.log('User info stored:', userInfo)
+      } else {
+        console.error('No user info found in response')
+        console.error('Available response data structure:', JSON.stringify(response.data, null, 2))
       }
 
-      ElMessage.success('Login successful!')
-
-      // Redirect to homepage after login
+      ElMessage.success('登录成功！')
+      
+      // Navigate to home page after successful login
       router.push('/home')
     } else {
-      throw new Error(response.message || 'Login failed')
+      throw new Error(response.message || '登录失败')
     }
     
   } catch (error) {
     console.error('Login error:', error)
-
-    let errorMessage = 'Login failed, please try again'
+    
+    // Handle different error types
+    let errorMessage = '登录失败，请重试'
+    
     if (error.response?.status === 401) {
-      errorMessage = 'Invalid email or password'
+      errorMessage = '邮箱或密码错误'
     } else if (error.response?.status === 403) {
-      errorMessage = 'Account has been disabled, please contact support'
+      errorMessage = '账户已被禁用，请联系管理员'
     } else if (error.response?.status === 422) {
-      errorMessage = 'Invalid request parameters'
+      errorMessage = '请求参数错误'
     } else if (error.response?.data?.message) {
       errorMessage = error.response.data.message
     } else if (error.message) {
       errorMessage = error.message
     }
-
+    
     ElMessage.error(errorMessage)
   } finally {
     loading.value = false
@@ -184,7 +244,7 @@ const handleLogin = async () => {
 }
 
 .form-title {
-  color: #303133;
+  color: #E5E7EB;
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
@@ -192,6 +252,7 @@ const handleLogin = async () => {
 .form-subtitle {
   font-size: 14px;
   margin-bottom: 0;
+  color: #9CA3AF;
 }
 
 

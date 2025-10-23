@@ -43,11 +43,12 @@
           class="page-header"
           @back="goBack"
           title="< Back"
-          content="Your Personalized Travel Itinerary"
+          :content="itineraryData?.title || 'Your Personalized Travel Itinerary'"
         />
 
         <div class="page-actions">
           <el-button
+            v-if="!isFromSaved"
             type="primary"
             @click="regenerateItinerary"
             :loading="regenerating"
@@ -56,11 +57,45 @@
             Regenerate
           </el-button>
           <el-button
+            v-if="!isFromSaved"
             type="success"
             @click="modifyPreferences"
           >
             <el-icon><Edit /></el-icon>
             Modify Preferences
+          </el-button>
+          <el-button
+            v-if="currentItineraryId && !isFromSaved"
+            type="warning"
+            @click="saveItinerary"
+            :loading="saving"
+          >
+            <el-icon><Star /></el-icon>
+            Save to Generated Plan
+          </el-button>
+          <el-button
+            v-if="currentItineraryId && itineraryStatus === 'Generated'"
+            type="success"
+            @click="completeItinerary"
+          >
+            <el-icon><Check /></el-icon>
+            Complete
+          </el-button>
+          <el-button
+            v-if="itineraryStatus === 'Generated'"
+            type="info"
+            disabled
+          >
+            <el-icon><Star /></el-icon>
+            In Generated Plan
+          </el-button>
+          <el-button
+            v-if="itineraryStatus === 'Completed'"
+            type="success"
+            disabled
+          >
+            <el-icon><Check /></el-icon>
+            Completed
           </el-button>
         </div>
 
@@ -109,8 +144,13 @@
 
           <TravelItineraryResult
             :itinerary-data="itineraryData"
+            :current-itinerary-id="currentItineraryId"
+            :itinerary-status="itineraryStatus"
+            :is-from-saved="isFromSaved"
             @download="handleDownload"
             @share="handleShare"
+            @save="saveItinerary"
+            @complete="completeItinerary"
           />
 
           <!-- 反馈区块（深色卡片） -->
@@ -174,14 +214,44 @@
       </el-main>
     </el-container>
   </el-container>
+
+  <!-- 保存确认弹窗 -->
+  <el-dialog
+    v-model="showSaveDialog"
+    title="Not saved yet"
+    width="400px"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+    :show-close="false"
+  >
+    <div class="save-dialog-content">
+      <p>Do you want to save this itinerary?</p>
+      <p class="dialog-subtitle">Your current itinerary will be lost if you don't save it.</p>
+    </div>
+    
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="cancelNavigation">
+          Cancel
+        </el-button>
+        <el-button type="danger" @click="exitAndClear">
+          Exit
+        </el-button>
+        <el-button type="primary" @click="saveAndNavigate">
+          Save
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
 import axios from 'axios'
+import request from '@/apis/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Refresh, Edit, House, MapLocation, User, SwitchButton, View } from '@element-plus/icons-vue'
+import { ArrowLeft, Refresh, Edit, House, MapLocation, User, SwitchButton, View, Star, Check } from '@element-plus/icons-vue'
 import TravelItineraryResult from '@/components/travel/TravelItineraryResult.vue'
 
 // Router
@@ -191,13 +261,22 @@ const route = useRoute()
 // 新增：通用导航函数（与规划页一致）
 const go = (path) => router.push(path)
 
+// 弹窗状态
+const showSaveDialog = ref(false)
+const isNavigating = ref(false)
+const pendingNavigation = ref(null)
+
 // Reactive data
 const loading = ref(false)
 const regenerating = ref(false)
 const submittingFeedback = ref(false)
+const saving = ref(false)
 const error = ref('')
 const itineraryData = ref(null)
 const generationTime = ref(new Date())
+const currentItineraryId = ref(null)
+const isFromSaved = ref(false)
+const itineraryStatus = ref('Temporary') // 'Temporary', 'Generated', 'Completed'
 
 // Keep the last form data we used to generate the itinerary
 const lastFormData = ref(null)
@@ -232,13 +311,42 @@ const formatGenerationTime = () => {
 const generateItinerary = async (formData = null) => {
   // helper: try to strip code fences like ```json ... ``` and parse JSON
   const tryParseJsonFromString = (s) => {
-    if (!s || typeof s !== 'string') return null;
+    if (!s || typeof s !== 'string') {
+      console.log('tryParseJsonFromString: input is not a string:', typeof s, s);
+      return null;
+    }
+    
+    console.log('tryParseJsonFromString: original input length:', s.length);
+    console.log('tryParseJsonFromString: input preview:', s.substring(0, 200));
+    
     let candidate = s.trim();
+    
     // remove triple-backtick fences and leading language tag like ```json
+    const originalCandidate = candidate;
     candidate = candidate.replace(/^```(?:\w+)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    
+    console.log('tryParseJsonFromString: after removing fences:', candidate.substring(0, 200));
+    
     try {
-      return JSON.parse(candidate);
+      const parsed = JSON.parse(candidate);
+      console.log('tryParseJsonFromString: successfully parsed JSON');
+      return parsed;
     } catch (e) {
+      console.error('tryParseJsonFromString: JSON parse failed:', e.message);
+      console.log('tryParseJsonFromString: failed content preview:', candidate.substring(0, 500));
+      
+      // Try to find JSON content within the string
+      const jsonMatch = candidate.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          console.log('tryParseJsonFromString: successfully parsed JSON from regex match');
+          return parsed;
+        } catch (e2) {
+          console.error('tryParseJsonFromString: regex match parse also failed:', e2.message);
+        }
+      }
+      
       return null;
     }
   };
@@ -252,28 +360,53 @@ const generateItinerary = async (formData = null) => {
     lastFormData.value = payload;
 
     // call backend
-    const response = await axios.post('http://localhost:8080/api/ai/generate/', payload, {
+    const response = await request.post('/ai/generate/', payload, {
       headers: { 'Content-Type': 'application/json' },
       // optional timeout here
       // timeout: 120000
     });
 
     console.log('API full response:', response);
+    console.log('response.data:', response?.data);
+    console.log('response.data.output:', response?.data?.output);
 
-    // get candidate output: response.data.output or response.data
-    let outputCandidate = response?.data?.output ?? response?.data;
+    // Try different possible response structures
+    let outputCandidate;
+    if (response?.data?.output) {
+      outputCandidate = response.data.output;
+      console.log('Using response.data.output');
+    } else if (response?.output) {
+      outputCandidate = response.output;
+      console.log('Using response.output');
+    } else if (response?.data) {
+      outputCandidate = response.data;
+      console.log('Using response.data');
+    } else {
+      outputCandidate = response;
+      console.log('Using response directly');
+    }
+    
+    console.log('Initial outputCandidate type:', typeof outputCandidate);
+    console.log('Initial outputCandidate:', outputCandidate);
 
     // If outputCandidate is object and contains raw_text or text, try to parse that
     if (outputCandidate && typeof outputCandidate === 'object') {
       const textField = outputCandidate.raw_text ?? outputCandidate.text ?? null;
+      console.log('Found textField:', !!textField, 'type:', typeof textField);
+      
       if (textField) {
+        console.log('Attempting to parse textField...');
         const parsed = tryParseJsonFromString(textField);
         if (parsed) {
+          console.log('Successfully parsed textField to object');
           outputCandidate = parsed;
         } else {
           // If not parseable, leave it as object (but likely won't contain dailyPlans)
           console.warn('Could not parse JSON from output.raw_text/text; content preview:', (textField.slice ? textField.slice(0, 300) : textField));
+          console.warn('Will try to use original outputCandidate as-is');
         }
+      } else {
+        console.log('No textField found, using outputCandidate as-is');
       }
     }
 
@@ -297,7 +430,13 @@ const generateItinerary = async (formData = null) => {
 
     // success -> assign
     itineraryData.value = outputCandidate;
+    
+    // 修复：从正确的路径获取itinerary_id
+    currentItineraryId.value = response?.data?.itinerary_id || response?.itinerary_id;
+    isFromSaved.value = false;
+    itineraryStatus.value = 'Temporary'; // 新生成的行程默认为临时状态
     generationTime.value = new Date(outputCandidate.generatedAt || outputCandidate.generated_at || Date.now());
+    
     ElMessage.success('Itinerary generated successfully!');
   } catch (err) {
     console.error('Failed to generate itinerary:', err);
@@ -378,6 +517,114 @@ const submitFeedback = async () => {
     ElMessage.error('Failed to submit feedback')
   } finally {
     submittingFeedback.value = false
+  }
+}
+
+// 加载已保存的行程
+const loadSavedItinerary = async (itineraryId) => {
+  try {
+    loading.value = true
+    error.value = ''
+    
+    console.log('Loading saved itinerary with ID:', itineraryId)
+    const response = await request.get(`/ai/itinerary/${itineraryId}/`)
+    console.log('API response:', response)
+    
+    const itinerary = response.data
+    console.log('Itinerary data:', itinerary)
+    console.log('LLM response:', itinerary.llm_response)
+    
+    // 检查llm_response是否存在且有效
+    if (!itinerary.llm_response) {
+      console.error('llm_response is null or undefined')
+      error.value = '行程数据不完整，llm_response为空'
+      ElMessage.error('行程数据不完整')
+      return
+    }
+    
+    // 检查llm_response的结构
+    if (typeof itinerary.llm_response === 'string') {
+      try {
+        itineraryData.value = JSON.parse(itinerary.llm_response)
+      } catch (parseError) {
+        console.error('Failed to parse llm_response as JSON:', parseError)
+        error.value = '行程数据格式错误'
+        ElMessage.error('行程数据格式错误')
+        return
+      }
+    } else if (typeof itinerary.llm_response === 'object') {
+      itineraryData.value = itinerary.llm_response
+    } else {
+      console.error('llm_response has unexpected type:', typeof itinerary.llm_response)
+      error.value = '行程数据类型错误'
+      ElMessage.error('行程数据类型错误')
+      return
+    }
+    
+    console.log('Final itineraryData:', itineraryData.value)
+    
+    currentItineraryId.value = itinerary.itinerary_id
+    isFromSaved.value = true
+    itineraryStatus.value = itinerary.isCompleted || 'Temporary'
+    generationTime.value = new Date(itinerary.create_time)
+    
+    ElMessage.success('行程加载成功')
+  } catch (err) {
+    console.error('Failed to load saved itinerary:', err)
+    console.error('Error details:', {
+      message: err.message,
+      response: err.response,
+      status: err.response?.status,
+      data: err.response?.data
+    })
+    error.value = '加载行程失败: ' + (err.response?.data?.error || err.message)
+    ElMessage.error('加载行程失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 保存行程到Trip Plan
+const saveItinerary = async () => {
+  if (!currentItineraryId.value) {
+    ElMessage.warning('没有可保存的行程')
+    return
+  }
+  
+  try {
+    saving.value = true
+    
+    const response = await request.post('/ai/save-itinerary/', {
+      itinerary_id: currentItineraryId.value
+    })
+    
+    ElMessage.success('行程已保存到Generated Plan列表')
+    itineraryStatus.value = 'Generated'
+  } catch (err) {
+    console.error('Failed to save itinerary:', err)
+    ElMessage.error('保存行程失败')
+  } finally {
+    saving.value = false
+  }
+}
+
+// 标记行程为完成
+const completeItinerary = async () => {
+  if (!currentItineraryId.value) {
+    ElMessage.warning('没有可完成的行程')
+    return
+  }
+  
+  try {
+    const response = await request.post('/ai/complete-itinerary/', {
+      itinerary_id: currentItineraryId.value
+    })
+    
+    ElMessage.success('行程已标记为完成')
+    itineraryStatus.value = 'Completed'
+  } catch (err) {
+    console.error('Failed to complete itinerary:', err)
+    ElMessage.error('标记行程完成失败')
   }
 }
 
@@ -711,21 +958,28 @@ const useMockData = () => {
 }
 
 /**
- * Parse route.query.formData and set lastFormData then call generateItinerary
+ * Parse route.query and load data accordingly
+ * - If itinerary_id exists, load saved itinerary
+ * - If formData exists, prepare for new generation
  */
 const initFromRoute = () => {
   error.value = ''
   loading.value = true
   try {
-    if (route.query.formData) {
+    if (route.query.itinerary_id) {
+      // Load saved itinerary
+      loadSavedItinerary(route.query.itinerary_id)
+      return
+    } else if (route.query.formData) {
+      // Parse form data for new generation
       const parsed = JSON.parse(decodeURIComponent(route.query.formData))
       lastFormData.value = parsed
     } else {
       lastFormData.value = {}
     }
   } catch (err) {
-    console.error('Failed to parse formData from route:', err)
-    error.value = 'Invalid form data passed from planner.'
+    console.error('Failed to parse route data:', err)
+    error.value = 'Invalid data passed from planner.'
     lastFormData.value = {}
   } finally {
     loading.value = false
@@ -736,8 +990,11 @@ const initFromRoute = () => {
 onMounted(() => {
   // parse route and trigger generation
   initFromRoute()
-  // start generation (use lastFormData, even if it's empty)
-  generateItinerary(lastFormData.value)
+  
+  // Only generate new itinerary if we have formData (not loading saved itinerary)
+  if (route.query.formData && !route.query.itinerary_id) {
+    generateItinerary(lastFormData.value)
+  }
   
   // For testing purposes: if there's an error after 3 seconds, show mock data option
   setTimeout(() => {
@@ -747,8 +1004,132 @@ onMounted(() => {
   }, 3000)
 })
 
+// 清空所有temporary itinerary的函数
+const clearAllTemporaryItineraries = async () => {
+  try {
+    // 获取所有行程
+    const response = await request.get('/itinerary/itineraries/')
+    const itineraries = response.data || []
+    
+    // 找出所有temporary状态的行程
+    const temporaryItineraries = itineraries.filter(item => item.isCompleted === 'Temporary')
+    
+    // 删除所有temporary行程
+    const deletePromises = temporaryItineraries.map(item => 
+      request.delete(`/itinerary/itineraries/${item.itinerary_id}/`)
+    )
+    
+    await Promise.all(deletePromises)
+    console.log(`Deleted ${temporaryItineraries.length} temporary itineraries`)
+  } catch (error) {
+    console.error('Failed to clear temporary itineraries:', error)
+  }
+}
+
+// 导航守卫：离开页面前的确认
+onBeforeRouteLeave((to, from, next) => {
+  // 如果正在导航过程中，直接允许
+  if (isNavigating.value) {
+    next()
+    return
+  }
+  
+  // 如果当前itinerary是temporary状态，显示保存确认弹窗
+  if (currentItineraryId.value && itineraryStatus.value === 'Temporary') {
+    showSaveDialog.value = true
+    pendingNavigation.value = { to, from, next }
+    next(false) // 阻止导航
+  } else {
+    // 不是temporary状态，直接清空所有temporary并允许导航
+    clearAllTemporaryItineraries().then(() => {
+      next()
+    })
+  }
+})
+
+// 保存当前itinerary并继续导航
+const saveAndNavigate = async () => {
+  try {
+    if (currentItineraryId.value) {
+      // 将当前itinerary状态改为Generated
+      await request.patch(`/itinerary/itineraries/${currentItineraryId.value}/`, {
+        isCompleted: 'Generated'
+      })
+      itineraryStatus.value = 'Generated'
+      ElMessage.success('Itinerary saved successfully!')
+    }
+    
+    // 清空其他temporary itinerary（排除当前已保存的）
+    await clearOtherTemporaryItineraries(currentItineraryId.value)
+    
+    // 继续导航
+    continueNavigation()
+  } catch (error) {
+    console.error('Failed to save itinerary:', error)
+    ElMessage.error('Failed to save itinerary')
+  }
+}
+
+// 清空其他temporary itinerary的函数（排除指定ID）
+const clearOtherTemporaryItineraries = async (excludeId) => {
+  try {
+    // 获取所有行程
+    const response = await request.get('/itinerary/itineraries/')
+    const itineraries = response.data || []
+    
+    // 找出所有temporary状态的行程，但排除指定ID
+    const temporaryItineraries = itineraries.filter(item => 
+      item.isCompleted === 'Temporary' && item.itinerary_id !== excludeId
+    )
+    
+    // 删除所有temporary行程
+    const deletePromises = temporaryItineraries.map(item => 
+      request.delete(`/itinerary/itineraries/${item.itinerary_id}/`)
+    )
+    
+    await Promise.all(deletePromises)
+    console.log(`Deleted ${temporaryItineraries.length} other temporary itineraries`)
+  } catch (error) {
+    console.error('Failed to clear other temporary itineraries:', error)
+  }
+}
+
+// 直接退出并清空所有temporary
+const exitAndClear = async () => {
+  try {
+    // 清空所有temporary itinerary（包括当前的）
+    await clearAllTemporaryItineraries()
+    
+    // 继续导航
+    continueNavigation()
+  } catch (error) {
+    console.error('Failed to clear temporary itineraries:', error)
+    // 即使清空失败也继续导航
+    continueNavigation()
+  }
+}
+
+// 继续导航的辅助函数
+const continueNavigation = () => {
+  showSaveDialog.value = false
+  isNavigating.value = true
+  
+  if (pendingNavigation.value) {
+    const { next } = pendingNavigation.value
+    pendingNavigation.value = null
+    next()
+  }
+}
+
+// 取消导航
+const cancelNavigation = () => {
+  showSaveDialog.value = false
+  pendingNavigation.value = null
+}
+
 // Cleanup
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
+  // 清理逻辑已经在导航守卫中处理
   // Cancel any pending requests if needed (axios cancel token) - optional
 })
 </script>
@@ -950,5 +1331,33 @@ onBeforeUnmount(() => {
     align-items: flex-start;
     gap: 0.5rem;
   }
+}
+
+/* 保存确认弹窗样式 */
+.save-dialog-content {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.save-dialog-content p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.dialog-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.dialog-footer .el-button {
+  min-width: 80px;
 }
 </style>

@@ -71,7 +71,7 @@
 
                 <div class="subsection">
                   <h3 class="sub-title">Generated Plans</h3>
-                  <div class="plan-list">
+                  <div class="plan-list" v-loading="loading">
                     <div
                       v-for="(plan, idx) in generatedPlans"
                       :key="plan.id"
@@ -79,7 +79,13 @@
                       @click="openItinerary(plan)"
                     >
                       <div class="plan-title">{{ plan.title }}</div>
-                      <div class="plan-meta">{{ plan.destination }} · {{ plan.duration }} · {{ plan.date }}</div>
+                      <div class="plan-meta">
+                        <span>{{ plan.destination }}</span>
+                        <span>·</span>
+                        <span>{{ plan.duration }}</span>
+                        <span>·</span>
+                        <span>{{ plan.date }}</span>
+                      </div>
                       <div class="plan-actions" @click.stop>
                         <el-popover trigger="click" placement="bottom-end">
                           <div class="popover-actions">
@@ -91,7 +97,7 @@
                         </el-popover>
                       </div>
                     </div>
-                    <div v-if="generatedPlans.length === 0" class="empty-hint">No generated plans yet</div>
+                    <div v-if="!loading && generatedPlans.length === 0" class="empty-hint">No generated plans yet</div>
                   </div>
                 </div>
 
@@ -99,7 +105,7 @@
 
                 <div class="subsection">
                   <h3 class="sub-title">Completed Plans</h3>
-                  <div class="plan-list">
+                  <div class="plan-list" v-loading="loading">
                     <div
                       v-for="(plan, idx) in finishedPlans"
                       :key="plan.id"
@@ -107,7 +113,13 @@
                       @click="openItinerary(plan)"
                     >
                       <div class="plan-title">{{ plan.title }}</div>
-                      <div class="plan-meta">{{ plan.destination }} · {{ plan.duration }} · {{ plan.date }}</div>
+                      <div class="plan-meta">
+                        <span>{{ plan.destination }}</span>
+                        <span>·</span>
+                        <span>{{ plan.duration }}</span>
+                        <span>·</span>
+                        <span>{{ plan.date }}</span>
+                      </div>
                       <div class="plan-actions" @click.stop>
                         <el-popover trigger="click" placement="bottom-end">
                           <div class="popover-actions">
@@ -119,7 +131,7 @@
                         </el-popover>
                       </div>
                     </div>
-                    <div v-if="finishedPlans.length === 0" class="empty-hint">No completed plans yet</div>
+                    <div v-if="!loading && finishedPlans.length === 0" class="empty-hint">No completed plans yet</div>
                   </div>
                 </div>
               </div>
@@ -141,11 +153,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { House, MapLocation, User, SwitchButton, ArrowDown, MoreFilled } from '@element-plus/icons-vue'
 import RecordMap from '@/components/map/RecordMap.vue'
+import request from '@/apis/request'
 
 const router = useRouter()
 const userName = localStorage.getItem('userName') || 'Guest'
@@ -153,6 +166,7 @@ const activeMenu = ref('plan')
 
 const generatedPlans = ref([])
 const finishedPlans = ref([])
+const loading = ref(false)
 
 const go = (path) => router.push(path)
 
@@ -162,26 +176,117 @@ const logout = async () => {
     localStorage.removeItem('token')
     localStorage.removeItem('userName')
     ElMessage.success('Logged out successfully')
-    router.push('/login')
+    router.push('/login-form')
   } catch (e) {
     ElMessage.error('Logout failed')
   }
 }
 
-// 模拟从本地加载计划（后期可替换为后端数据）
-const loadMockPlans = () => {
-  generatedPlans.value = [
-    { id: 'g1', title: '悉尼三日游', destination: 'Sydney', duration: '3天', date: '2025-04-15', formData: { destination: 'Sydney', duration: 3 } },
-    { id: 'g2', title: '墨尔本亲子行', destination: 'Melbourne', duration: '5天', date: '2025-05-02', formData: { destination: 'Melbourne', duration: 5 } },
-  ]
-  finishedPlans.value = [
-    { id: 'f1', title: '堪培拉文化之旅', destination: 'Canberra', duration: '2天', date: '2025-03-28', formData: { destination: 'Canberra', duration: 2 } },
-  ]
+// 从后端API加载行程数据
+const loadItineraries = async () => {
+  loading.value = true
+  try {
+    // 确保token存在
+    const token = localStorage.getItem('token')
+    console.log('Token from localStorage:', token ? 'exists' : 'not found')
+    
+    if (!token) {
+      ElMessage.error('请先登录')
+      router.push('/login-form')
+      return
+    }
+
+    console.log('Making API request to /itinerary/itineraries/')
+    const response = await request.get('/itinerary/itineraries/')
+    console.log('API response:', response)
+    console.log('Response type:', typeof response)
+    console.log('Response.data type:', typeof response.data)
+    console.log('Response.data:', response.data)
+    
+    // 更健壮的响应解析逻辑
+    let itineraries = []
+    if (Array.isArray(response.data)) {
+      // 如果response.data直接是数组
+      itineraries = response.data
+      console.log('Using response.data as direct array')
+    } else if (response.data && Array.isArray(response.data.results)) {
+      // 如果response.data.results是数组
+      itineraries = response.data.results
+      console.log('Using response.data.results')
+    } else if (response.data && Array.isArray(response.data.data)) {
+      // 如果response.data.data是数组
+      itineraries = response.data.data
+      console.log('Using response.data.data')
+    } else if (Array.isArray(response)) {
+      // 如果response本身是数组
+      itineraries = response
+      console.log('Using response as direct array')
+    } else {
+      console.warn('Unexpected response format:', response)
+      itineraries = []
+    }
+    
+    console.log('Parsed itineraries:', itineraries)
+    
+    // 使用nextTick确保DOM更新完成
+    await nextTick()
+    
+    // 根据isCompleted状态分类
+    generatedPlans.value = itineraries
+      .filter(item => item.isCompleted === 'Generated')
+      .map(item => ({
+        id: item.itinerary_id,
+        title: item.title || '未命名行程',
+        destination: item.destination || '未知目的地',
+        duration: item.duration || '0 days',
+        date: item.start_time ? new Date(item.start_time).toLocaleDateString() : new Date(item.create_time).toLocaleDateString(),
+        start_time: item.start_time,
+        itinerary_id: item.itinerary_id,
+        isCompleted: item.isCompleted
+      }))
+    
+    finishedPlans.value = itineraries
+      .filter(item => item.isCompleted === 'Completed')
+      .map(item => ({
+        id: item.itinerary_id,
+        title: item.title || '未命名行程',
+        destination: item.destination || '未知目的地',
+        duration: item.duration || '0 days',
+        date: item.start_time ? new Date(item.start_time).toLocaleDateString() : new Date(item.create_time).toLocaleDateString(),
+        start_time: item.start_time,
+        itinerary_id: item.itinerary_id,
+        isCompleted: item.isCompleted
+      }))
+      
+    console.log('Loaded itineraries:', { generatedPlans: generatedPlans.value, finishedPlans: finishedPlans.value })
+      
+  } catch (error) {
+    console.error('Failed to load itineraries:', error)
+    console.error('Error details:', {
+      message: error.message,
+      response: error.response,
+      status: error.response?.status,
+      data: error.response?.data
+    })
+    
+    if (error.response?.status === 401) {
+      ElMessage.error('登录已过期，请重新登录')
+      router.push('/login-form')
+    } else {
+      ElMessage.error('加载行程列表失败: ' + (error.message || '未知错误'))
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
 const openItinerary = (plan) => {
-  const payload = encodeURIComponent(JSON.stringify(plan.formData || {}))
-  router.push({ path: '/travel/itinerary-result', query: { formData: payload } })
+  router.push({ 
+    path: '/travel/itinerary-result', 
+    query: { 
+      itinerary_id: plan.itinerary_id || plan.id 
+    } 
+  })
 }
 
 const confirmDelete = async (type, plan) => {
@@ -195,19 +300,32 @@ const confirmDelete = async (type, plan) => {
         type: 'warning'
       }
     )
+    
+    // 调用后端API删除行程
+    await request.delete(`/itinerary/itineraries/${plan.itinerary_id || plan.id}/`)
+    
+    // 从本地列表中移除
     if (type === 'generated') {
       generatedPlans.value = generatedPlans.value.filter(p => p.id !== plan.id)
     } else {
       finishedPlans.value = finishedPlans.value.filter(p => p.id !== plan.id)
     }
     ElMessage.success('Plan deleted')
-  } catch (e) {
-    // cancelled
+  } catch (error) {
+    if (error.name !== 'cancel') {
+      console.error('Failed to delete itinerary:', error)
+      ElMessage.error('删除行程失败')
+    }
   }
 }
 
-onMounted(() => {
-  loadMockPlans()
+onMounted(async () => {
+  // 等待DOM完全渲染
+  await nextTick()
+  // 添加小延迟确保所有组件都已初始化
+  setTimeout(() => {
+    loadItineraries()
+  }, 100)
 })
 </script>
 
