@@ -14,6 +14,7 @@ export const loginAPI = (loginData) => {
     data: {
       email: loginData.email,
       password: loginData.password,
+      rememberMe: loginData.rememberMe,
     }
   })
 }
