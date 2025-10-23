@@ -89,6 +89,83 @@
           </div>
         </el-form-item>
 
+        <!-- ✅新增：Trip Start Date -->
+        <el-form-item label="Trip Start Date" prop="startDate">
+          <el-date-picker
+            v-model="travelForm.startDate"
+            type="date"
+            placeholder="Select start date"
+            class="w-100"
+            :disabled="loading"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+          />
+        </el-form-item>
+
+        <!-- 🆕 Multi-Destination Selection (替换原有 block) -->
+        <el-form-item label="Travel Destinations" prop="destination">
+          <div class="destination-container">
+            <div
+              v-for="(dest, index) in travelForm.destinations"
+              :key="index"
+              class="destination-item mb-3"
+            >
+              <div class="destination-inputs">
+                <!-- Cascader：用户仍然可以选择多级，但我们只在输入框中保留前两层显示 -->
+                <el-cascader
+                  v-model="dest.path"
+                  :options="destinationOptions"
+                  placeholder="Select destination (select deeper to add tags)"
+                  class="w-100"
+                  clearable
+                  filterable
+                  :disabled="loading"
+                  @change="handleDestinationSelect(index, $event)"
+                />
+                <el-button
+                  v-if="travelForm.destinations.length > 1"
+                  type="danger"
+                  size="small"
+                  plain
+                  @click="removeDestination(index)"
+                  :disabled="loading"
+                  style="margin-left: 8px;"
+                >
+                  Remove
+                </el-button>
+              </div>
+
+              <!-- Tags for selected fine-grained places (shown under the input like attractions) -->
+              <div class="destination-tags mt-2" v-if="dest.tags && dest.tags.length">
+                <el-tag
+                  v-for="(tag, tIndex) in dest.tags"
+                  :key="tIndex"
+                  closable
+                  @close="removeDestinationTag(index, tIndex)"
+                  class="me-2 mb-2"
+                >
+                  {{ tag }}
+                </el-tag>
+              </div>
+            </div>
+
+            <!-- Add destination button -->
+            <el-button
+              type="primary"
+              plain
+              size="small"
+              @click="addDestination"
+              :disabled="loading || travelForm.destinations.length >= 6"
+            >
+              <el-icon class="me-1"><Plus /></el-icon>
+              Add Destination
+            </el-button>
+          </div>
+        </el-form-item>
+
+
+
+
         <!-- Trip Duration -->
         <el-form-item label="Trip Duration" prop="days">
           <el-input-number
@@ -105,19 +182,8 @@
       <!-- Travel Preferences -->
       <div class="form-section">
         <h3 class="section-title">Travel Preferences</h3>
-        
-        <!-- Destination Selection -->
-        <el-form-item label="Travel Destination" prop="destination">
-          <el-cascader
-            v-model="travelForm.destination"
-            :options="destinationOptions"
-            placeholder="Select state/city/region"
-            class="w-100"
-            :disabled="loading"
-            clearable
-            filterable
-          />
-        </el-form-item>
+
+
 
         <!-- Must-Visit Attractions -->
         <el-form-item label="Must-Visit Attractions">
@@ -214,13 +280,15 @@ const loading = ref(false)
 const currentAttraction = ref('')
 
 // Form data
+// 🆕 Add new fields
 const travelForm = reactive({
+  startDate: '', // 🆕 trip start date
   peopleCount: 1,
-  members: [
-    { age: '', gender: '' }
-  ],
+  members: [{ age: '', gender: '' }],
   days: 3,
-  destination: [],
+  destinations: [ // 🆕 modified destination structure
+    { path: [], tags: [] }
+  ],
   attractions: [],
   themes: [],
   description: ''
@@ -228,6 +296,9 @@ const travelForm = reactive({
 
 // Form validation rules
 const travelRules = {
+  startDate: [
+    { required: true, message: 'Please select trip start date', trigger: 'change' }
+  ],
   peopleCount: [
     { required: true, message: 'Please select number of travelers', trigger: 'change' }
   ],
@@ -236,11 +307,20 @@ const travelRules = {
     { type: 'number', min: 1, max: 30, message: 'Trip duration should be between 1-30 days', trigger: 'blur' }
   ],
   destination: [
-    { required: true, message: 'Please select your destination', trigger: 'change' }
+    { validator: validateDestinations, trigger: 'blur' }
   ],
   themes: [
     { type: 'array', min: 1, message: 'Please select at least one travel theme', trigger: 'change' }
   ]
+}
+
+// 🆕 Custom validation: at least one destination selected
+function validateDestinations(rule, value, callback) {
+  if (!travelForm.destinations.some(d => d.path.length > 0)) {
+    callback(new Error('Please select at least one destination'))
+  } else {
+    callback()
+  }
 }
 
 // Australian destination options (simplified version, should be fetched from API in production)
@@ -256,7 +336,8 @@ const destinationOptions = [
           { value: 'sydney-cbd', label: 'Sydney CBD' },
           { value: 'bondi', label: 'Bondi' },
           { value: 'manly', label: 'Manly' },
-          { value: 'darling-harbour', label: 'Darling Harbour' }
+          { value: 'darling-harbour', label: 'Darling Harbour' },
+          { value: 'others', label: 'Others...', isCustom: true }
         ]
       },
       {
@@ -264,11 +345,13 @@ const destinationOptions = [
         label: 'Blue Mountains',
         children: [
           { value: 'katoomba', label: 'Katoomba' },
-          { value: 'leura', label: 'Leura' }
+          { value: 'leura', label: 'Leura' },
+          { value: 'others', label: 'Others...', isCustom: true }
         ]
       },
       { value: 'hunter-valley', label: 'Hunter Valley' },
-      { value: 'byron-bay', label: 'Byron Bay' }
+      { value: 'byron-bay', label: 'Byron Bay' },
+      { value: 'others', label: 'Others...', isCustom: true }
     ]
   },
   {
@@ -282,12 +365,14 @@ const destinationOptions = [
           { value: 'melbourne-cbd', label: 'Melbourne CBD' },
           { value: 'st-kilda', label: 'St Kilda' },
           { value: 'fitzroy', label: 'Fitzroy' },
-          { value: 'south-yarra', label: 'South Yarra' }
+          { value: 'south-yarra', label: 'South Yarra' },
+          { value: 'others', label: 'Others...', isCustom: true }
         ]
       },
       { value: 'great-ocean-road', label: 'Great Ocean Road' },
       { value: 'yarra-valley', label: 'Yarra Valley' },
-      { value: 'phillip-island', label: 'Phillip Island' }
+      { value: 'phillip-island', label: 'Phillip Island' },
+      { value: 'others', label: 'Others...', isCustom: true }
     ]
   },
   {
@@ -299,13 +384,15 @@ const destinationOptions = [
         label: 'Brisbane',
         children: [
           { value: 'brisbane-cbd', label: 'Brisbane CBD' },
-          { value: 'south-bank', label: 'South Bank' }
+          { value: 'south-bank', label: 'South Bank' },
+          { value: 'others', label: 'Others...', isCustom: true }
         ]
       },
       { value: 'gold-coast', label: 'Gold Coast' },
       { value: 'cairns', label: 'Cairns' },
       { value: 'whitsundays', label: 'Whitsundays' },
-      { value: 'sunshine-coast', label: 'Sunshine Coast' }
+      { value: 'sunshine-coast', label: 'Sunshine Coast' },
+      { value: 'others', label: 'Others...', isCustom: true }
     ]
   },
   {
@@ -317,11 +404,13 @@ const destinationOptions = [
         label: 'Perth',
         children: [
           { value: 'perth-cbd', label: 'Perth CBD' },
-          { value: 'fremantle', label: 'Fremantle' }
+          { value: 'fremantle', label: 'Fremantle' },
+          { value: 'others', label: 'Others...', isCustom: true }
         ]
       },
       { value: 'margaret-river', label: 'Margaret River' },
-      { value: 'broome', label: 'Broome' }
+      { value: 'broome', label: 'Broome' },
+      { value: 'others', label: 'Others...', isCustom: true }
     ]
   },
   {
@@ -333,11 +422,13 @@ const destinationOptions = [
         label: 'Adelaide',
         children: [
           { value: 'adelaide-cbd', label: 'Adelaide CBD' },
-          { value: 'glenelg', label: 'Glenelg' }
+          { value: 'glenelg', label: 'Glenelg' },
+          { value: 'others', label: 'Others...', isCustom: true }
         ]
       },
       { value: 'barossa-valley', label: 'Barossa Valley' },
-      { value: 'kangaroo-island', label: 'Kangaroo Island' }
+      { value: 'kangaroo-island', label: 'Kangaroo Island' },
+      { value: 'others', label: 'Others...', isCustom: true }
     ]
   },
   {
@@ -346,7 +437,8 @@ const destinationOptions = [
     children: [
       { value: 'hobart', label: 'Hobart' },
       { value: 'launceston', label: 'Launceston' },
-      { value: 'cradle-mountain', label: 'Cradle Mountain' }
+      { value: 'cradle-mountain', label: 'Cradle Mountain' },
+      { value: 'others', label: 'Others...', isCustom: true }
     ]
   },
   {
@@ -355,17 +447,20 @@ const destinationOptions = [
     children: [
       { value: 'darwin', label: 'Darwin' },
       { value: 'alice-springs', label: 'Alice Springs' },
-      { value: 'uluru', label: 'Uluru' }
+      { value: 'uluru', label: 'Uluru' },
+      { value: 'others', label: 'Others...', isCustom: true }
     ]
   },
   {
     value: 'act',
     label: 'Australian Capital Territory',
     children: [
-      { value: 'canberra', label: 'Canberra' }
+      { value: 'canberra', label: 'Canberra' },
+      { value: 'others', label: 'Others...', isCustom: true }
     ]
   }
-]
+];
+
 
 // Watch people count to adjust members array
 watch(() => travelForm.peopleCount, (newCount) => {
@@ -421,6 +516,127 @@ const addAttraction = () => {
 const removeAttraction = (index) => {
   travelForm.attractions.splice(index, 1)
 }
+// 🆕 Manage dynamic destinations
+import { ElMessageBox } from 'element-plus'
+
+function addDestination() {
+  travelForm.destinations.push({ path: [], tags: [] })
+}
+
+function removeDestination(index) {
+  travelForm.destinations.splice(index, 1)
+}
+
+function removeDestinationTag(destIndex, tagIndex) {
+  if (!travelForm.destinations[destIndex]) return
+  travelForm.destinations[destIndex].tags.splice(tagIndex, 1)
+}
+
+/*
+  关键函数：处理 cascader 变化
+  规则：
+    - 接收完整的 path （如 ['nsw','sydney','sydney-cbd']）
+    - basePath 保留前两层（如果存在两层），用于在输入框中显示（dest.path = basePath）
+    - extras 为 path 的第3层及以后；把 extras 对应的 label（或用户自定义值）添加至 dest.tags
+    - 如果 extras 中出现 'others'（value === 'others'），弹出 prompt 让用户输入自定义 tag 并加入 dest.tags
+*/
+async function handleDestinationSelect(index, fullPath) {
+  const dest = travelForm.destinations[index]
+  if (!dest) return
+
+  // ensure arrays
+  if (!Array.isArray(dest.tags)) dest.tags = []
+  if (!Array.isArray(fullPath)) fullPath = []
+
+  // if user cleared selection
+  if (fullPath.length === 0) {
+    dest.path = []
+    return
+  }
+
+  // compute base (keep up to 2 levels)
+  const basePath = fullPath.length >= 2 ? fullPath.slice(0, 2) : fullPath.slice()
+  // extras are deeper levels (3rd, 4th, ...)
+  const extrasPath = fullPath.slice(2)
+
+  // get labels for fullPath to map extras values to human labels (if available)
+  const fullLabels = findLabelsFromPath(destinationOptions, fullPath) // may be null if custom inserted
+  const baseLabels = fullLabels ? fullLabels.slice(0, 2) : null
+  const extrasLabels = fullLabels ? fullLabels.slice(2) : null
+
+  // apply basePath to dest.path so input displays only base
+ dest.path = basePath
+
+  // process extras: for each extra value, either add mapped label or handle 'others'
+  for (let i = 0; i < extrasPath.length; i++) {
+    const extraValue = extrasPath[i]
+    // if extras label available from options, use it; else fallback to the value
+    const labelFromOptions = extrasLabels && extrasLabels[i] ? extrasLabels[i] : null
+
+    if (extraValue === 'others') {
+      // prompt for custom label
+      try {
+        const res = await ElMessageBox.prompt(
+          'Please enter your custom destination name (max 15 characters):',
+          'Custom Destination',
+          {
+            confirmButtonText: 'Confirm',
+            cancelButtonText: 'Cancel',
+            inputPattern: /^.{1,15}$/,
+            inputErrorMessage: 'Up to 15 characters allowed'
+          }
+        )
+        const custom = res && res.value ? String(res.value).trim() : ''
+        if (custom) {
+          // add to tags if not duplicate
+          if (!dest.tags.includes(custom)) dest.tags.push(custom)
+        }
+      } catch (e) {
+        // user cancelled prompt -> do nothing (不要把 'Others...' 当作标签保留)
+      }
+    } else {
+      // normal case: add mapped label (preferred) or the raw value
+      const toAdd = labelFromOptions || extraValue
+      if (toAdd && !dest.tags.includes(toAdd)) dest.tags.push(toAdd)
+    }
+  }
+}
+
+// 🆕 Recursive search utility
+function findOptionsByValue(options, values) {
+  let currentOptions = options
+  let currentNode = null
+  for (const v of values) {
+    currentNode = currentOptions.find(opt => opt.value === v)
+    if (!currentNode) return null
+    currentOptions = currentNode.children || []
+  }
+  return currentNode
+}
+
+// Helper：根据 value path 返回对应的 label path（若找不到返回 null）
+function findLabelsFromPath(options, path) {
+  const labels = []
+  let opts = options
+  for (const v of path) {
+    if (!Array.isArray(opts)) return null
+    const node = opts.find(o => o.value === v)
+    if (!node) return null
+    labels.push(node.label)
+    opts = node.children || []
+  }
+  return labels
+}
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Handle form submission
@@ -438,6 +654,12 @@ const handleSubmit = async () => {
       return
     }
 
+    // Validate attractions or destination selection
+    if (!travelForm.destinations && (!travelForm.attractions || travelForm.attractions.length === 0)) {
+      ElMessage.error('Please select at least one destination or attraction')
+      return
+    }
+
     loading.value = true
 
     // Prepare data for submission
@@ -448,17 +670,17 @@ const handleSubmit = async () => {
         gender: member.gender
       })),
       days: travelForm.days,
-      destination: travelForm.destination,
+      destination: travelForm.destinations,
       attractions: travelForm.attractions,
       themes: travelForm.themes,
-      description: travelForm.description
+      description: String(travelForm.description || '').trim()
     }
 
     // Emit submit event with form data
     emit('submit', submitData)
-    
+
     ElMessage.success('Generating your personalized travel itinerary...')
-    
+
   } catch (error) {
     console.error('Form submission error:', error)
     ElMessage.error('Submission failed, please try again')
@@ -466,6 +688,7 @@ const handleSubmit = async () => {
     loading.value = false
   }
 }
+
 </script>
 
 <style scoped>
