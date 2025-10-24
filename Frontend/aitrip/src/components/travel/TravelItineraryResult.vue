@@ -345,7 +345,8 @@ const getActivityTypeColor = (type) => {
     'Culture': 'primary',
     'Dining': 'success',
     'Nature': 'info',
-    'Shopping': 'warning'
+    'Shopping': 'warning',
+    'Exploration': 'primary'
   }
   return colorMap[type] || 'default'
 }
@@ -752,6 +753,56 @@ const shareItinerary = () => {
 }
 :deep(.action-buttons .el-button--default:hover) {
   background: rgba(255, 255, 255, 0.12);
+}
+
+/* Custom Activity Type Tag Styles - Light background with dark text */
+:deep(.activity-header .el-tag) {
+  font-weight: 600;
+  border: none;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+}
+
+/* Adventure - Light red background with dark red text */
+:deep(.activity-header .el-tag--danger) {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+/* Culture - Light blue background with dark blue text */
+:deep(.activity-header .el-tag--primary) {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+/* Dining - Light green background with dark green text */
+:deep(.activity-header .el-tag--success) {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+/* Nature - Light cyan background with dark cyan text */
+:deep(.activity-header .el-tag--info) {
+  background-color: #ecfeff;
+  color: #0891b2;
+}
+
+/* Shopping - Light yellow background with dark orange text */
+:deep(.activity-header .el-tag--warning) {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+/* Exploration - Light purple background with dark purple text */
+:deep(.activity-header .el-tag) {
+  background-color: #faf5ff;
+  color: #7c3aed;
+}
+
+/* Default fallback */
+:deep(.activity-header .el-tag--default) {
+  background-color: #f8fafc;
+  color: #475569;
 }
 
 /* Mobile Responsive */

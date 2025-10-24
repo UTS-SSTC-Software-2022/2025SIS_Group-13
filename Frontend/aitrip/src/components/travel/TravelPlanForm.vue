@@ -63,6 +63,27 @@
                   <el-option label="Male" value="male" />
                   <el-option label="Female" value="female" />
                 </el-select>
+                <el-select
+                  v-model="member.language"
+                  placeholder="Language"
+                  class="language-select"
+                  :disabled="loading"
+                >
+                  <el-option label="English" value="english" />
+                  <el-option label="Chinese" value="chinese" />
+                  <el-option label="Spanish" value="spanish" />
+                  <el-option label="French" value="french" />
+                  <el-option label="German" value="german" />
+                  <el-option label="Japanese" value="japanese" />
+                  <el-option label="Korean" value="korean" />
+                  <el-option label="Arabic" value="arabic" />
+                </el-select>
+                <el-input
+                  v-model="member.allergiesAndMedical"
+                  placeholder="Allergies & Medical Info"
+                  class="medical-input"
+                  :disabled="loading"
+                />
                 <el-button
                   v-if="travelForm.members.length > 1"
                   type="danger"
@@ -89,7 +110,7 @@
           </div>
         </el-form-item>
 
-        <!-- ✅新增：Trip Start Date -->
+        <!-- Trip Start Date -->
         <el-form-item label="Trip Start Date" prop="startDate">
           <el-date-picker
             v-model="travelForm.startDate"
@@ -99,63 +120,111 @@
             :disabled="loading"
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
+            :disabled-date="disabledDate"
           />
         </el-form-item>
 
-        <!-- 🆕 Multi-Destination Selection (替换原有 block) -->
-        <el-form-item label="Travel Destinations" prop="destination">
+        <!-- Travel Destinations -->
+        <el-form-item label="Travel Destinations" prop="destinations">
           <div class="destination-container">
             <div
               v-for="(dest, index) in travelForm.destinations"
               :key="index"
               class="destination-item mb-3"
             >
-              <div class="destination-inputs">
-                <!-- Cascader：用户仍然可以选择多级，但我们只在输入框中保留前两层显示 -->
-                <el-cascader
-                  v-model="dest.path"
-                  :options="destinationOptions"
-                  placeholder="Select destination (select deeper to add tags)"
-                  class="w-100"
-                  clearable
-                  filterable
-                  :disabled="loading"
-                  @change="handleDestinationSelect(index, $event)"
-                />
-                <el-button
-                  v-if="travelForm.destinations.length > 1"
-                  type="danger"
-                  size="small"
-                  plain
-                  @click="removeDestination(index)"
-                  :disabled="loading"
-                  style="margin-left: 8px;"
-                >
-                  Remove
-                </el-button>
-              </div>
+              <!-- Outer Layer: City Selection -->
+              <div class="destination-outer-layer">
+                <div class="city-selection-row">
+                  <el-cascader
+                    v-if="!dest.citySelected"
+                    v-model="dest.cityPath"
+                    :options="cityOptions"
+                    placeholder="Select State/City or choose Other"
+                    class="city-selector"
+                    clearable
+                    filterable
+                    :disabled="loading"
+                    @change="handleCitySelect(index, $event)"
+                  />
+                  
+                  <!-- City Display (when selected) -->
+                  <div v-else class="selected-city-display">
+                    <el-tag 
+                      type="primary" 
+                      size="large"
+                      class="city-tag"
+                      closable
+                      @close="clearCitySelection(index)"
+                    >
+                      {{ dest.cityName }}
+                    </el-tag>
+                  </div>
 
-              <!-- Tags for selected fine-grained places (shown under the input like attractions) -->
-              <div class="destination-tags mt-2" v-if="dest.tags && dest.tags.length">
-                <el-tag
-                  v-for="(tag, tIndex) in dest.tags"
-                  :key="tIndex"
-                  closable
-                  @close="removeDestinationTag(index, tIndex)"
-                  class="me-2 mb-2"
-                >
-                  {{ tag }}
-                </el-tag>
+                  <!-- Remove Destination Button -->
+                  <el-button
+                    v-if="travelForm.destinations.length > 1"
+                    type="danger"
+                    size="small"
+                    plain
+                    @click="removeDestination(index)"
+                    :disabled="loading"
+                    class="remove-destination-btn"
+                  >
+                    Remove
+                  </el-button>
+                </div>
+
+                <!-- Inner Layer: Attractions Selection (only show when city is selected) -->
+                <div v-if="dest.citySelected" class="destination-inner-layer mt-2">
+                  <div class="attractions-selection-row">
+                    <el-select
+                      v-model="selectedAttraction"
+                      placeholder="Select attractions in this city"
+                      class="attraction-selector"
+                      clearable
+                      filterable
+                      :disabled="loading"
+                      @change="handleAttractionSelect(index, $event)"
+                    >
+                      <el-option
+                        v-for="attraction in getAttractionsForCity(dest.cityPath)"
+                        :key="attraction.value"
+                        :label="attraction.label"
+                        :value="attraction.value"
+                      />
+                      <el-option
+                        label="Other (Custom Input)"
+                        value="custom"
+                      />
+                    </el-select>
+                  </div>
+
+                  <!-- Attraction Tags -->
+                  <div class="attraction-tags mt-2" v-if="dest.attractions && dest.attractions.length">
+                    <el-tag
+                      v-for="(attraction, aIndex) in dest.attractions"
+                      :key="aIndex"
+                      closable
+                      @close="removeAttractionTag(index, aIndex)"
+                      class="me-2 mb-2"
+                      type="success"
+                      size="small"
+                    >
+                      {{ attraction }}
+                    </el-tag>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Add destination button -->
+            <!-- Add Destination Button -->
             <el-button
               type="primary"
               plain
               size="small"
               @click="addDestination"
               :disabled="loading || travelForm.destinations.length >= 6"
+              class="add-destination-btn"
             >
               <el-icon class="me-1"><Plus /></el-icon>
               Add Destination
@@ -163,11 +232,8 @@
           </div>
         </el-form-item>
 
-
-
-
         <!-- Trip Duration -->
-        <el-form-item label="Trip Duration" prop="days">
+        <el-form-item label="Trip Duration (days)" prop="days">
           <el-input-number
             v-model="travelForm.days"
             :min="1"
@@ -183,50 +249,85 @@
       <div class="form-section">
         <h3 class="section-title">Travel Preferences</h3>
 
+        <!-- Trip Type -->
+        <el-form-item label="Trip Type" prop="tripType">
+          <el-select
+            v-model="travelForm.tripType"
+            placeholder="Select trip type"
+            class="w-100"
+            :disabled="loading"
+          >
+            <el-option label="Romantic" value="romantic" />
+            <el-option label="Budget Travel" value="budget" />
+            <el-option label="Luxury" value="luxury" />
+            <el-option label="Family Leisure" value="family" />
+            <el-option label="Adventure & Thrill" value="adventure" />
+            <el-option label="Cultural Deep Dive" value="cultural" />
+            <el-option label="Relaxed & Slow" value="relaxed" />
+          </el-select>
+        </el-form-item>
 
-
-        <!-- Must-Visit Attractions -->
-        <el-form-item label="Must-Visit Attractions">
-          <div class="attractions-container">
-            <el-input
-              v-model="currentAttraction"
-              placeholder="Enter attraction name, press Enter to add"
-              class="attraction-input"
+        <!-- Travel Pace -->
+        <el-form-item label="Preferred Travel Pace" prop="travelPace">
+          <div class="slider-container">
+            <span class="slider-label">Relaxed & Slow</span>
+            <el-slider
+              v-model="travelForm.travelPace"
+              :min="1"
+              :max="5"
+              :step="1"
+              show-stops
               :disabled="loading"
-              @keyup.enter="addAttraction"
-            >
-              <template #append>
-                <el-button @click="addAttraction" :disabled="loading">
-                  Add
-                </el-button>
-              </template>
-            </el-input>
-            <div class="attractions-tags mt-2">
-              <el-tag
-                v-for="(attraction, index) in travelForm.attractions"
-                :key="index"
-                closable
-                @close="removeAttraction(index)"
-                class="me-2 mb-2"
-              >
-                {{ attraction }}
-              </el-tag>
-            </div>
+              class="pace-slider"
+            />
+            <span class="slider-label">Packed & High Density</span>
           </div>
         </el-form-item>
 
         <!-- Travel Themes -->
         <el-form-item label="Travel Themes" prop="themes">
-          <el-checkbox-group v-model="travelForm.themes" :disabled="loading">
-            <el-checkbox label="Culture & Heritage">Culture & Heritage</el-checkbox>
-            <el-checkbox label="Nature & Wildlife">Nature & Wildlife</el-checkbox>
-            <el-checkbox label="Food & Wine">Food & Wine</el-checkbox>
-            <el-checkbox label="Relaxation & Beaches">Relaxation & Beaches</el-checkbox>
-            <el-checkbox label="Adventure & Exploration">Adventure & Exploration</el-checkbox>
-            <el-checkbox label="Shopping & Entertainment">Shopping & Entertainment</el-checkbox>
-            <el-checkbox label="Family Fun">Family Fun</el-checkbox>
-            <el-checkbox label="Photography">Photography</el-checkbox>
-          </el-checkbox-group>
+          <div class="themes-grid">
+            <el-checkbox-group v-model="travelForm.themes" :disabled="loading">
+              <el-checkbox label="Culture & Heritage">Culture & Heritage</el-checkbox>
+              <el-checkbox label="Nature & Wildlife">Nature & Wildlife</el-checkbox>
+              <el-checkbox label="Food & Wine">Food & Wine</el-checkbox>
+              <el-checkbox label="Relaxation & Beaches">Relaxation & Beaches</el-checkbox>
+              <el-checkbox label="Adventure & Exploration">Adventure & Exploration</el-checkbox>
+              <el-checkbox label="Shopping & Entertainment">Shopping & Entertainment</el-checkbox>
+              <el-checkbox label="Family Fun">Family Fun</el-checkbox>
+              <el-checkbox label="Photography">Photography</el-checkbox>
+            </el-checkbox-group>
+          </div>
+        </el-form-item>
+
+        <!-- Budget Plan -->
+        <el-form-item label="Budget Plan" prop="budgetLevel">
+          <div class="slider-container">
+            <span class="slider-label">Budget Focused</span>
+            <el-slider
+              v-model="travelForm.budgetLevel"
+              :min="1"
+              :max="5"
+              :step="1"
+              show-stops
+              :disabled="loading"
+              class="budget-slider"
+            />
+            <span class="slider-label">High-end Luxury</span>
+          </div>
+        </el-form-item>
+
+        <!-- Travel Wishes -->
+        <el-form-item label="Travel Wishes" prop="travelWishes">
+          <el-input
+            v-model="travelForm.travelWishes"
+            type="textarea"
+            :rows="3"
+            placeholder="e.g., 'Coffee time every day', 'Must visit a place with ocean'"
+            maxlength="200"
+            show-word-limit
+            :disabled="loading"
+          />
         </el-form-item>
       </div>
 
@@ -264,7 +365,7 @@
 
 <script setup>
 import { ref, reactive, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 
 // Props and emits
@@ -276,23 +377,28 @@ const travelFormRef = ref()
 // Loading state
 const loading = ref(false)
 
-// Current attraction input
-const currentAttraction = ref('')
-
 // Form data
-// 🆕 Add new fields
 const travelForm = reactive({
-  startDate: '', // 🆕 trip start date
+  startDate: '',
   peopleCount: 1,
-  members: [{ age: '', gender: '' }],
+  members: [{ age: '', gender: '', language: '', allergiesAndMedical: '' }],
   days: 3,
-  destinations: [ // 🆕 modified destination structure
-    { path: [], tags: [] }
-  ],
-  attractions: [],
+  destinations: [{ 
+    cityPath: [], 
+    cityName: '', 
+    citySelected: false, 
+    attractions: [] 
+  }],
+  tripType: '',
+  travelPace: 3,
   themes: [],
+  budgetLevel: 3,
+  travelWishes: '',
   description: ''
 })
+
+// Add reactive variable for attraction selection
+const selectedAttraction = ref('')
 
 // Form validation rules
 const travelRules = {
@@ -306,24 +412,118 @@ const travelRules = {
     { required: true, message: 'Please enter trip duration', trigger: 'blur' },
     { type: 'number', min: 1, max: 30, message: 'Trip duration should be between 1-30 days', trigger: 'blur' }
   ],
-  destination: [
+  destinations: [
     { validator: validateDestinations, trigger: 'blur' }
+  ],
+  tripType: [
+    { required: true, message: 'Please select trip type', trigger: 'change' }
   ],
   themes: [
     { type: 'array', min: 1, message: 'Please select at least one travel theme', trigger: 'change' }
   ]
 }
 
-// 🆕 Custom validation: at least one destination selected
+// Custom validation: at least one destination selected
 function validateDestinations(rule, value, callback) {
-  if (!travelForm.destinations.some(d => d.path.length > 0)) {
+  if (!travelForm.destinations.some(d => d.citySelected)) {
     callback(new Error('Please select at least one destination'))
   } else {
     callback()
   }
 }
 
-// Australian destination options (simplified version, should be fetched from API in production)
+// Disable past dates
+const disabledDate = (time) => {
+  return time.getTime() < Date.now() - 8.64e7 // Disable dates before today
+}
+
+// City options (State/City only) - updated to match destinationOptions structure
+const cityOptions = [
+  {
+    value: 'nsw',
+    label: 'New South Wales',
+    children: [
+      { value: 'sydney', label: 'Sydney' },
+      { value: 'blue-mountains', label: 'Blue Mountains' },
+      { value: 'hunter-valley', label: 'Hunter Valley' },
+      { value: 'byron-bay', label: 'Byron Bay' },
+      { value: 'others', label: 'Others...' }
+    ]
+  },
+  {
+    value: 'vic',
+    label: 'Victoria',
+    children: [
+      { value: 'melbourne', label: 'Melbourne' },
+      { value: 'great-ocean-road', label: 'Great Ocean Road' },
+      { value: 'yarra-valley', label: 'Yarra Valley' },
+      { value: 'phillip-island', label: 'Phillip Island' },
+      { value: 'others', label: 'Others...' }
+    ]
+  },
+  {
+    value: 'qld',
+    label: 'Queensland',
+    children: [
+      { value: 'brisbane', label: 'Brisbane' },
+      { value: 'gold-coast', label: 'Gold Coast' },
+      { value: 'cairns', label: 'Cairns' },
+      { value: 'whitsundays', label: 'Whitsundays' },
+      { value: 'sunshine-coast', label: 'Sunshine Coast' },
+      { value: 'others', label: 'Others...' }
+    ]
+  },
+  {
+    value: 'wa',
+    label: 'Western Australia',
+    children: [
+      { value: 'perth', label: 'Perth' },
+      { value: 'margaret-river', label: 'Margaret River' },
+      { value: 'broome', label: 'Broome' },
+      { value: 'others', label: 'Others...' }
+    ]
+  },
+  {
+    value: 'sa',
+    label: 'South Australia',
+    children: [
+      { value: 'adelaide', label: 'Adelaide' },
+      { value: 'barossa-valley', label: 'Barossa Valley' },
+      { value: 'kangaroo-island', label: 'Kangaroo Island' },
+      { value: 'others', label: 'Others...' }
+    ]
+  },
+  {
+    value: 'tas',
+    label: 'Tasmania',
+    children: [
+      { value: 'hobart', label: 'Hobart' },
+      { value: 'launceston', label: 'Launceston' },
+      { value: 'cradle-mountain', label: 'Cradle Mountain' },
+      { value: 'others', label: 'Others...' }
+    ]
+  },
+  {
+    value: 'nt',
+    label: 'Northern Territory',
+    children: [
+      { value: 'darwin', label: 'Darwin' },
+      { value: 'alice-springs', label: 'Alice Springs' },
+      { value: 'uluru', label: 'Uluru' },
+      { value: 'others', label: 'Others...' }
+    ]
+  },
+  {
+    value: 'act',
+    label: 'Australian Capital Territory',
+    children: [
+      { value: 'canberra', label: 'Canberra' },
+      { value: 'others', label: 'Others...' }
+    ]
+  }
+]
+
+// Full destination options with attractions (for getting attractions by city)
 const destinationOptions = [
   {
     value: 'nsw',
@@ -459,8 +659,7 @@ const destinationOptions = [
       { value: 'others', label: 'Others...', isCustom: true }
     ]
   }
-];
-
+]
 
 // Watch people count to adjust members array
 watch(() => travelForm.peopleCount, (newCount) => {
@@ -469,7 +668,7 @@ watch(() => travelForm.peopleCount, (newCount) => {
   if (newCount > currentLength) {
     // Add new members
     for (let i = currentLength; i < newCount; i++) {
-      travelForm.members.push({ age: '', gender: '' })
+      travelForm.members.push({ age: '', gender: '', language: '', allergiesAndMedical: '' })
     }
   } else if (newCount < currentLength) {
     // Remove excess members
@@ -482,7 +681,7 @@ watch(() => travelForm.peopleCount, (newCount) => {
  */
 const addMember = () => {
   if (travelForm.members.length < 10) {
-    travelForm.members.push({ age: '', gender: '' })
+    travelForm.members.push({ age: '', gender: '', language: '', allergiesAndMedical: '' })
     travelForm.peopleCount = travelForm.members.length
   }
 }
@@ -498,123 +697,129 @@ const removeMember = (index) => {
 }
 
 /**
- * Add attraction
+ * Manage dynamic destinations
  */
-const addAttraction = () => {
-  const attraction = currentAttraction.value.trim()
-  if (attraction && !travelForm.attractions.includes(attraction)) {
-    travelForm.attractions.push(attraction)
-    currentAttraction.value = ''
-  } else if (travelForm.attractions.includes(attraction)) {
-    ElMessage.warning('This attraction has already been added')
-  }
-}
-
-/**
- * Remove attraction
- */
-const removeAttraction = (index) => {
-  travelForm.attractions.splice(index, 1)
-}
-// 🆕 Manage dynamic destinations
-import { ElMessageBox } from 'element-plus'
-
 function addDestination() {
-  travelForm.destinations.push({ path: [], tags: [] })
+  travelForm.destinations.push({ 
+    cityPath: [], 
+    cityName: '', 
+    citySelected: false, 
+    attractions: [] 
+  })
 }
 
 function removeDestination(index) {
   travelForm.destinations.splice(index, 1)
 }
 
-function removeDestinationTag(destIndex, tagIndex) {
-  if (!travelForm.destinations[destIndex]) return
-  travelForm.destinations[destIndex].tags.splice(tagIndex, 1)
-}
-
-/*
-  关键函数：处理 cascader 变化
-  规则：
-    - 接收完整的 path （如 ['nsw','sydney','sydney-cbd']）
-    - basePath 保留前两层（如果存在两层），用于在输入框中显示（dest.path = basePath）
-    - extras 为 path 的第3层及以后；把 extras 对应的 label（或用户自定义值）添加至 dest.tags
-    - 如果 extras 中出现 'others'（value === 'others'），弹出 prompt 让用户输入自定义 tag 并加入 dest.tags
-*/
-async function handleDestinationSelect(index, fullPath) {
+// Handle city selection (outer layer)
+const handleCitySelect = (index, value) => {
   const dest = travelForm.destinations[index]
-  if (!dest) return
-
-  // ensure arrays
-  if (!Array.isArray(dest.tags)) dest.tags = []
-  if (!Array.isArray(fullPath)) fullPath = []
-
-  // if user cleared selection
-  if (fullPath.length === 0) {
-    dest.path = []
+  
+  if (!value || value.length === 0) {
+    dest.citySelected = false
+    dest.cityName = ''
+    dest.attractions = []
     return
   }
 
-  // compute base (keep up to 2 levels)
-  const basePath = fullPath.length >= 2 ? fullPath.slice(0, 2) : fullPath.slice()
-  // extras are deeper levels (3rd, 4th, ...)
-  const extrasPath = fullPath.slice(2)
-
-  // get labels for fullPath to map extras values to human labels (if available)
-  const fullLabels = findLabelsFromPath(destinationOptions, fullPath) // may be null if custom inserted
-  const baseLabels = fullLabels ? fullLabels.slice(0, 2) : null
-  const extrasLabels = fullLabels ? fullLabels.slice(2) : null
-
-  // apply basePath to dest.path so input displays only base
- dest.path = basePath
-
-  // process extras: for each extra value, either add mapped label or handle 'others'
-  for (let i = 0; i < extrasPath.length; i++) {
-    const extraValue = extrasPath[i]
-    // if extras label available from options, use it; else fallback to the value
-    const labelFromOptions = extrasLabels && extrasLabels[i] ? extrasLabels[i] : null
-
-    if (extraValue === 'others') {
-      // prompt for custom label
-      try {
-        const res = await ElMessageBox.prompt(
-          'Please enter your custom destination name (max 15 characters):',
-          'Custom Destination',
-          {
-            confirmButtonText: 'Confirm',
-            cancelButtonText: 'Cancel',
-            inputPattern: /^.{1,15}$/,
-            inputErrorMessage: 'Up to 15 characters allowed'
-          }
-        )
-        const custom = res && res.value ? String(res.value).trim() : ''
-        if (custom) {
-          // add to tags if not duplicate
-          if (!dest.tags.includes(custom)) dest.tags.push(custom)
-        }
-      } catch (e) {
-        // user cancelled prompt -> do nothing (不要把 'Others...' 当作标签保留)
+  // Check if the last level is "others"
+  if (value[value.length - 1] === 'others') {
+    // Prompt for custom city name
+    ElMessageBox.prompt('Please enter the custom city name:', 'Custom City', {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      inputPattern: /\S+/,
+      inputErrorMessage: 'City name cannot be empty'
+    }).then(({ value: customName }) => {
+      if (customName && customName.trim()) {
+        dest.cityPath = value
+        dest.cityName = customName.trim()
+        dest.citySelected = true
+        dest.attractions = []
       }
-    } else {
-      // normal case: add mapped label (preferred) or the raw value
-      const toAdd = labelFromOptions || extraValue
-      if (toAdd && !dest.tags.includes(toAdd)) dest.tags.push(toAdd)
+    }).catch(() => {
+      // User cancelled, reset selection
+      dest.cityPath = []
+    })
+  } else {
+    // For predefined cities
+    dest.cityPath = value
+    dest.cityName = value[value.length - 1]
+    dest.citySelected = true
+    dest.attractions = []
+  }
+}
+
+// Clear city selection
+const clearCitySelection = (index) => {
+  const dest = travelForm.destinations[index]
+  dest.cityPath = []
+  dest.cityName = ''
+  dest.citySelected = false
+  dest.attractions = []
+}
+
+// Handle attraction selection (inner layer)
+const handleAttractionSelect = (index, value) => {
+  if (!value) return
+  
+  const dest = travelForm.destinations[index]
+  
+  if (value === 'custom') {
+    // Prompt for custom attraction name
+    ElMessageBox.prompt('Please enter the custom attraction name:', 'Custom Attraction', {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      inputPattern: /\S+/,
+      inputErrorMessage: 'Attraction name cannot be empty'
+    }).then(({ value: customName }) => {
+      if (customName && customName.trim()) {
+        const attractionName = customName.trim()
+        if (!dest.attractions.includes(attractionName)) {
+          dest.attractions.push(attractionName)
+        }
+      }
+    }).catch(() => {
+      // User cancelled, do nothing
+    })
+  } else {
+    // For predefined attractions
+    if (!dest.attractions.includes(value)) {
+      dest.attractions.push(value)
     }
   }
+  
+  // Clear the selection
+  selectedAttraction.value = ''
 }
 
-// 🆕 Recursive search utility
-function findOptionsByValue(options, values) {
-  let currentOptions = options
-  let currentNode = null
-  for (const v of values) {
-    currentNode = currentOptions.find(opt => opt.value === v)
-    if (!currentNode) return null
-    currentOptions = currentNode.children || []
-  }
-  return currentNode
+// Remove attraction tag
+const removeAttractionTag = (index, attractionIndex) => {
+  travelForm.destinations[index].attractions.splice(attractionIndex, 1)
 }
 
-// Helper：根据 value path 返回对应的 label path（若找不到返回 null）
+// Get attractions for a specific city
+const getAttractionsForCity = (cityPath) => {
+  if (!cityPath || cityPath.length < 2) return []
+  
+  const [state, city] = cityPath
+  
+  // Find the state in destinationOptions
+  const stateOption = destinationOptions.find(s => s.value === state)
+  if (!stateOption) return []
+  
+  // Find the city in the state
+  const cityOption = stateOption.children.find(c => c.value === city)
+  if (!cityOption || !cityOption.children) return []
+  
+  // Return the attractions (children of the city)
+  return cityOption.children.filter(attraction => attraction.value !== 'others')
+}
+
+/**
+ * Helper: find labels from path
+ */
 function findLabelsFromPath(options, path) {
   const labels = []
   let opts = options
@@ -628,51 +833,92 @@ function findLabelsFromPath(options, path) {
   return labels
 }
 
-
-
-
-
-
-
-
-
-
-
 /**
  * Handle form submission
  */
 const handleSubmit = async () => {
   try {
-    // Validate form
-    const valid = await travelFormRef.value.validate()
-    if (!valid) return
-
-    // Validate members info
-    const invalidMembers = travelForm.members.some(member => !member.age || !member.gender)
-    if (invalidMembers) {
-      ElMessage.error('Please complete age and gender information for all travelers')
+    // Validate form with detailed error messages
+    const valid = await travelFormRef.value.validate().catch(() => false)
+    if (!valid) {
+      // Check specific validation failures and provide detailed English messages
+      const validationErrors = []
+      
+      // Check required fields
+      if (!travelForm.startDate) {
+        validationErrors.push('Trip start date is required')
+      }
+      if (!travelForm.peopleCount) {
+        validationErrors.push('Number of travelers is required')
+      }
+      if (!travelForm.days || travelForm.days < 1 || travelForm.days > 30) {
+        validationErrors.push('Trip duration must be between 1-30 days')
+      }
+      if (!travelForm.destinations.some(d => d.citySelected)) {
+        validationErrors.push('At least one travel destination must be selected')
+      }
+      if (!travelForm.tripType) {
+        validationErrors.push('Trip type must be selected')
+      }
+      if (!travelForm.themes || travelForm.themes.length === 0) {
+        validationErrors.push('At least one travel theme must be selected')
+      }
+      
+      // Show detailed error message
+      const errorMessage = validationErrors.length > 0 
+        ? `Please complete the following required information:\n• ${validationErrors.join('\n• ')}`
+        : 'Please complete all required fields before generating your itinerary'
+      
+      ElMessage({
+        message: errorMessage,
+        type: 'error',
+        duration: 6000,
+        showClose: true
+      })
       return
     }
 
-    // Validate attractions or destination selection
-    if (!travelForm.destinations && (!travelForm.attractions || travelForm.attractions.length === 0)) {
-      ElMessage.error('Please select at least one destination or attraction')
+    // Validate members info
+    const invalidMembers = travelForm.members.some(member => !member.age || !member.gender || !member.language)
+    if (invalidMembers) {
+      ElMessage({
+        message: 'Please complete age, gender and language information for all travelers',
+        type: 'error',
+        duration: 5000,
+        showClose: true
+      })
       return
     }
 
     loading.value = true
 
+    // Prepare destination string for backend
+    const destinationString = travelForm.destinations
+      .filter(dest => dest.citySelected)
+      .map(dest => {
+        const cityString = dest.cityName
+        const attractionsString = dest.attractions.length > 0 ? ' #' + dest.attractions.join(', #') : ''
+        return cityString + attractionsString
+      })
+      .join('\n')
+
     // Prepare data for submission
     const submitData = {
+      startDate: travelForm.startDate,
       peopleCount: travelForm.peopleCount,
       members: travelForm.members.map(member => ({
         age: parseInt(member.age),
-        gender: member.gender
+        gender: member.gender,
+        language: member.language,
+        allergiesAndMedical: member.allergiesAndMedical || ''
       })),
       days: travelForm.days,
-      destination: travelForm.destinations,
-      attractions: travelForm.attractions,
+      destination: destinationString,
+      tripType: travelForm.tripType,
+      travelPace: travelForm.travelPace,
       themes: travelForm.themes,
+      budgetLevel: travelForm.budgetLevel,
+      travelWishes: travelForm.travelWishes || '',
       description: String(travelForm.description || '').trim()
     }
 
@@ -688,14 +934,13 @@ const handleSubmit = async () => {
     loading.value = false
   }
 }
-
 </script>
 
 <style scoped>
 .travel-plan-form { position: relative; }
 
 .form-title {
-  color: #E5E7EB; /* 深色背景下更清晰 */
+  color: #E5E7EB;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
@@ -703,7 +948,7 @@ const handleSubmit = async () => {
 .form-subtitle {
   font-size: 14px;
   margin-bottom: 0;
-  color: #9CA3AF; /* 深色背景副标题 */
+  color: #9CA3AF;
 }
 
 .travel-form-content { margin-top: 2rem; }
@@ -711,7 +956,7 @@ const handleSubmit = async () => {
 .form-section {
   margin-bottom: 2rem;
   padding: 1.25rem 1.25rem 1rem;
-  background: rgba(17, 24, 39, 0.65); /* 深色毛玻璃卡片 */
+  background: rgba(17, 24, 39, 0.65);
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   backdrop-filter: blur(12px);
@@ -719,7 +964,7 @@ const handleSubmit = async () => {
 }
 
 .section-title {
-  color: #cbd5e1; /* 深色标题 */
+  color: #cbd5e1;
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 0.75rem;
@@ -731,14 +976,22 @@ const handleSubmit = async () => {
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 10px;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.04); /* 深色半透明 */
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .member-item { margin-bottom: 1rem; }
 .member-item:last-of-type { margin-bottom: 0.5rem; }
-.member-inputs { display: flex; gap: 0.5rem; align-items: center; }
-.age-input { flex: 1; max-width: 120px; }
-.gender-select { flex: 1; max-width: 120px; }
+.member-inputs { 
+  display: grid; 
+  grid-template-columns: 80px 100px 120px 1fr auto;
+  gap: 0.5rem; 
+  align-items: center; 
+}
+
+.age-input { max-width: 80px; }
+.gender-select { max-width: 100px; }
+.language-select { max-width: 120px; }
+.medical-input { flex: 1; }
 
 .add-member-btn {
   width: 100%;
@@ -747,9 +1000,100 @@ const handleSubmit = async () => {
   background: rgba(255, 255, 255, 0.04);
 }
 
-.attractions-container { width: 100%; }
-.attraction-input { width: 100%; }
-.attractions-tags { min-height: 32px; }
+.destination-container { width: 100%; }
+.destination-item { margin-bottom: 1rem; }
+
+.destination-outer-layer {
+  width: 100%;
+}
+
+.city-selection-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.city-selector {
+  flex: 1;
+  min-width: 0;
+}
+
+.selected-city-display {
+  flex: 1;
+  min-width: 0;
+}
+
+.city-tag {
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.remove-destination-btn {
+  flex-shrink: 0;
+}
+
+.destination-inner-layer {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.attractions-selection-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.attraction-selector {
+  width: 100%;
+}
+
+.attraction-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.add-destination-btn {
+  margin-top: 8px;
+  width: 100%;
+  border-style: dashed;
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.slider-label {
+  color: #9CA3AF;
+  font-size: 12px;
+  white-space: nowrap;
+  min-width: 100px;
+}
+
+.pace-slider, .budget-slider {
+  flex: 1;
+}
+
+.themes-grid {
+  width: 100%;
+}
+
+.themes-grid :deep(.el-checkbox-group) {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1rem;
+}
 
 .submit-btn {
   height: 44px;
@@ -758,7 +1102,7 @@ const handleSubmit = async () => {
   border-radius: 8px;
   border: none;
   color: #fff;
-  background: linear-gradient(90deg, #3b82f6, #6366f1); /* 复用既有蓝紫渐变 */
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
   box-shadow: 0 8px 22px rgba(59, 130, 246, 0.28);
 }
 .submit-btn:hover { filter: brightness(1.05); }
@@ -782,19 +1126,16 @@ const handleSubmit = async () => {
   background: rgba(255, 255, 255, 0.06) !important;
 }
 
-/* 让 Select 输入框在非聚焦时也保持深色 */
 :deep(.el-select .el-input__wrapper) {
   background: rgba(255, 255, 255, 0.035) !important;
   border: 1px solid rgba(148, 163, 184, 0.22) !important;
 }
 
-/* 特殊需求文本域改为更深背景，降低亮度 */
 :deep(.el-textarea__inner) {
   background: rgba(255, 255, 255, 0.06) !important;
   border-color: rgba(148, 163, 184, 0.22) !important;
 }
 
-/* Select 下拉面板使用深色毛玻璃，并提升文字对比 */
 :deep(.el-select__popper) {
   background: rgba(15, 23, 42, 0.92) !important;
   border: 1px solid rgba(148, 163, 184, 0.18) !important;
@@ -813,18 +1154,47 @@ const handleSubmit = async () => {
   color: #fff !important;
 }
 
-:deep(.el-checkbox-group) {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.5rem;
+:deep(.el-checkbox) { 
+  margin-right: 0; 
+  white-space: nowrap; 
+  color: #e5e7eb !important;
 }
-:deep(.el-checkbox) { margin-right: 0; white-space: nowrap; }
+
+:deep(.el-slider__runway) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+:deep(.el-slider__bar) {
+  background-color: #6366f1 !important;
+}
+
+:deep(.el-slider__button) {
+  border-color: #6366f1 !important;
+  background-color: #6366f1 !important;
+}
+
+:deep(.el-slider__stop) {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
 
 @media (max-width: 768px) {
   .form-section { padding: 1rem; }
-  .member-inputs { flex-direction: column; gap: 0.5rem; }
-  .age-input, .gender-select { max-width: none; }
-  :deep(.el-checkbox-group) { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+  .member-inputs { 
+    grid-template-columns: 1fr;
+    gap: 0.5rem; 
+  }
+  .age-input, .gender-select, .language-select, .medical-input { max-width: none; }
+  .themes-grid :deep(.el-checkbox-group) { 
+    grid-template-columns: 1fr;
+  }
+  .slider-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .slider-label {
+    min-width: auto;
+    text-align: center;
+  }
 }
 
 @media (max-width: 576px) {
