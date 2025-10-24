@@ -191,7 +191,7 @@ const loadItineraries = async () => {
     console.log('Token from localStorage:', token ? 'exists' : 'not found')
     
     if (!token) {
-      ElMessage.error('请先登录')
+      ElMessage.error('Please login first')
       router.push('/login-form')
       return
     }
@@ -270,10 +270,10 @@ const loadItineraries = async () => {
     })
     
     if (error.response?.status === 401) {
-      ElMessage.error('登录已过期，请重新登录')
+      ElMessage.error('Login expired, please login again')
       router.push('/login-form')
     } else {
-      ElMessage.error('加载行程列表失败: ' + (error.message || '未知错误'))
+      ElMessage.error('Failed to load itinerary list: ' + (error.message || 'Unknown error'))
     }
   } finally {
     loading.value = false
@@ -314,7 +314,7 @@ const confirmDelete = async (type, plan) => {
   } catch (error) {
     if (error.name !== 'cancel') {
       console.error('Failed to delete itinerary:', error)
-      ElMessage.error('删除行程失败')
+      ElMessage.error('Failed to delete itinerary')
     }
   }
 }

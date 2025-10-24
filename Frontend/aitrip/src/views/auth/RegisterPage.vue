@@ -191,10 +191,10 @@ const handleRegister = async () => {
     const response = await registerAPI(registerForm)
     // Backend returns success as number 1 for success, 0 for failure
     if (response.success === 1) {
-      ElMessage.success('注册成功！正在跳转到登录页面...')
+      ElMessage.success('Registration successful! Redirecting to login page...')
       router.push('/login-form')
     } else {
-      ElMessage.error(response.msg || '注册失败，请重试')
+      ElMessage.error(response.msg || 'Registration failed, please try again')
     }
   } catch (error) {
     console.error('Registration error:', error)
@@ -220,33 +220,33 @@ const handleRegister = async () => {
         if (fieldErrors.length > 0) {
           ElMessage.error(fieldErrors.join('\n'))
         } else {
-          ElMessage.error('注册信息有误，请检查后重试')
+          ElMessage.error('Registration information is incorrect, please check and try again')
         }
       } 
       // Handle other server errors
       else if (error.response.status >= 500) {
-        ElMessage.error('服务器错误，请稍后重试')
+        ElMessage.error('Server error, please try again later')
       }
       // Handle other client errors
       else if (error.response.status >= 400) {
-        ElMessage.error(errorData.msg || '请求失败，请检查输入信息')
+        ElMessage.error(errorData.msg || 'Request failed, please check your input')
       }
       // Handle general API errors
       else {
-        ElMessage.error(errorData.msg || '注册失败，请重试')
+        ElMessage.error(errorData.msg || 'Registration failed, please try again')
       }
     } 
     // Handle network errors
     else if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
-      ElMessage.error('网络连接失败，请检查网络后重试')
+      ElMessage.error('Network connection failed, please check your network and try again')
     }
     // Handle timeout errors
     else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-      ElMessage.error('请求超时，请重试')
+      ElMessage.error('Request timeout, please try again')
     }
     // Handle other errors
     else {
-      ElMessage.error('注册失败，请重试')
+      ElMessage.error('Registration failed, please try again')
     }
   }
 }

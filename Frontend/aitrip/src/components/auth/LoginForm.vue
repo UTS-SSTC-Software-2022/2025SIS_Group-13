@@ -148,14 +148,14 @@ const handleLogin = async () => {
     // 检查响应是否成功
     if (response.status && response.status !== 200) {
       console.error('Login API returned non-200 status:', response.status)
-      ElMessage.error(`登录失败：服务器返回状态 ${response.status}`)
+      ElMessage.error(`Login failed: Server returned status ${response.status}`)
       return
     }
     
     // 检查响应数据结构
     if (!response.data) {
       console.error('No response data received')
-      ElMessage.error('登录失败：服务器未返回数据')
+      ElMessage.error('Login failed: No data returned from server')
       return
     }
     
@@ -205,26 +205,26 @@ const handleLogin = async () => {
         console.error('Available response data structure:', JSON.stringify(response.data, null, 2))
       }
 
-      ElMessage.success('登录成功！')
+      ElMessage.success('Login successful!')
       
       // Navigate to home page after successful login
       router.push('/home')
     } else {
-      throw new Error(response.message || '登录失败')
+      throw new Error(response.message || 'Login failed')
     }
     
   } catch (error) {
     console.error('Login error:', error)
     
     // Handle different error types
-    let errorMessage = '登录失败，请重试'
+    let errorMessage = 'Login failed, please try again'
     
     if (error.response?.status === 401) {
-      errorMessage = '邮箱或密码错误'
+      errorMessage = 'Incorrect email or password'
     } else if (error.response?.status === 403) {
-      errorMessage = '账户已被禁用，请联系管理员'
+      errorMessage = 'Account has been disabled, please contact administrator'
     } else if (error.response?.status === 422) {
-      errorMessage = '请求参数错误'
+      errorMessage = 'Invalid request parameters'
     } else if (error.response?.data?.message) {
       errorMessage = error.response.data.message
     } else if (error.message) {

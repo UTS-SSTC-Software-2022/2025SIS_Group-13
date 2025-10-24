@@ -28,7 +28,7 @@ class GenerateView(APIView):
             # 自动保存生成的行程到数据库
             if output_json and request.user.is_authenticated:
                 # 从LLM响应中提取信息
-                title = output_json.get('title', f"行程计划 - {form_data.get('destination', '未知目的地')}")
+                title = output_json.get('title', f"Travel itinerary - {form_data.get('destination', 'Unknown destination')}")
                 destination = output_json.get('destination') or form_data.get('destination', '')
                 duration = output_json.get('duration') or form_data.get('days', 1)
                 start_time = None
@@ -90,7 +90,7 @@ class SaveItineraryView(APIView):
             itinerary.save()
 
             return Response({
-                'message': '行程已保存到Generated Plan列表',
+                'message': 'The itinerary has been saved to the "Generated Plan" list.',
                 'itinerary_id': itinerary.itinerary_id
             }, status=status.HTTP_200_OK)
 
@@ -135,7 +135,7 @@ class GetItineraryView(APIView):
 
         except Itinerary.DoesNotExist:
             return Response({
-                'error': '行程不存在或您没有权限访问'
+                'error': 'The itinerary does not exist or you do not have the permission to access it.'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({
@@ -167,13 +167,13 @@ class CompleteItineraryView(APIView):
             itinerary.save()
 
             return Response({
-                'message': '行程已标记为完成',
+                'message': 'The trip has been marked as completed.',
                 'itinerary_id': itinerary.itinerary_id
             }, status=status.HTTP_200_OK)
 
         except Itinerary.DoesNotExist:
             return Response({
-                'error': '行程不存在或您没有权限访问'
+                'error': 'The itinerary does not exist or you do not have the permission to access it.'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
              return Response({

@@ -538,8 +538,8 @@ const loadSavedItinerary = async (itineraryId) => {
     // 检查llm_response是否存在且有效
     if (!itinerary.llm_response) {
       console.error('llm_response is null or undefined')
-      error.value = '行程数据不完整，llm_response为空'
-      ElMessage.error('行程数据不完整')
+      error.value = 'Itinerary data incomplete, llm_response is empty'
+      ElMessage.error('Itinerary data incomplete')
       return
     }
     
@@ -549,8 +549,8 @@ const loadSavedItinerary = async (itineraryId) => {
         itineraryData.value = JSON.parse(itinerary.llm_response)
       } catch (parseError) {
         console.error('Failed to parse llm_response as JSON:', parseError)
-        error.value = '行程数据格式错误'
-        ElMessage.error('行程数据格式错误')
+        error.value = 'Itinerary data format error'
+        ElMessage.error('Itinerary data format error')
         return
       }
     } else if (typeof itinerary.llm_response === 'object') {
@@ -565,8 +565,8 @@ const loadSavedItinerary = async (itineraryId) => {
           itineraryData.value = JSON.parse(jsonText)
         } catch (parseError) {
           console.error('Failed to parse raw_text as JSON:', parseError)
-          error.value = '行程数据格式错误，无法解析raw_text'
-          ElMessage.error('行程数据格式错误')
+          error.value = 'Itinerary data format error, unable to parse raw_text'
+          ElMessage.error('Itinerary data format error')
           return
         }
       } else {
@@ -575,8 +575,8 @@ const loadSavedItinerary = async (itineraryId) => {
       }
     } else {
       console.error('llm_response has unexpected type:', typeof itinerary.llm_response)
-      error.value = '行程数据类型错误'
-      ElMessage.error('行程数据类型错误')
+      error.value = 'Itinerary data type error'
+      ElMessage.error('Itinerary data type error')
       return
     }
     
@@ -587,7 +587,7 @@ const loadSavedItinerary = async (itineraryId) => {
     itineraryStatus.value = itinerary.isCompleted || 'Temporary'
     generationTime.value = new Date(itinerary.create_time)
     
-    ElMessage.success('行程加载成功')
+    ElMessage.success('Itinerary loaded successfully')
   } catch (err) {
     console.error('Failed to load saved itinerary:', err)
     console.error('Error details:', {
@@ -596,8 +596,8 @@ const loadSavedItinerary = async (itineraryId) => {
       status: err.response?.status,
       data: err.response?.data
     })
-    error.value = '加载行程失败: ' + (err.response?.data?.error || err.message)
-    ElMessage.error('加载行程失败')
+    error.value = 'Failed to load itinerary: ' + (err.response?.data?.error || err.message)
+    ElMessage.error('Failed to load itinerary')
   } finally {
     loading.value = false
   }
@@ -606,7 +606,7 @@ const loadSavedItinerary = async (itineraryId) => {
 // 保存行程到Trip Plan
 const saveItinerary = async () => {
   if (!currentItineraryId.value) {
-    ElMessage.warning('没有可保存的行程')
+    ElMessage.warning('No itinerary to save')
     return
   }
   
@@ -617,11 +617,11 @@ const saveItinerary = async () => {
       itinerary_id: currentItineraryId.value
     })
     
-    ElMessage.success('行程已保存到Generated Plan列表')
+    ElMessage.success('Itinerary saved to Generated Plan list')
     itineraryStatus.value = 'Generated'
   } catch (err) {
     console.error('Failed to save itinerary:', err)
-    ElMessage.error('保存行程失败')
+    ElMessage.error('Failed to save itinerary')
   } finally {
     saving.value = false
   }
@@ -630,7 +630,7 @@ const saveItinerary = async () => {
 // 标记行程为完成
 const completeItinerary = async () => {
   if (!currentItineraryId.value) {
-    ElMessage.warning('没有可完成的行程')
+    ElMessage.warning('No itinerary to complete')
     return
   }
   
@@ -639,11 +639,11 @@ const completeItinerary = async () => {
       itinerary_id: currentItineraryId.value
     })
     
-    ElMessage.success('行程已标记为完成')
+    ElMessage.success('Itinerary marked as completed')
     itineraryStatus.value = 'Completed'
   } catch (err) {
     console.error('Failed to complete itinerary:', err)
-    ElMessage.error('标记行程完成失败')
+    ElMessage.error('Failed to mark itinerary as completed')
   }
 }
 
