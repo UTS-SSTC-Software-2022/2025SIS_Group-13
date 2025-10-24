@@ -7,6 +7,7 @@ from django.db import transaction
 from django.utils.dateparse import parse_datetime
 from .services import call_gemini
 from itinerary.models import Itinerary
+from utils.response import ResponseHandler
 
 class GenerateView(APIView):
     """POST /api/ai/generate/ -> returns Gemini output"""
@@ -94,13 +95,16 @@ class SaveItineraryView(APIView):
             }, status=status.HTTP_200_OK)
 
         except Itinerary.DoesNotExist:
-            return Response({
-                'error': '行程不存在或您没有权限访问'
-            }, status=status.HTTP_404_NOT_FOUND)
+            return ResponseHandler.error(
+                msg='Itinerary not found',
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
         except Exception as e:
-             return Response({
-                 'error': str(e)
-             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return ResponseHandler.error(
+                msg=str(e),
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class GetItineraryView(APIView):
@@ -115,16 +119,19 @@ class GetItineraryView(APIView):
                 user=request.user
             )
             
-            return Response({
-                'itinerary_id': itinerary.itinerary_id,
-                'title': itinerary.title,
-                'destination': itinerary.destination,
-                'duration': itinerary.duration,
-                'start_time': itinerary.start_time,
-                'isCompleted': itinerary.isCompleted,
-                'llm_response': itinerary.llm_response,
-                'create_time': itinerary.create_time,
-            }, status=status.HTTP_200_OK)
+            return ResponseHandler.success(
+                data={
+                    'itinerary_id': itinerary.itinerary_id,
+                    'title': itinerary.title,
+                    'destination': itinerary.destination,
+                    'duration': itinerary.duration,
+                    'start_time': itinerary.start_time,
+                    'isCompleted': itinerary.isCompleted,
+                    'llm_response': itinerary.llm_response,
+                    'create_time': itinerary.create_time,
+                },
+                msg='Itinerary retrieved successfully'
+            )
 
         except Itinerary.DoesNotExist:
             return Response({

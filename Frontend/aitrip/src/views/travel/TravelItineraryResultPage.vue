@@ -530,9 +530,10 @@ const loadSavedItinerary = async (itineraryId) => {
     const response = await request.get(`/ai/itinerary/${itineraryId}/`)
     console.log('API response:', response)
     
-    const itinerary = response.data
+    // 检查响应是否使用ResponseHandler格式
+    const itinerary = response.data || response
     console.log('Itinerary data:', itinerary)
-    console.log('LLM response:', itinerary.llm_response)
+    console.log('LLM response:', itinerary?.llm_response)
     
     // 检查llm_response是否存在且有效
     if (!itinerary.llm_response) {
@@ -553,7 +554,25 @@ const loadSavedItinerary = async (itineraryId) => {
         return
       }
     } else if (typeof itinerary.llm_response === 'object') {
-      itineraryData.value = itinerary.llm_response
+      // 检查是否包含raw_text字段（JSON解析失败时的格式）
+      if (itinerary.llm_response.raw_text) {
+        try {
+          // 尝试解析raw_text中的JSON
+          const rawText = itinerary.llm_response.raw_text
+          // 如果raw_text包含```json标记，需要提取JSON部分
+          const jsonMatch = rawText.match(/```json\s*([\s\S]*?)\s*```/)
+          const jsonText = jsonMatch ? jsonMatch[1] : rawText
+          itineraryData.value = JSON.parse(jsonText)
+        } catch (parseError) {
+          console.error('Failed to parse raw_text as JSON:', parseError)
+          error.value = '行程数据格式错误，无法解析raw_text'
+          ElMessage.error('行程数据格式错误')
+          return
+        }
+      } else {
+        // 直接使用对象
+        itineraryData.value = itinerary.llm_response
+      }
     } else {
       console.error('llm_response has unexpected type:', typeof itinerary.llm_response)
       error.value = '行程数据类型错误'
