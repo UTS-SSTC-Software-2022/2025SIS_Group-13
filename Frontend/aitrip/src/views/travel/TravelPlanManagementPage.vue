@@ -80,7 +80,7 @@
                     >
                       <div class="plan-title">{{ plan.title }}</div>
                       <div class="plan-meta">
-                        <span>{{ plan.destination.charAt(0).toUpperCase() + plan.destination.slice(1) }}</span>
+                        <span>{{ plan.destination }}</span>
                         <span>·</span>
                         <span>{{ plan.duration }}</span>
                         <span>·</span>
@@ -226,6 +226,14 @@ const loadItineraries = async () => {
       itineraries = []
     }
     
+    
+    if (itineraries.length > 0) { 
+      for (const itinerary of itineraries) {
+        if (itinerary.destination) {
+          itinerary.destination = itinerary.destination.charAt(0).toUpperCase() + itinerary.destination.slice(1)
+        }
+      }
+    }
     console.log('Parsed itineraries:', itineraries)
     
     // 使用nextTick确保DOM更新完成
