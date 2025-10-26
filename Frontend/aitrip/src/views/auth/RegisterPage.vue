@@ -209,20 +209,21 @@ const handleRegister = async () => {
         
         // Process each field error with user-friendly messages
         Object.entries(errorData.data).forEach(([field, messages]) => {
+          const fieldNameEng = field
           const fieldName = getFieldDisplayName(field)
           const errorMessages = Array.isArray(messages) ? messages : [messages]
-          
+
           errorMessages.forEach(message => {
-            fieldErrors.push(`${fieldName}: ${translateErrorMessage(message)}`)
+            fieldErrors.push(`${fieldNameEng}: ${message}`)
           })
         })
-        
+
         if (fieldErrors.length > 0) {
           ElMessage.error(fieldErrors.join('\n'))
         } else {
           ElMessage.error('Registration information is incorrect, please check and try again')
         }
-      } 
+      }
       // Handle other server errors
       else if (error.response.status >= 500) {
         ElMessage.error('Server error, please try again later')
@@ -235,7 +236,7 @@ const handleRegister = async () => {
       else {
         ElMessage.error(errorData.msg || 'Registration failed, please try again')
       }
-    } 
+    }
     // Handle network errors
     else if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
       ElMessage.error('Network connection failed, please check your network and try again')
@@ -277,12 +278,12 @@ const translateErrorMessage = (message) => {
     'The password is too similar to the username.': '密码与用户名太相似',
     'The password is too similar to the email address.': '密码与邮箱地址太相似'
   }
-  
+
   // Check for exact matches first
   if (translations[message]) {
     return translations[message]
   }
-  
+
   // Check for partial matches
   for (const [english, chinese] of Object.entries(translations)) {
     if (message.includes(english)) {
