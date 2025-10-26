@@ -209,11 +209,12 @@ const handleRegister = async () => {
         
         // Process each field error with user-friendly messages
         Object.entries(errorData.data).forEach(([field, messages]) => {
+          const fieldNameEng = field
           const fieldName = getFieldDisplayName(field)
           const errorMessages = Array.isArray(messages) ? messages : [messages]
           
           errorMessages.forEach(message => {
-            fieldErrors.push(`${fieldName}: ${translateErrorMessage(message)}`)
+            fieldErrors.push(`${fieldNameEng}: ${message}`)
           })
         })
         
@@ -282,7 +283,7 @@ const translateErrorMessage = (message) => {
   if (translations[message]) {
     return translations[message]
   }
-  
+
   // Check for partial matches
   for (const [english, chinese] of Object.entries(translations)) {
     if (message.includes(english)) {
