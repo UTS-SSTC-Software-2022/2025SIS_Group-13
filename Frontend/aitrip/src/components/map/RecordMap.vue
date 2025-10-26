@@ -184,7 +184,7 @@ const addPlanMarkers = async () => {
 
   // Add markers for unfinished plans (gray flags)
   props.plans.forEach((plan) => {
-    const destination = plan.destination || plan.formData?.destination
+    const destination = plan.destination
     const coords = cityCoordinates[destination]
     
     if (coords) {
@@ -215,7 +215,7 @@ const addPlanMarkers = async () => {
             </div>
             <div style="margin-bottom: 8px;">
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📍 Destination:</strong> ${destination}</p>
-              <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || plan.formData?.duration || '0 days'}</p>
+              <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || '0 days'}</p>
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📅 Date:</strong> ${plan.date || 'TBD'}</p>
             </div>
             <div style="background: #f5f5f5; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
@@ -239,7 +239,7 @@ const addPlanMarkers = async () => {
 
   // Add markers for finished plans (colored flags)
   props.finishedPlans.forEach((plan) => {
-    const destination = plan.destination || plan.formData?.destination
+    const destination = plan.destination
     const coords = cityCoordinates[destination]
     
     if (coords) {
@@ -270,7 +270,7 @@ const addPlanMarkers = async () => {
             </div>
             <div style="margin-bottom: 8px;">
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📍 Destination:</strong> ${destination}</p>
-              <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || plan.formData?.duration || '0 days'}</p>
+              <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || '0 days'}</p>
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📅 Date:</strong> ${plan.date || 'Completed'}</p>
             </div>
             <div style="background: #f0f9ff; padding: 8px; border-radius: 4px; margin-bottom: 8px;">

@@ -141,7 +141,7 @@
             <el-col :xs="24" :sm="24" :md="12" :lg="12">
               <RecordMap 
                 :plans="generatedPlans" 
-                :finished-plans="finishedPlans"
+                :finishedPlans="finishedPlans"
                 class="map-container"
               />
             </el-col>
