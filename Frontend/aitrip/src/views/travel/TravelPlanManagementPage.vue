@@ -80,7 +80,7 @@
                     >
                       <div class="plan-title">{{ plan.title }}</div>
                       <div class="plan-meta">
-                        <span>{{ plan.destination }}</span>
+                        <span>{{ plan.destination.charAt(0).toUpperCase() + plan.destination.slice(1) }}</span>
                         <span>·</span>
                         <span>{{ plan.duration }}</span>
                         <span>·</span>

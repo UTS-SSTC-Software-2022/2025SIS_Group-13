@@ -184,7 +184,8 @@ const addPlanMarkers = async () => {
 
   // Add markers for unfinished plans (gray flags)
   props.plans.forEach((plan) => {
-    const destination = plan.destination
+    // Extract city name before # symbol
+    const destination = plan.destination.split('#')[0].trim()
     const coords = cityCoordinates[destination]
     
     if (coords) {
@@ -239,7 +240,8 @@ const addPlanMarkers = async () => {
 
   // Add markers for finished plans (colored flags)
   props.finishedPlans.forEach((plan) => {
-    const destination = plan.destination
+    // Extract city name before # symbol
+    const destination = plan.destination.split('#')[0].trim()
     const coords = cityCoordinates[destination]
     
     if (coords) {
