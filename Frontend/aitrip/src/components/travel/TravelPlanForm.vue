@@ -443,82 +443,82 @@ const cityOptions = [
     value: 'nsw',
     label: 'New South Wales',
     children: [
-      { value: 'sydney', label: 'Sydney' },
-      { value: 'blue-mountains', label: 'Blue Mountains' },
-      { value: 'hunter-valley', label: 'Hunter Valley' },
-      { value: 'byron-bay', label: 'Byron Bay' },
-      { value: 'others', label: 'Others...' }
+      { value: 'Sydney', label: 'Sydney' },
+      { value: 'Blue Mountains', label: 'Blue Mountains' },
+      { value: 'Hunter Valley', label: 'Hunter Valley' },
+      { value: 'Byron Bay', label: 'Byron Bay' },
+      { value: 'Others...', label: 'Others...' }
     ]
   },
   {
     value: 'vic',
     label: 'Victoria',
     children: [
-      { value: 'melbourne', label: 'Melbourne' },
-      { value: 'great-ocean-road', label: 'Great Ocean Road' },
-      { value: 'yarra-valley', label: 'Yarra Valley' },
-      { value: 'phillip-island', label: 'Phillip Island' },
-      { value: 'others', label: 'Others...' }
+      { value: 'Melbourne', label: 'Melbourne' },
+      { value: 'Great Ocean Road', label: 'Great Ocean Road' },
+      { value: 'Yarra Valley', label: 'Yarra Valley' },
+      { value: 'Phillip Island', label: 'Phillip Island' },
+      { value: 'Others...', label: 'Others...' }
     ]
   },
   {
     value: 'qld',
     label: 'Queensland',
     children: [
-      { value: 'brisbane', label: 'Brisbane' },
-      { value: 'gold-coast', label: 'Gold Coast' },
-      { value: 'cairns', label: 'Cairns' },
-      { value: 'whitsundays', label: 'Whitsundays' },
-      { value: 'sunshine-coast', label: 'Sunshine Coast' },
-      { value: 'others', label: 'Others...' }
+      { value: 'Brisbane', label: 'Brisbane' },
+      { value: 'Gold Coast', label: 'Gold Coast' },
+      { value: 'Cairns', label: 'Cairns' },
+      { value: 'Whitsundays', label: 'Whitsundays' },
+      { value: 'Sunshine Coast', label: 'Sunshine Coast' },
+      { value: 'Others...', label: 'Others...' }
     ]
   },
   {
     value: 'wa',
     label: 'Western Australia',
     children: [
-      { value: 'perth', label: 'Perth' },
-      { value: 'margaret-river', label: 'Margaret River' },
-      { value: 'broome', label: 'Broome' },
-      { value: 'others', label: 'Others...' }
+      { value: 'Perth', label: 'Perth' },
+      { value: 'Margaret River', label: 'Margaret River' },
+      { value: 'Broome', label: 'Broome' },
+      { value: 'Others...', label: 'Others...' }
     ]
   },
   {
     value: 'sa',
     label: 'South Australia',
     children: [
-      { value: 'adelaide', label: 'Adelaide' },
-      { value: 'barossa-valley', label: 'Barossa Valley' },
-      { value: 'kangaroo-island', label: 'Kangaroo Island' },
-      { value: 'others', label: 'Others...' }
+      { value: 'Adelaide', label: 'Adelaide' },
+      { value: 'Barossa Valley', label: 'Barossa Valley' },
+      { value: 'Kangaroo Island', label: 'Kangaroo Island' },
+      { value: 'Others...', label: 'Others...' }
     ]
   },
   {
     value: 'tas',
     label: 'Tasmania',
     children: [
-      { value: 'hobart', label: 'Hobart' },
-      { value: 'launceston', label: 'Launceston' },
-      { value: 'cradle-mountain', label: 'Cradle Mountain' },
-      { value: 'others', label: 'Others...' }
+      { value: 'Hobart', label: 'Hobart' },
+      { value: 'Launceston', label: 'Launceston' },
+      { value: 'Cradle Mountain', label: 'Cradle Mountain' },
+      { value: 'Others...', label: 'Others...' }
     ]
   },
   {
     value: 'nt',
     label: 'Northern Territory',
     children: [
-      { value: 'darwin', label: 'Darwin' },
-      { value: 'alice-springs', label: 'Alice Springs' },
-      { value: 'uluru', label: 'Uluru' },
-      { value: 'others', label: 'Others...' }
+      { value: 'Darwin', label: 'Darwin' },
+      { value: 'Alice Springs', label: 'Alice Springs' },
+      { value: 'Uluru', label: 'Uluru' },
+      { value: 'Others...', label: 'Others...' }
     ]
   },
   {
     value: 'act',
     label: 'Australian Capital Territory',
     children: [
-      { value: 'canberra', label: 'Canberra' },
-      { value: 'others', label: 'Others...' }
+      { value: 'Canberra', label: 'Canberra' },
+      { value: 'Others...', label: 'Others...' }
     ]
   }
 ]
