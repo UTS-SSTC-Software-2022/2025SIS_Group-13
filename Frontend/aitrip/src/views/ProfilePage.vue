@@ -34,7 +34,7 @@
           <el-page-header
             class="page-header"
             @back="$router.back()"
-            title="< Back"
+            title="Back"
             content="User Profile"
           />
 
@@ -71,13 +71,6 @@
               <el-input v-model="profile.avatar" placeholder="Image URL" clearable />
             </el-form-item>
 
-            <el-divider>
-              <span class="section-name">Settings</span>
-            </el-divider>
-
-            <el-form-item label="Dark Mode">
-              <el-switch v-model="darkMode" />
-            </el-form-item>
 
             <div class="actions">
               <el-button type="primary" class="btn-primary" @click="onSave">Save</el-button>
