@@ -52,7 +52,7 @@
             class="form"
           >
             <el-form-item label="* Email">
-              <el-input v-model="profile.email" placeholder="email@example.com" clearable />
+              <el-input v-model="profile.email" placeholder="email@example.com" :disabled="true" />
             </el-form-item>
 
             <el-form-item label="* First Name">
@@ -80,8 +80,6 @@
             </el-form-item>
 
             <div class="actions">
-              <el-button @click="goMyProfile">View My Profile</el-button>
-              <el-button @click="goPlanHistory">View Plan History</el-button>
               <el-button type="primary" class="btn-primary" @click="onSave">Save</el-button>
             </div>
           </el-form>
@@ -92,14 +90,16 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { House, MapLocation, User, SwitchButton } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { getUserProfileAPI, updateUserProfileAPI } from '@/apis/auth'
 
 const router = useRouter()
 const go = (path) => router.push(path)
 
-// 下面的数据结构只用于示例（不改变你原有的字段和逻辑的话，直接对齐你的数据源即可）
+// 用户资料数据结构
 const profile = reactive({
   email: '',
   firstName: '',
@@ -110,20 +110,48 @@ const profile = reactive({
 const darkMode = ref(false)
 const formRef = ref(null)
 
-const onSave = () => {
-  // 按你原有保存逻辑处理，这里仅占位
-  // e.g. await api.saveProfile(profile)
+// Load user profile data
+const loadProfile = async () => {
+  try {
+    const response = await getUserProfileAPI()
+    if (response && response.data) {
+      const userData = response.data
+      profile.email = userData.email || ''
+      profile.firstName = userData.first_name || userData.firstName || ''
+      profile.lastName = userData.last_name || userData.lastName || ''
+      profile.phone = userData.phone || ''
+      profile.avatar = userData.avatar || ''
+    }
+  } catch (error) {
+    console.error('Failed to load profile:', error)
+    ElMessage.error('Failed to load user profile')
+  }
 }
 
-const goMyProfile = () => {
-  // 保留你原有跳转；若你项目是 /profile/show，就保持一致
-  router.push('/profile/show')
+// Save user profile
+const onSave = async () => {
+  try {
+    const response = await updateUserProfileAPI({
+      first_name: profile.firstName,
+      last_name: profile.lastName,
+      phone: profile.phone,
+      avatar: profile.avatar
+    })
+    
+    if (response) {
+      ElMessage.success('Profile updated successfully!')
+    }
+  } catch (error) {
+    console.error('Failed to update profile:', error)
+    ElMessage.error('Failed to update profile. Please try again.')
+  }
 }
 
-const goPlanHistory = () => {
-  // 保留你原有的“计划历史”路由路径
-  router.push('/travel/itinerary-result')
-}
+
+// Load profile on component mount
+onMounted(() => {
+  loadProfile()
+})
 </script>
 
 <style scoped>

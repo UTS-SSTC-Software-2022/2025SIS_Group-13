@@ -227,6 +227,7 @@ const loadLocationsAndDrawRoute = async () => {
     
     const locations = dayLocations.value
     
+    console.log(locations)
     // If we have coordinates, use them; otherwise geocode addresses
     const waypoints = []
     
