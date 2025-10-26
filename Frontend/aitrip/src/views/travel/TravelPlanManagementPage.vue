@@ -230,7 +230,7 @@ const loadItineraries = async () => {
     if (itineraries.length > 0) { 
       for (const itinerary of itineraries) {
         if (itinerary.destination) {
-          itinerary.title = itinerary.title.slice(0, 20) + itinerary.title.charAt(20).toUpperCase() + itinerary.title.slice(21)
+          itinerary.title = itinerary.title.slice(0, 19) + itinerary.title.charAt(19).toUpperCase() + itinerary.title.slice(20)
           itinerary.destination = itinerary.destination.charAt(0).toUpperCase() + itinerary.destination.slice(1)
         }
       }
