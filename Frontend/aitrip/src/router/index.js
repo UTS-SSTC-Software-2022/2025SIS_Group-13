@@ -1,8 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-  { path: '/__preview', name: 'preview', component: () => import('@/views/ProfilePage.vue') },
-
   // ✅ 首屏进入 Landing：用你现有的 LoginPage.vue 当宣传页
   { path: '/', name: 'landing', component: () => import('@/views/auth/LoginPage.vue') },
 
@@ -15,8 +13,10 @@ const routes = [
   { path: '/home', name: 'home', component: () => import('@/views/HomePage.vue') },
   { path: '/profile', name: 'profile', component: () => import('@/views/ProfilePage.vue') },
   {path: '/profile/show', name: 'profile-show', component: () => import('@/views/ProfileShowPage.vue')},
-  { path: '/travel/plan', name: 'travel-plan', component: () => import('@/views/travel/TravelPlanPage.vue') },
+  { path: '/travel/plan', name: 'travel-plan', component: () => import('@/views/travel/TravelPlanManagementPage.vue') },
+  { path: '/travel/plan/create', name: 'travel-plan-create', component: () => import('@/views/travel/TravelPlanPage.vue') },
   { path: '/travel/itinerary-result', name: 'travel-itinerary-result', component: () => import('@/views/travel/TravelItineraryResultPage.vue') },
+  { path: '/route-map-demo', name: 'route-map-demo', component: () => import('@/views/RouteMapDemo.vue') },
 
   // 404
   { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFoundPage.vue') }

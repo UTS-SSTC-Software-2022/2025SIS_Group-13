@@ -11,7 +11,7 @@
               <el-icon class="summary-icon"><Calendar /></el-icon>
               <div>
                 <div class="summary-label">Duration</div>
-                <div class="summary-value">{{ itinerary.duration }} days</div>
+                <div class="summary-value">{{ itinerary.duration || '0 days' }}</div>
               </div>
             </div>
           </el-col>
@@ -45,6 +45,7 @@
         </el-row>
       </div>
     </div>
+
 
     <!-- Daily Itinerary Section -->
     <div class="daily-itinerary">
@@ -83,6 +84,9 @@
           <!-- Day Details (Expandable) -->
           <el-collapse-transition>
             <div v-show="expandedDays.includes(index)" class="day-details">
+              <!-- Daily Route Map -->
+              <DailyRouteMap :day-data="day" />
+              
               <div class="activities-timeline">
                 <div 
                   v-for="(activity, actIndex) in day.activities" 
@@ -170,17 +174,53 @@
 
     <!-- Action Buttons -->
     <div class="action-buttons">
-      <el-button type="primary" size="large" @click="downloadItinerary">
-        <el-icon><Download /></el-icon>
-        Download Itinerary
+      <!-- Save按钮：将Temporary状态改为Generated -->
+      <el-button 
+        v-if="currentItineraryId && itineraryStatus === 'Temporary' && !isFromSaved"
+        type="primary" 
+        size="large" 
+        @click="saveItinerary"
+      >
+        <el-icon><Check /></el-icon>
+        Save to Generated Plan
       </el-button>
+      
+      <!-- Complete按钮：将Generated状态改为Completed -->
+      <el-button 
+        v-if="currentItineraryId && itineraryStatus === 'Generated'"
+        type="success" 
+        size="large" 
+        @click="completeItinerary"
+      >
+        <el-icon><Star /></el-icon>
+        Complete
+      </el-button>
+      
+      <!-- 状态显示按钮（已保存或已完成时显示） -->
+      <el-button 
+        v-if="currentItineraryId && itineraryStatus === 'Generated' && isFromSaved"
+        type="info" 
+        size="large" 
+        disabled
+      >
+        <el-icon><Check /></el-icon>
+        In Generated Plan
+      </el-button>
+      
+      <el-button 
+        v-if="currentItineraryId && itineraryStatus === 'Completed'"
+        type="success" 
+        size="large" 
+        disabled
+      >
+        <el-icon><Star /></el-icon>
+        Completed
+      </el-button>
+      
+      <!-- Share按钮 -->
       <el-button type="default" size="large" @click="shareItinerary">
         <el-icon><Share /></el-icon>
         Share
-      </el-button>
-      <el-button type="success" size="large" @click="saveItinerary">
-        <el-icon><Star /></el-icon>
-        Save to Favorites
       </el-button>
     </div>
   </div>
@@ -189,6 +229,7 @@
 <script setup>
 import {ref, reactive, onMounted, watch} from 'vue'
 import { ElMessage } from 'element-plus'
+import DailyRouteMap from '@/components/map/DailyRouteMap.vue'
 import {
   Calendar,
   Location,
@@ -198,9 +239,10 @@ import {
   Position,
   Download,
   Share,
-  Star,
   Sunny,
-  Cloudy
+  Cloudy,
+  Check,
+  Star
 } from '@element-plus/icons-vue'
 
 // Props
@@ -208,8 +250,23 @@ const props = defineProps({
   itineraryData: {
     type: Object,
     default: null
+  },
+  currentItineraryId: {
+    type: [String, Number],
+    default: null
+  },
+  itineraryStatus: {
+    type: String,
+    default: 'Temporary'
+  },
+  isFromSaved: {
+    type: Boolean,
+    default: false
   }
 })
+
+// Emits
+const emit = defineEmits(['download', 'share', 'save', 'complete'])
 
 // Reactive data
 const expandedDays = ref([])
@@ -288,55 +345,24 @@ const getActivityTypeColor = (type) => {
     'Culture': 'primary',
     'Dining': 'success',
     'Nature': 'info',
-    'Shopping': 'warning'
+    'Shopping': 'warning',
+    'Exploration': 'primary'
   }
   return colorMap[type] || 'default'
 }
 
-const downloadItinerary = () => {
-  ElMessage.success('Itinerary download started!')
-  // TODO: Implement PDF download functionality
+const saveItinerary = () => {
+  emit('save')
+}
+
+const completeItinerary = () => {
+  emit('complete')
 }
 
 const shareItinerary = () => {
-  ElMessage.info('Share functionality coming soon!')
-  // TODO: Implement share functionality
+  emit('share')
 }
 
-const saveItinerary = () => {
-  ElMessage.success('Itinerary saved to favorites!')
-  // TODO: Implement save to user favorites
-}
-
-// Lifecycle
-onMounted(() => {
-    if (props.itineraryData) {
-      Object.assign(itinerary, props.itineraryData)
-    } else {
-      fetchItineraryFromAPI()
-    }
-})
-
-// TODO: API call function
-const fetchItineraryFromAPI = async () => {
-  try {
-    loading.value = true
-    const response = await fetch('/api/travel/itinerary/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(travelFormData)
-    })
-    const data = await response.json()
-    Object.assign(itinerary, data)
-  } catch (error) {
-    console.error('Failed to fetch itinerary:', error)
-    ElMessage.error('Failed to load itinerary')
-  } finally {
-    loading.value = false
-  }
-}
 </script>
 
 <style scoped>
@@ -355,22 +381,24 @@ const fetchItineraryFromAPI = async () => {
 .result-title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: #e6edf3;
   margin-bottom: 0.5rem;
 }
 
 .result-subtitle {
   font-size: 1.1rem;
-  color: #7f8c8d;
+  color: #a0aec0;
   margin-bottom: 2rem;
 }
 
 .trip-summary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 20px;
   padding: 2.5rem;
-  color: white;
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  color: #e5e7eb;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  backdrop-filter: blur(10px);
 }
 
 .summary-item {
@@ -378,14 +406,14 @@ const fetchItineraryFromAPI = async () => {
   align-items: center;
   gap: 1.5rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
 
 .summary-item:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.09);
   transform: translateY(-2px);
 }
 
@@ -408,19 +436,19 @@ const fetchItineraryFromAPI = async () => {
 .section-title {
   font-size: 1.8rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #e6edf3;
   margin-bottom: 1.5rem;
   text-align: center;
 }
 
 .day-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
   margin-bottom: 2rem;
   overflow: hidden;
   transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(148, 163, 184, 0.18);
 }
 
 .day-card:hover {
@@ -433,18 +461,18 @@ const fetchItineraryFromAPI = async () => {
   justify-content: space-between;
   padding: 2rem 2.5rem;
   cursor: pointer;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: rgba(255, 255, 255, 0.04);
   transition: all 0.3s ease;
   min-height: 120px;
 }
 
 .day-header:hover {
-  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .day-header.expanded {
-  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
-  color: white;
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.28) 0%, rgba(64, 158, 255, 0.22) 100%);
+  color: #e6edf3;
 }
 
 .day-info {
@@ -455,17 +483,20 @@ const fetchItineraryFromAPI = async () => {
   font-size: 1.4rem;
   font-weight: 700;
   margin-bottom: 0.25rem;
+  color: #e6edf3;
 }
 
 .day-date {
   font-size: 0.9rem;
   opacity: 0.8;
   margin-bottom: 0.5rem;
+  color: #a0aec0;
 }
 
 .day-overview {
   font-size: 1rem;
   font-weight: 500;
+  color: #e6edf3;
 }
 
 .day-weather {
@@ -513,7 +544,12 @@ const fetchItineraryFromAPI = async () => {
 /* Day Details Styles */
 .day-details {
   padding: 0 2.5rem 2rem;
-  background: #fafbfc;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Route Map Integration */
+.day-details .route-map-container {
+  margin-bottom: 2rem;
 }
 
 .activities-timeline {
@@ -586,12 +622,12 @@ const fetchItineraryFromAPI = async () => {
 .activity-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #e6edf3;
   margin: 0;
 }
 
 .activity-description {
-  color: #5a6c7d;
+  color: #a0aec0;
   line-height: 1.6;
   margin-bottom: 1rem;
 }
@@ -604,7 +640,7 @@ const fetchItineraryFromAPI = async () => {
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
-  color: #6c757d;
+  color: #a0aec0;
 }
 
 .address,
@@ -614,7 +650,7 @@ const fetchItineraryFromAPI = async () => {
 }
 
 .activity-tips {
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 8px;
   padding: 1rem;
   margin-top: 1rem;
@@ -623,7 +659,7 @@ const fetchItineraryFromAPI = async () => {
 .activity-tips h5 {
   margin: 0 0 0.5rem 0;
   font-size: 0.9rem;
-  color: #495057;
+  color: #e6edf3;
 }
 
 .activity-tips ul {
@@ -633,25 +669,26 @@ const fetchItineraryFromAPI = async () => {
 
 .activity-tips li {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: #a0aec0;
   margin-bottom: 0.25rem;
 }
 
 /* Day Summary Styles */
 .day-summary {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 16px;
   padding: 2rem;
   margin-top: 2rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(8px);
 }
 
 .summary-title {
   margin: 0 0 1.5rem 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #e6edf3;
 }
 
 .summary-stats {
@@ -682,13 +719,13 @@ const fetchItineraryFromAPI = async () => {
 .stat-label {
   display: block;
   font-size: 0.85rem;
-  color: #6c757d;
+  color: #a0aec0;
   margin-bottom: 0.25rem;
 }
 
 .stat-value {
   font-weight: 700;
-  color: #2c3e50;
+  color: #e6edf3;
   font-size: 1.1rem;
 }
 
@@ -699,10 +736,73 @@ const fetchItineraryFromAPI = async () => {
   gap: 1.5rem;
   margin-top: 4rem;
   padding: 2.5rem 0;
-  border-top: 2px solid #f0f2f5;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 20px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(8px);
+}
+
+/* Dark theme buttons inside action section */
+:deep(.action-buttons .el-button) {
+  color: #e6edf3;
+}
+:deep(.action-buttons .el-button--default) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+:deep(.action-buttons .el-button--default:hover) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Custom Activity Type Tag Styles - Light background with dark text */
+:deep(.activity-header .el-tag) {
+  font-weight: 600;
+  border: none;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+}
+
+/* Adventure - Light red background with dark red text */
+:deep(.activity-header .el-tag--danger) {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+/* Culture - Light blue background with dark blue text */
+:deep(.activity-header .el-tag--primary) {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+/* Dining - Light green background with dark green text */
+:deep(.activity-header .el-tag--success) {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+/* Nature - Light cyan background with dark cyan text */
+:deep(.activity-header .el-tag--info) {
+  background-color: #ecfeff;
+  color: #0891b2;
+}
+
+/* Shopping - Light yellow background with dark orange text */
+:deep(.activity-header .el-tag--warning) {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+/* Exploration - Light purple background with dark purple text */
+:deep(.activity-header .el-tag) {
+  background-color: #faf5ff;
+  color: #7c3aed;
+}
+
+/* Default fallback */
+:deep(.activity-header .el-tag--default) {
+  background-color: #f8fafc;
+  color: #475569;
 }
 
 /* Mobile Responsive */
@@ -732,6 +832,11 @@ const fetchItineraryFromAPI = async () => {
   
   .day-weather {
     margin-right: 0;
+  }
+  
+  /* Route Map mobile styles */
+  .day-details .route-map-container {
+    margin-bottom: 1.5rem;
   }
   
   .activity-item {

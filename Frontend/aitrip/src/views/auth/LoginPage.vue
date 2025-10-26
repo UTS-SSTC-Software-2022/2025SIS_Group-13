@@ -2,8 +2,15 @@
   <div class="login-container">
     <!-- Login Button in top right corner -->
     <div class="login-header">
-      <img src="@/assets/images/LeisurA logo.svg" alt="LeisurA Logo" class="logo" />
-      <el-button type="primary" size="large" class="top-login-btn" @click="goToLoginForm">
+      <a href="/">
+        <img src="\src\assets\images\LeisurA logo.svg" alt="LeisurA Logo" class="logo" />
+      </a>
+      <el-button 
+        type="primary" 
+        size="large"
+        @click="goToLoginForm"
+        class="top-login-btn"
+      >
         Login
       </el-button>
     </div>

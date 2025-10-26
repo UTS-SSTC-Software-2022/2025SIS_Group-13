@@ -1,43 +1,69 @@
 <template>
-  <div class="travel-plan-page">
-    <div class="container-fluid h-100">
-      <div class="row h-100">
-        <div class="col-12 d-flex align-items-center justify-content-center">
-          <div class="travel-plan-wrapper">
-            <div class="back-button-container">
-              <el-button 
-                type="info" 
-                plain 
-                size="small"
-                @click="goBack"
-                class="back-btn"
-              >
-                <el-icon class="me-1"><ArrowLeft /></el-icon>
-                Back
-              </el-button>
-            </div>
-            <TravelPlanForm @submit="handleFormSubmit" />
-          </div>
+  <!-- 背景渐变层：与登录/注册页一致的柔和深色渐变 -->
+  <div class="auth-bg"></div>
+
+  <el-container class="layout-container" direction="vertical">
+    <el-container class="bottom-container">
+      <!-- Sidebar consistent with overall design -->
+      <el-aside class="sidebar" width="200px">
+        <el-menu 
+          mode="vertical" 
+          class="sidebar-menu" 
+          :default-active="'plan'"
+          background-color="#0f0f0f"
+          text-color="#e5e7eb"
+          active-text-color="#1890ff"
+        >
+          <el-menu-item index="home" @click="go('/home')">
+            <el-icon><House /></el-icon>
+            <span>Home</span>
+          </el-menu-item>
+          <el-menu-item index="plan" @click="go('/travel/plan')">
+            <el-icon><MapLocation /></el-icon>
+            <span>Plan Trip</span>
+          </el-menu-item>
+          <el-menu-item index="profile" @click="go('/profile')">
+            <el-icon><User /></el-icon>
+            <span>Profile</span>
+          </el-menu-item>
+          <el-menu-item index="logout" @click="go('/login-form')">
+            <el-icon><SwitchButton /></el-icon>
+            <span>Logout</span>
+          </el-menu-item>
+        </el-menu>
+      </el-aside>
+
+      <!-- Main: full-width form, no card wrapper -->
+      <el-main class="home-main">
+        <el-page-header
+          class="page-header"
+          @back="goBack"
+          title="< Back"
+          content="Create Your Personalized Travel Itinerary"
+        />
+        <div class="form-container">
+          <TravelPlanForm @submit="handleFormSubmit" />
         </div>
-      </div>
-    </div>
-  </div>
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { ArrowLeft } from '@element-plus/icons-vue'
+import { House, MapLocation, User, SwitchButton } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import TravelPlanForm from '@/components/travel/TravelPlanForm.vue'
 
 const router = useRouter()
+const go = (path) => router.push(path)
 
 /**
- * Go back to home page
+ * Go back to management page
  */
 const goBack = () => {
-  router.push('/home')
+  router.push('/travel/plan')
 }
 
 /**
@@ -54,7 +80,7 @@ const handleFormSubmit = async (formData) => {
     await router.push({
       path: '/travel/itinerary-result',
       query: {
-        result: encodeURIComponent(JSON.stringify(output))
+        formData: encodeURIComponent(JSON.stringify(formData))
       }
     })
   } catch (error) {
@@ -65,90 +91,66 @@ const handleFormSubmit = async (formData) => {
 </script>
 
 <style scoped>
-.travel-plan-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 0;
+/* Sidebar + main layout to match management page */
+.layout-container {
+  height: 100vh;
+  background-color: transparent;
 }
 
-.travel-plan-wrapper {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 3rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  max-width: 800px;
-  width: 100%;
-  margin: 2rem;
+.bottom-container {
+  flex: 1;
+  height: 100vh;
+}
+
+.sidebar {
+  background-color: #0f0f0f;
+  height: 100%;
+}
+
+.sidebar-menu {
+  height: 100%;
+  border-right: none;
+}
+
+.sidebar-menu .el-menu-item {
+  height: 56px;
+  line-height: 56px;
+}
+
+.sidebar-menu .el-menu-item:hover {
+  background-color: #1890ff !important;
+}
+
+.home-main {
+  padding: 24px;
+  /* 使用登录/注册页一致的深色渐变作为页面底色 */
+  background: transparent;
   position: relative;
-  max-height: 90vh;
+  z-index: 1;
   overflow-y: auto;
+  height: 100%;
 }
 
-.back-button-container {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 10;
+/* 背景渐变（复用 auth 页的样式） */
+.auth-bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(60rem 60rem at 10% 10%, rgba(99, 102, 241, .25), transparent 60%),
+    radial-gradient(60rem 60rem at 90% 90%, rgba(236, 72, 153, .22), transparent 60%),
+    linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  filter: saturate(110%);
+  z-index: 0;
 }
 
-.back-btn {
-  border-radius: 20px;
-  border-color: #dcdfe6;
-  color: #606266;
-  background: rgba(255, 255, 255, 0.8);
+.page-header {
+  margin-bottom: 12px;
+  color: #e6edf3; /* 深色背景下的浅色标题 */
 }
+:deep(.el-page-header__title) { color: #e6edf3; }
+:deep(.el-page-header__content) { color: #a0aec0; }
 
-.back-btn:hover {
-  background: rgba(255, 255, 255, 1);
-  border-color: #c0c4cc;
-  color: #409eff;
-}
-
-/* Custom scrollbar for the wrapper */
-.travel-plan-wrapper::-webkit-scrollbar {
-  width: 6px;
-}
-
-.travel-plan-wrapper::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
-}
-
-.travel-plan-wrapper::-webkit-scrollbar-thumb {
-  background: rgba(64, 158, 255, 0.3);
-  border-radius: 3px;
-}
-
-.travel-plan-wrapper::-webkit-scrollbar-thumb:hover {
-  background: rgba(64, 158, 255, 0.5);
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .travel-plan-page {
-    padding: 1rem 0;
-  }
-
-  .travel-plan-wrapper {
-    margin: 1rem;
-    padding: 2rem 1.5rem;
-    max-height: 95vh;
-  }
-
-  .back-button-container {
-    top: 0.5rem;
-    left: 0.5rem;
-  }
-}
-
-@media (max-width: 576px) {
-  .travel-plan-wrapper {
-    margin: 0.5rem;
-    padding: 1.5rem 1rem;
-  }
+.form-container {
+  background: transparent; /* full-width form, no card */
 }
 </style>

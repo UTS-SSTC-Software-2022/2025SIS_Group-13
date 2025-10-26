@@ -3,6 +3,12 @@ from django.conf import settings
 
 # Create your models here.
 class Itinerary(models.Model):
+    STATUS_CHOICES = [
+        ('Temporary', 'Temporary'),
+        ('Generated', 'Generated'),
+        ('Completed', 'Completed'),
+    ]
+    
     itinerary_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -15,6 +21,33 @@ class Itinerary(models.Model):
     title = models.CharField(
         max_length=255,
         verbose_name='Title'
+    )
+    llm_response = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name='LLM Generated Plan',
+        help_text='Complete LLM response for quick display'
+    )
+    destination = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name='Destination'
+    )
+    start_time = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Start Time'
+    )
+    duration = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Duration (days)'
+    )
+    isCompleted = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='Temporary',
+        verbose_name='Completion Status'
     )
     create_time = models.DateTimeField(
         auto_now_add=True,

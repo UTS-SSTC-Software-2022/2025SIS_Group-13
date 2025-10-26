@@ -17,7 +17,7 @@ request.interceptors.request.use(
 
     // Add token to request headers if it exists
     if (token) {
-      config.headers['Authorization'] = `${token}`
+      config.headers['Authorization'] = `Bearer ${token}`
     }
     return config
   },
@@ -32,11 +32,6 @@ request.interceptors.response.use(
   (response) => {
     const res = response.data
 
-    if (res.code === 401) {
-      localStorage.removeItem('token')
-      router.push('/login')
-    }
-
     // Update localStorage if response contains new token
     if (response.headers['new-token']) {
       localStorage.setItem('token', response.headers['new-token'])
@@ -46,6 +41,15 @@ request.interceptors.response.use(
   },
   (error) => {
     console.error('Response error:', error)
+    
+    // Handle 401 unauthorized errors
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('userInfo')
+      localStorage.removeItem('userName')
+      window.location.href = '/login-form'
+    }
+    
     return Promise.reject(error)
   }
 )

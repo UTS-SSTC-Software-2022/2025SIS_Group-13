@@ -14,6 +14,7 @@ export const loginAPI = (loginData) => {
     data: {
       email: loginData.email,
       password: loginData.password,
+      rememberMe: loginData.rememberMe,
     }
   })
 }
@@ -32,7 +33,6 @@ export const registerAPI = (registerData) => {
   return request({
     url: '/auth/register/',
     method: 'post',
-    noToken: true,  // Registration doesn't require authentication
     data: {
       email: registerData.email,
       username: registerData.username,
