@@ -59,7 +59,7 @@
           <el-input
             v-model="registerForm.password"
             type="password"
-            placeholder="Please enter your password (at least 6 characters)"
+            placeholder="Please enter your password (at least 8 characters) and include at least one uppercase letter, one lowercase letter, and one number"
             prefix-icon="Lock"
             show-password
             class="custom-input"
@@ -174,7 +174,7 @@ const registerRules = {
   ],
   password: [
     {  message: 'Please enter your password', trigger: 'blur' },
-    { min: 6, message: 'Password length must be at least 6 characters', trigger: 'blur' }
+    { min: 8, message: 'Password length must be at least 8 characters', trigger: 'blur' }
   ],
   confirmPassword: [
     {  message: 'Please confirm your password', trigger: 'blur' },
