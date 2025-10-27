@@ -204,7 +204,7 @@ const handleRegister = async () => {
   if (!registerFormRef.value) return
   
   try {
-    // await registerFormRef.value.validate()
+    await registerFormRef.value.validate()
     const response = await registerAPI(registerForm)
     // Backend returns success as number 1 for success, 0 for failure
     if (response.success === 1) {
