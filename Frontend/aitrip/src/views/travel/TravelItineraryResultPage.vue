@@ -42,7 +42,7 @@
         <el-page-header
           class="page-header"
           @back="goBack"
-          title="< Back"
+          title="Back"
           :content="itineraryData?.title || 'Your Personalized Travel Itinerary'"
         />
 
@@ -289,7 +289,7 @@ const feedback = reactive({
 
 // Methods
 const goBack = () => {
-  router.push('/home')
+  router.push('/travel/plan')
 }
 
 const formatGenerationTime = () => {

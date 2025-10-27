@@ -116,11 +116,11 @@ const go = (path) => router.push(path)
 
 const logout = async () => {
   try {
-    await logoutAPI()
+    // 保持与 HomePage 一致的退出逻辑（若有 API 可替换）
     localStorage.removeItem('token')
     localStorage.removeItem('userName')
     ElMessage.success('Logged out successfully')
-    router.push('/login')
+    router.push('/login-form')
   } catch (e) {
     ElMessage.error('Logout failed')
   }

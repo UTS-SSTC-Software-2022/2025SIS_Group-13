@@ -9,7 +9,7 @@
       <el-page-header
         class="page-header"
         @back="$router.push('/login-form')"
-        title="< Back"
+        title="Back"
       />
 
       <!-- 这里保留原页面的标题和灰色提示，格式与布局保持不变（居中） -->

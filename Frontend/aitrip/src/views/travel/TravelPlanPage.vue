@@ -26,7 +26,7 @@
             <el-icon><User /></el-icon>
             <span>Profile</span>
           </el-menu-item>
-          <el-menu-item index="logout" @click="go('/login-form')">
+          <el-menu-item index="logout" @click="logout">
             <el-icon><SwitchButton /></el-icon>
             <span>Logout</span>
           </el-menu-item>
@@ -38,7 +38,7 @@
         <el-page-header
           class="page-header"
           @back="goBack"
-          title="< Back"
+          title="Back"
           content="Create Your Personalized Travel Itinerary"
         />
         <div class="form-container">
@@ -88,6 +88,19 @@ const handleFormSubmit = async (formData) => {
     ElMessage.error('Failed to open itinerary results, please try again')
   }
 }
+
+const logout = async () => {
+  try {
+    // 保持与 HomePage 一致的退出逻辑（若有 API 可替换）
+    localStorage.removeItem('token')
+    localStorage.removeItem('userName')
+    ElMessage.success('Logged out successfully')
+    router.push('/login-form')
+  } catch (e) {
+    ElMessage.error('Logout failed')
+  }
+}
+
 </script>
 
 <style scoped>
