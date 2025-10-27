@@ -59,7 +59,7 @@
           <el-input
             v-model="registerForm.password"
             type="password"
-            placeholder="Please enter your password (at least 8 characters)"
+            placeholder="At least 8 chars, with letter, number & special char"
             prefix-icon="Lock"
             show-password
             class="custom-input"
@@ -158,6 +158,23 @@ const validateLastName = (rule, value, callback) => {
   }
 }
 
+const validatePassword = (rule, value, callback) => {
+  const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/
+  if (!value) {
+    callback(new Error('Please enter your password'))
+  } 
+  else if (value.length < 8) {
+    callback(new Error('Password must be at least 8 characters long'))
+  }
+  else if (!passwordRegex.test(value)) {
+    callback(new Error('Password must contain at least one letter, one number, and one special character'))
+  } 
+ else {
+    callback()
+  }
+}
+
+
 const registerRules = {
   username: [
     { validator: validateUsername, trigger: 'blur' }
@@ -174,7 +191,7 @@ const registerRules = {
   ],
   password: [
     {  message: 'Please enter your password', trigger: 'blur' },
-    { min: 8, message: 'Password length must be at least 8 characters', trigger: 'blur' }
+    { validator: validatePassword, trigger: 'blur' }
   ],
   confirmPassword: [
     {  message: 'Please confirm your password', trigger: 'blur' },
@@ -187,7 +204,7 @@ const handleRegister = async () => {
   if (!registerFormRef.value) return
   
   try {
-    await registerFormRef.value.validate()
+    // await registerFormRef.value.validate()
     const response = await registerAPI(registerForm)
     // Backend returns success as number 1 for success, 0 for failure
     if (response.success === 1) {
