@@ -59,7 +59,7 @@
           <el-input
             v-model="registerForm.password"
             type="password"
-            placeholder="Please enter your password (at least 8 characters) and include at least one uppercase letter, one lowercase letter, and one number"
+            placeholder="Please enter your password (at least 8 characters)"
             prefix-icon="Lock"
             show-password
             class="custom-input"
