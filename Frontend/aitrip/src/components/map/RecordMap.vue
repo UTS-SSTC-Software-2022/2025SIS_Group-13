@@ -162,6 +162,26 @@ const loadGoogleMapsScript = () => {
   })
 }
 
+// Geocode address to get coordinates
+const geocodeAddress = (address) => {
+  return new Promise((resolve, reject) => {
+    const geocoder = new google.maps.Geocoder()
+    
+    geocoder.geocode({ address }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const location = results[0].geometry.location
+        resolve({
+          lat: location.lat(),
+          lng: location.lng()
+        })
+      } else {
+        console.warn(`Geocode failed for ${address}:`, status)
+        reject(new Error(`Failed to geocode ${address}`))
+      }
+    })
+  })
+}
+
 // Add markers for travel plans
 const addPlanMarkers = async () => {
   if (!map.value) return
@@ -169,26 +189,15 @@ const addPlanMarkers = async () => {
   // Clear existing markers
   clearMarkers()
 
-  // City coordinates mapping with more details
-  const cityCoordinates = {
-    'Sydney': { lat: -33.8688, lng: 151.2093, attractions: ['Opera House', 'Harbour Bridge', 'Bondi Beach'] },
-    'Melbourne': { lat: -37.8136, lng: 144.9631, attractions: ['Federation Square', 'Royal Botanic Gardens', 'St Kilda Beach'] },
-    'Brisbane': { lat: -27.4698, lng: 153.0251, attractions: ['South Bank', 'Lone Pine Koala Sanctuary', 'Story Bridge'] },
-    'Canberra': { lat: -35.2809, lng: 149.1300, attractions: ['Parliament House', 'War Memorial', 'National Gallery'] },
-    'Perth': { lat: -31.9505, lng: 115.8605, attractions: ['Kings Park', 'Swan River', 'Fremantle'] },
-    'Adelaide': { lat: -34.9285, lng: 138.6007, attractions: ['Adelaide Oval', 'Central Market', 'Glenelg Beach'] },
-    'Darwin': { lat: -12.4634, lng: 130.8456, attractions: ['Mindil Beach', 'Crocosaurus Cove', 'Litchfield National Park'] },
-    'Hobart': { lat: -42.8821, lng: 147.3272, attractions: ['Salamanca Market', 'Mount Wellington', 'MONA'] }
-  }
-
-
   // Add markers for unfinished plans (gray flags)
-  props.plans.forEach((plan) => {
-    // Extract city name before # symbol
-    const destination = plan.destination.split('#')[0].trim()
-    const coords = cityCoordinates[destination]
-    
-    if (coords) {
+  for (const plan of props.plans) {
+    try {
+      // Extract city name before # symbol
+      const destination = plan.destination.split('#')[0].trim()
+      
+      // Geocode the destination to get coordinates
+      const coords = await geocodeAddress(destination)
+      
       const marker = new google.maps.Marker({
         position: coords,
         map: map.value,
@@ -206,7 +215,6 @@ const addPlanMarkers = async () => {
       })
 
       // Create enhanced info window
-      const attractions = coords.attractions ? coords.attractions.slice(0, 3).join(', ') : 'Various attractions'
       const infoWindow = new google.maps.InfoWindow({
         content: `
           <div style="padding: 12px; font-family: Arial, sans-serif; max-width: 300px;">
@@ -218,10 +226,6 @@ const addPlanMarkers = async () => {
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📍 Destination:</strong> ${destination}</p>
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || '0 days'}</p>
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📅 Date:</strong> ${plan.date || 'TBD'}</p>
-            </div>
-            <div style="background: #f5f5f5; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
-              <p style="margin: 0; color: #555; font-size: 12px;"><strong>🎯 Key Attractions:</strong></p>
-              <p style="margin: 4px 0 0; color: #777; font-size: 11px;">${attractions}</p>
             </div>
             <div style="text-align: center;">
               <span style="background: #909399; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">PLANNED</span>
@@ -235,16 +239,20 @@ const addPlanMarkers = async () => {
       })
 
       markers.value.push({ marker, infoWindow })
+    } catch (error) {
+      console.error(`Failed to add marker for destination: ${plan.destination}`, error)
     }
-  })
+  }
 
   // Add markers for finished plans (colored flags)
-  props.finishedPlans.forEach((plan) => {
-    // Extract city name before # symbol
-    const destination = plan.destination.split('#')[0].trim()
-    const coords = cityCoordinates[destination]
-    
-    if (coords) {
+  for (const plan of props.finishedPlans) {
+    try {
+      // Extract city name before # symbol
+      const destination = plan.destination.split('#')[0].trim()
+      
+      // Geocode the destination to get coordinates
+      const coords = await geocodeAddress(destination)
+      
       const marker = new google.maps.Marker({
         position: coords,
         map: map.value,
@@ -262,7 +270,6 @@ const addPlanMarkers = async () => {
       })
 
       // Create enhanced info window for completed plans
-      const attractions = coords.attractions ? coords.attractions.slice(0, 3).join(', ') : 'Various attractions'
       const infoWindow = new google.maps.InfoWindow({
         content: `
           <div style="padding: 12px; font-family: Arial, sans-serif; max-width: 300px;">
@@ -274,10 +281,6 @@ const addPlanMarkers = async () => {
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📍 Destination:</strong> ${destination}</p>
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>⏱️ Duration:</strong> ${plan.duration || '0 days'}</p>
               <p style="margin: 0 0 4px; color: #666; font-size: 14px;"><strong>📅 Date:</strong> ${plan.date || 'Completed'}</p>
-            </div>
-            <div style="background: #f0f9ff; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
-              <p style="margin: 0; color: #555; font-size: 12px;"><strong>🎯 Key Attractions:</strong></p>
-              <p style="margin: 4px 0 0; color: #777; font-size: 11px;">${attractions}</p>
             </div>
             <div style="text-align: center;">
               <span style="background: #67c23a; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">✓ COMPLETED</span>
@@ -291,8 +294,10 @@ const addPlanMarkers = async () => {
       })
 
       markers.value.push({ marker, infoWindow })
+    } catch (error) {
+      console.error(`Failed to add marker for destination: ${plan.destination}`, error)
     }
-  })
+  }
 }
 
 // Clear all markers
